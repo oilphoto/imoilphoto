@@ -58,7 +58,7 @@ export default async function handler(req, res) {
                 "type": "box", "layout": "vertical", "spacing": "sm",
                 "contents": [
                     { "type": "button", "style": "primary", "color": "#f59e0b", "height": "sm", "action": { "type": "uri", "label": "🗺️ นำทาง Google Maps", "uri": "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(location) } },
-                    { "type": "button", "style": "secondary", "color": "#111827", "height": "sm", "action": { "type": "uri", "label": "📞 โทรออกหาลูกค้า", "uri": "tel:" + phone } }
+                    { "type": "button", "style": "secondary", "color": "#fafbfd", "height": "sm", "action": { "type": "uri", "label": "📞 โทรออกหาลูกค้า", "uri": "tel:" + phone } }
                 ]
             }
         }

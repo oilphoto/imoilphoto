@@ -33,7 +33,7 @@ export default async function handler(req, res) {
             "header": {
                 "type": "box", "layout": "vertical",
                 "contents": [
-                    { "type": "text", "text": "I'M OIL PHOTO", "color": "#f59e0b", "size": "xs", "weight": "bold", "letterSpacing": "1.5px" },
+                    { "type": "text", "text": "I'M OIL PHOTO", "color": "#f59e0b", "size": "xs", "weight": "bold" },
                     { "type": "text", "text": "📸 บรีฟคิวงานออกกองร่างทอง", "color": "#ffffff", "size": "md", "weight": "bold", "margin": "sm" }
                 ]
             },

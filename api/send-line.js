@@ -20,7 +20,6 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Missing LINE Token in Vercel settings.' });
     }
 
-    // ปรับโครงสร้างใหม่ให้ผ่านเกณฑ์ความปลอดภัยของ LINE Server 100%
     const flexPayload = {
         "type": "flex",
         "altText": "📸 I'M OIL PHOTO - สรุปคิวงานจองออกกองด่วน!",
@@ -38,7 +37,7 @@ export default async function handler(req, res) {
                 "type": "box", "layout": "vertical",
                 "contents": [
                     { "type": "box", "layout": "horizontal", "margin": "md", "contents": [{ "type": "text", "text": "ประเภทงาน", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "🎓 " + packageType, "color": "#38bdf8", "size": "sm", "weight": "bold", "flex": 8 }] },
-                    { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "คุณลูกค้า", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": name, "color": "#ffffff", "size": "sm", "weight": "medium", "flex": 8 }] },
+                    { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "คุณลูกค้า", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": name, "color": "#ffffff", "size": "sm", "weight": "bold", "flex": 8 }] },
                     { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "วันถ่ายงาน", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "📅 " + date, "color": "#ffffff", "size": "sm", "flex": 8 }] },
                     { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "เวลาทำงาน", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "⏱️ " + time, "color": "#ffffff", "size": "sm", "flex": 8 }] },
                     { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "สถานที่นัด", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "📍 " + location, "color": "#ffffff", "size": "sm", "wrap": true, "flex": 8 }] },

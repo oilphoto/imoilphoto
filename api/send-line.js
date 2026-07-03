@@ -13,12 +13,16 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { name, phone, packageType, date, time, location, total, deposit, pending } = req.body;
+    // รับข้อมูลเพิ่มเติมคือ billUrl เพื่อนำมาใส่ในปุ่มกดดูบิลการจอง
+    const { name, phone, packageType, date, time, location, total, deposit, pending, billUrl } = req.body;
     const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 
     if (!LINE_TOKEN) {
         return res.status(500).json({ error: 'Missing LINE Token in Vercel settings.' });
     }
+
+    // กำหนดลิงก์ปลายทาง หากหน้าบ้านไม่ได้ส่งมา ให้ใช้ลิงก์หน้าหลักเป็นค่าเริ่มต้น
+    const targetUrl = billUrl || "https://imoilphoto.vercel.app";
 
     const flexPayload = {
         "type": "flex",
@@ -30,7 +34,7 @@ export default async function handler(req, res) {
                 "type": "box", "layout": "vertical",
                 "contents": [
                     { "type": "text", "text": "I'M OIL PHOTO", "color": "#f59e0b", "size": "xs", "weight": "bold" },
-                    { "type": "text", "text": "📸 สรุปจองงาน", "color": "#ffffff", "size": "md", "weight": "bold", "margin": "sm" }
+                    { "type": "text", "text": "📸 บรีฟคิวงานออกกองร่างทอง", "color": "#ffffff", "size": "md", "weight": "bold", "margin": "sm" }
                 ]
             },
             "body": {
@@ -57,8 +61,8 @@ export default async function handler(req, res) {
             "footer": {
                 "type": "box", "layout": "vertical", "spacing": "sm",
                 "contents": [
-                    { "type": "button", "style": "primary", "color": "#f59e0b", "height": "sm", "action": { "type": "uri", "label": "🗺️ นำทาง Google Maps", "uri": "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(location) } },
-                    { "type": "button", "style": "secondary", "color": "#fafbfd", "height": "sm", "action": { "type": "uri", "label": "📞 โทรออกหาลูกค้า", "uri": "tel:" + phone } }
+                    { "type": "button", "style": "primary", "color": "#f59e0b", "height": "sm", "action": { "type": "uri", "label": "📄 ดูบิลการจอง", "uri": targetUrl } },
+                    { "type": "button", "style": "primary", "color": "#374151", "height": "sm", "action": { "type": "uri", "label": "📞 โทรออกหาลูกค้า", "uri": "tel:" + phone } }
                 ]
             }
         }

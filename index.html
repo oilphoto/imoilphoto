@@ -4,14 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v6.8.0</title>
-    <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Font Awesome Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- 📅 Flatpickr Library -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -51,7 +47,6 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row">
 
-    <!-- Sidebar (no-print) -->
     <aside class="w-full md:w-64 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 p-6 flex flex-col justify-between no-print">
         <div>
             <div class="flex items-center gap-3 mb-8">
@@ -59,7 +54,6 @@
                 <span class="text-xl font-semibold tracking-wider bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">I'M OIL PHOTO</span>
             </div>
 
-            <!-- ปุ่มสลับโหมดใช้งานจริง -->
             <div class="bg-slate-950 p-1 rounded-xl border border-slate-800 flex gap-1 mb-6 text-xs font-bold">
                 <button onclick="toggleViewMode('public')" id="btnViewPublic" class="flex-1 bg-amber-500 text-slate-950 py-2 rounded-lg transition-all cursor-pointer text-center">🌐 หน้าบ้าน</button>
                 <button onclick="toggleViewMode('admin')" id="btnViewAdmin" class="flex-1 text-slate-400 py-2 rounded-lg transition-all cursor-pointer text-center">🔒 หลังบ้าน</button>
@@ -78,10 +72,8 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="flex-1 p-4 md:p-8 space-y-12 overflow-y-auto max-w-7xl mx-auto w-full">
 
-        <!-- DASHBOARD -->
         <section id="dashboard" class="space-y-6 no-print">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -90,7 +82,6 @@
                 </div>
             </div>
 
-            <!-- ระบบตั้งเป้าหมายรายได้ประจำเดือน -->
             <div id="adminGoalSection" class="hidden bg-gradient-to-r from-slate-900 to-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-3">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div class="space-y-0.5">
@@ -122,7 +113,6 @@
             </div>
         </section>
 
-        <!-- BOOKING GENERATOR SECTION -->
         <section id="quotation" class="space-y-6">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div><h2 class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-calendar-check mr-2"></i>ระบบออกเอกสารจองคิว & ใบเสร็จรับเงินมัดจำ</h2></div>
@@ -133,7 +123,6 @@
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                <!-- ฟอร์มกรอกข้อมูลคิวงานฝั่งซ้าย -->
                 <div class="lg:col-span-5 space-y-4 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl no-print">
                     <div class="bg-slate-950 p-4 rounded-xl border border-dashed border-amber-500/30 space-y-2">
                         <span class="text-xs font-bold text-amber-400 block"><i class="fa-solid fa-wallet"></i> บัญชีพร้อมเพย์รับเงินของคุณสุพจน์</span>
@@ -161,13 +150,11 @@
                         <button type="button" onclick="window.print()" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-bold py-3 px-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs"><i class="fa-solid fa-print"></i> พิมพ์ / PDF</button>
                     </div>
 
-                    <!-- 🛠️ 🎯 [จุดอัปเกรดออโต้ v6.8.0]: เปลี่ยนมาเรียกยิงระบบ API ของ Vercel ตรงๆ ไม่ต้องสลับแอปแชร์แล้ว -->
                     <div class="pt-2 border-t border-slate-800/80">
                         <button type="button" onclick="sendFlexMessageToLineDirectly()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"><i class="fa-brands fa-line text-lg"></i> 🚀 ยิงการ์ดบิลสีดาร์กเข้า LINE อัตโนมัติ</button>
                     </div>
                 </div>
 
-                <!-- ส่วนพรีวิวใบจองโทน Luxury สีขาว-น้ำเงินเข้ม -->
                 <div class="lg:col-span-7 w-full flex justify-center">
                     <div id="pdfCaptureArea" class="w-full max-w-[620px] bg-white p-6 rounded-2xl border border-slate-200 shadow-2xl space-y-5 text-slate-800 box-border">
                         
@@ -221,7 +208,6 @@
                             </div>
                         </div>
 
-                        <!-- บอร์ดแสดงเลขพร้อมเพย์ -->
                         <div id="receiptQrContainer" class="hidden bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center justify-between gap-3 text-xs">
                             <div>
                                 <div class="text-sm font-bold text-slate-900">บัญชีพร้อมเพย์โอนมัดจำ: <span id="ppAccountLabelText" class="text-emerald-700 font-mono text-base">064-550-3701</span></div>
@@ -237,7 +223,6 @@
             </div>
         </section>
 
-        <!-- CALENDAR SECTION -->
         <hr class="border-slate-800 no-print">
         <section id="calendar" class="space-y-6 no-print">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -267,7 +252,6 @@
             </div>
         </section>
 
-        <!-- FINANCE MANAGEMENT -->
         <hr class="border-slate-800 no-print" id="lineFinance">
         <section id="finance" class="space-y-6 no-print">
             <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
@@ -282,7 +266,6 @@
             </div>
         </section>
 
-        <!-- CUSTOMERS -->
         <hr class="border-slate-800 no-print" id="lineCustomers">
         <section id="customers" class="space-y-6 no-print">
             <div id="customerGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -290,7 +273,6 @@
 
     </main>
 
-    <!-- MODAL QUICK VIEW -->
     <div id="quickViewModal" onclick="if(event.target === this) closeQuickViewModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print p-4">
         <div class="bg-[#111827] border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
             <div class="bg-slate-950 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
@@ -305,7 +287,6 @@
         </div>
     </div>
 
-    <!-- JOB EDIT/ADD MODAL -->
     <div id="jobModal" onclick="if(event.target === this) closeJobModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
             <div class="bg-slate-950 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
@@ -341,7 +322,6 @@
         </div>
     </div>
 
-    <!-- SCRIPTS CORE LOGIC -->
     <script>
         const SUPABASE_URL = 'https://ihvtdaehpjmqwazpaghp.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_Eeu7tjWSA8qMcaBOVpCX2A_dAn3yNGL';
@@ -728,7 +708,7 @@
 
         function closeQuickViewModal() { document.getElementById('quickViewModal').classList.add('hidden'); }
 
-        // 🚀 ⚡ [ฟังก์ชันเวอร์ชัน v6.8.0]: ปรับปรุงให้ยิงตรงเข้า API Route บน Vercel ส่งสัญญาณการ์ดเด้งเข้าแอป LINE โดยตรงแบบเงียบๆ อัตโนมัติ
+        // 🚀 ⚡ [ฟังก์ชันเวอร์ชัน v6.8.0]: ปรับปรุงให้ยิงตรงเข้า API Route บน Vercel ส่งสัญญาณการ์ดเด้งเข้าแอป LINE โดยตรงแบบเงียบๆ อัตโนมัติ พร้อมส่ง billUrl
         async function sendFlexMessageToLineDirectly() {
             const name = document.getElementById('custName').value || 'ไม่ระบุชื่อ';
             const phone = document.getElementById('custPhone').value || 'ไม่ระบุเบอร์';
@@ -740,7 +720,19 @@
             const deposit = Number(document.getElementById('paidDeposit').value || 0);
             const pending = total - deposit;
 
-            const payload = { name, phone, packageType, date, time, location, total, deposit, pending };
+            // รวบรวมข้อมูลส่งไปที่ Vercel Backend Proxy API รวมถึงลิงก์ปัจจุบัน (billUrl)
+            const payload = { 
+                name, 
+                phone, 
+                packageType, 
+                date, 
+                time, 
+                location, 
+                total, 
+                deposit, 
+                pending,
+                billUrl: window.location.href // แนบลิงก์หน้าเว็บ Vercel ดีลตรงบิลการจองตัวนี้ไปด้วยเลย
+            };
 
             try {
                 // เรียกใช้ API Route ฝั่งหลังบ้านของ Vercel ปลอดภัยและไม่ติดบล็อก CORS 100%

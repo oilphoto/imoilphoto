@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-    // ปลดล็อคกำแพงความปลอดภัย CORS ให้หน้าเว็บยิงเข้าหา Vercel ได้ปกติ
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -15,15 +14,13 @@ export default async function handler(req, res) {
     }
 
     const { name, phone, packageType, date, time, location, total, deposit, pending } = req.body;
-    
-    // ดึงค่ารหัสลับที่เรากรอกไว้ใน Environment Variables ของ Vercel มาใช้งานอัตโนมัติ
     const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 
     if (!LINE_TOKEN) {
         return res.status(500).json({ error: 'Missing LINE Token in Vercel settings.' });
     }
 
-    // ประกอบร่างโครงสร้างการ์ด Flex Message สีดาร์ก Luxury พรีเมียมของ I'M OIL PHOTO
+    // ปรับโครงสร้างใหม่ให้ผ่านเกณฑ์ความปลอดภัยของ LINE Server 100%
     const flexPayload = {
         "type": "flex",
         "altText": "📸 I'M OIL PHOTO - สรุปคิวงานจองออกกองด่วน!",
@@ -40,12 +37,12 @@ export default async function handler(req, res) {
             "body": {
                 "type": "box", "layout": "vertical",
                 "contents": [
-                    { "type": "box", "layout": "grid", "grid": "12", "margin": "md", "contents": [{ "type": "text", "text": "ประเภทงาน", "color": "#8a9aa8", "size": "sm", "grid": "4" }, { "type": "text", "text": "🎓 " + packageType, "color": "#38bdf8", "size": "sm", "weight": "bold", "grid": "8" }] },
-                    { "type": "box", "layout": "grid", "grid": "12", "margin": "sm", "contents": [{ "type": "text", "text": "คุณลูกค้า", "color": "#8a9aa8", "size": "sm", "grid": "4" }, { "type": "text", "text": name, "color": "#ffffff", "size": "sm", "weight": "medium", "grid": "8" }] },
-                    { "type": "box", "layout": "grid", "grid": "12", "margin": "sm", "contents": [{ "type": "text", "text": "วันถ่ายงาน", "color": "#8a9aa8", "size": "sm", "grid": "4" }, { "type": "text", "text": "📅 " + date, "color": "#ffffff", "size": "sm", "grid": "8" }] },
-                    { "type": "box", "layout": "grid", "grid": "12", "margin": "sm", "contents": [{ "type": "text", "text": "เวลาทำงาน", "color": "#8a9aa8", "size": "sm", "grid": "4" }, { "type": "text", "text": "⏱️ " + time, "color": "#ffffff", "size": "sm", "grid": "8" }] },
-                    { "type": "box", "layout": "grid", "grid": "12", "margin": "sm", "contents": [{ "type": "text", "text": "สถานที่นัด", "color": "#8a9aa8", "size": "sm", "grid": "4" }, { "type": "text", "text": "📍 " + location, "color": "#ffffff", "size": "sm", "wrap": true, "grid": "8" }] },
-                    { "type": "box", "layout": "grid", "grid": "12", "margin": "sm", "contents": [{ "type": "text", "text": "เบอร์โทร", "color": "#8a9aa8", "size": "sm", "grid": "4" }, { "type": "text", "text": "📞 " + phone, "color": "#ffffff", "size": "sm", "grid": "8" }] },
+                    { "type": "box", "layout": "horizontal", "margin": "md", "contents": [{ "type": "text", "text": "ประเภทงาน", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "🎓 " + packageType, "color": "#38bdf8", "size": "sm", "weight": "bold", "flex": 8 }] },
+                    { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "คุณลูกค้า", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": name, "color": "#ffffff", "size": "sm", "weight": "medium", "flex": 8 }] },
+                    { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "วันถ่ายงาน", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "📅 " + date, "color": "#ffffff", "size": "sm", "flex": 8 }] },
+                    { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "เวลาทำงาน", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "⏱️ " + time, "color": "#ffffff", "size": "sm", "flex": 8 }] },
+                    { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "สถานที่นัด", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "📍 " + location, "color": "#ffffff", "size": "sm", "wrap": true, "flex": 8 }] },
+                    { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "เบอร์โทร", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "📞 " + phone, "color": "#ffffff", "size": "sm", "flex": 8 }] },
                     { "type": "separator", "margin": "lg", "color": "#2d3848" },
                     {
                         "type": "box", "layout": "vertical", "margin": "lg", "backgroundColor": "#161b24", "cornerRadius": "md", "paddingAll": "md",
@@ -69,7 +66,6 @@ export default async function handler(req, res) {
     };
 
     try {
-        // ทำหน้าที่เป็น Proxy ส่งสัญญาณทะลุกำแพง CORS ตรงเข้า LINE Server สำเร็จ 100%
         const response = await fetch('https://api.line.me/v2/bot/message/broadcast', {
             method: 'POST',
             headers: {

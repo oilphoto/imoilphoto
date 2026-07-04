@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v7.2.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v7.3.5</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -293,7 +293,7 @@
 
     </main>
 
-    <!-- ⚡ MODAL QUICK VIEW ดีไซน์ร่างทองตามภาพ image_916886.png -->
+    <!-- ⚡ MODAL QUICK VIEW ดีไซน์พรีเมียมสีดาร์กตามภาพ image_91e76a.png -->
     <div id="quickViewModal" onclick="if(event.target === this) closeQuickViewModal()" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center hidden no-print p-4 overflow-y-auto">
         <div class="bg-[#15171e] text-slate-200 w-full max-w-4xl rounded-2xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col" onclick="event.stopPropagation()">
             
@@ -307,7 +307,7 @@
                     <div class="flex items-center gap-2 text-xs text-slate-400">
                         <span id="qvJobDateBadge" class="bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-md font-bold">--</span>
                         <span>•</span>
-                        <span id="qvJobType">Wedding</span>
+                        <span id="qvJobType">--</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -344,13 +344,13 @@
                             <div class="relative">
                                 <span class="absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold"><i class="fa-solid fa-check"></i></span>
                                 <div class="text-xs font-bold text-slate-200">สร้างงาน ✓</div>
-                                <div id="tlStep1Date" class="text-[10px] text-slate-500 mt-0.5">-- • รับงาน - สร้างในคลาวด์คิว</div>
+                                <div id="tlStep1Date" class="text-[10px] text-slate-500 mt-0.5">-- • สร้างดีลสำเร็จในคลาวด์</div>
                             </div>
                             <!-- Step 2 -->
                             <div class="relative">
                                 <span class="absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold"><i class="fa-solid fa-check"></i></span>
                                 <div class="text-xs font-bold text-slate-200">รอถ่าย ✓</div>
-                                <div id="tlStep2Date" class="text-[10px] text-slate-500 mt-0.5">-- • ระหว่างรอ ถึงวันงานจริง</div>
+                                <div id="tlStep2Date" class="text-[10px] text-slate-500 mt-0.5">-- • ล็อคมัดจำเรียบร้อย</div>
                             </div>
                             <!-- Step 3 -->
                             <div class="relative">
@@ -381,6 +381,16 @@
                             <div class="space-y-0.5 text-right"><span class="text-slate-500 block text-[10px]">คงเหลือ</span><span id="qvPendingAmountText" class="font-bold text-amber-500 text-sm">฿0</span></div>
                         </div>
                         <button onclick="pullToInvoiceForm()" class="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"><i class="fa-solid fa-file-invoice"></i> ออกใบเรียกเก็บยอดชำระเพิ่มเติม</button>
+                        
+                        <!-- ✨ แผงปุ่มสำหรับติดต่อทักแชทลูกค้าด่วน / โทรหาลูกค้า (เพิ่มเข้ามาใหม่ตามคำขอ) -->
+                        <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/50">
+                            <a id="qvChatWithCustomerBtn" href="#" target="_blank" class="bg-[#00c755]/10 hover:bg-[#00c755]/20 text-[#00c755] border border-[#00c755]/20 font-bold py-2 rounded-xl text-[11px] transition-all flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-comment-dots text-xs"></i> 💬 ทักแชทหาลูกค้า
+                            </a>
+                            <a id="qvCallCustomerDirectBtn" href="#" class="bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 font-bold py-2 rounded-xl text-[11px] transition-all flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-phone text-xs"></i> โทรสายตรง
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Quick Action Buttons Box -->
@@ -485,7 +495,6 @@
         function openFacebookPageInbox() { window.open('https://business.facebook.com/latest/inbox/all', '_blank'); }
 
         function toggleViewMode(mode) {
-            currentSystemView = mode;
             const btnPub = document.getElementById('btnViewPublic'); const btnAdm = document.getElementById('btnViewAdmin');
             const stats = document.getElementById('adminStatsCards'); const btnAdd = document.getElementById('btnAddNewJobAdmin');
             const menuCal = document.getElementById('menuCalendar'); const menuFin = document.getElementById('menuFinance'); const menuCust = document.getElementById('menuCustomers');
@@ -494,6 +503,7 @@
             const sideNav = document.getElementById('sidebarNavLinks');
             const quotSec = document.getElementById('quotation');
 
+            currentSystemView = mode;
             if (mode === 'public') {
                 btnPub.className = "flex-1 bg-amber-500 text-slate-950 py-2 rounded-lg text-center cursor-pointer";
                 btnAdm.className = "flex-1 text-slate-400 py-2 rounded-lg transition-all text-center cursor-pointer";
@@ -600,7 +610,6 @@
             filteredJobs = allJobs.filter(job => job.date && job.date.split('-')[0] === selectedYear && job.date.split('-')[1] === selectedMonth);
             const monthNames = { "01": "มกราคม", "02": "กุมภาพันธ์", "03": "มีนาคม", "04": "เมษายน", "05": "พฤษภาคม", "06": "มิถุนายน", "07": "กรกฎาคม", "08": "สิงหาคม", "09": "กันยายน", "10": "ตุลาคม", "11": "พฤศจิกายน", "12": "ธันวาคม" };
             document.getElementById('calendarMonthTitle').innerText = `${monthNames[selectedMonth]} พ.ศ. ${parseInt(selectedYear) + 543}`;
-            // หากกำลังดู Modal รายละเอียดอยู่ ให้สั่งรีเฟรชข้อมูลใน Modal ด้วย
             if (selectedActiveJobId) {
                 const updatedJob = allJobs.find(j => j.id === selectedActiveJobId);
                 if (updatedJob) openQuickViewModal(selectedActiveJobId);
@@ -797,7 +806,7 @@
             alert("⚡ AI สกัดข้อมูลดิบลงฟอร์มให้เบื้องต้นเรียบร้อยครับคุณออย!");
         }
 
-        // ⚡ [ฟังก์ชันใหม่ถอดด้ามตามรูป image_916886.png]: โชว์แผงดีลงานประวัติ Timeline และการเงินสุดเท่
+        // ⚡ [ฟังก์ชัน Quick View ดีไซน์หรูสไตล์แผงควบคุม]: โชว์สถานะพร้อมปุ่มแชทสื่อสารหาลูกค้าด่วน
         function openQuickViewModal(jobId) {
             selectedActiveJobId = jobId;
             const job = allJobs.find(j => j.id === jobId); if (!job) return;
@@ -807,7 +816,7 @@
             let remaining = total - paid;
             let percentPaid = total > 0 ? (paid / total) * 100 : 0;
 
-            // ผูกข้อมูลฝั่ง Header และรายละเอียดเบื้องต้น
+            // ผูกข้อมูลฝั่ง Header
             document.getElementById('qvCustomerName').innerText = job.title || 'ไม่ระบุชื่อ';
             document.getElementById('qvJobCode').innerText = `JOB-2026-${String(job.id).padStart(3, '0')}`;
             document.getElementById('qvJobDateBadge').innerText = job.date || '--';
@@ -817,6 +826,28 @@
             document.getElementById('qvPaidAmountText').innerText = `฿${paid.toLocaleString()}`;
             document.getElementById('qvPendingAmountText').innerText = `฿${remaining.toLocaleString()}`;
             document.getElementById('qvFinanceProgressBar').style.width = `${percentPaid}%`;
+
+            // ดึงลิงก์แชทสื่อสารและเบอร์โทรศัพท์ลงชุดปุ่มติดต่อด่วน
+            const chatLinkBtn = document.getElementById('qvChatWithCustomerBtn');
+            const callDirectBtn = document.getElementById('qvCallCustomerDirectBtn');
+
+            if (job.facebook && job.facebook.trim()) {
+                let formattedUrl = job.facebook.trim();
+                if (!formattedUrl.startsWith('http')) formattedUrl = 'https://' + formattedUrl;
+                chatLinkBtn.setAttribute('href', formattedUrl);
+                chatLinkBtn.className = "bg-[#00c755]/10 hover:bg-[#00c755]/20 text-[#00c755] border border-[#00c755]/20 font-bold py-2 rounded-xl text-[11px] transition-all flex items-center justify-center gap-1.5 cursor-pointer";
+            } else {
+                chatLinkBtn.setAttribute('href', '#');
+                chatLinkBtn.className = "bg-slate-800 text-slate-500 border border-slate-700 font-bold py-2 rounded-xl text-[11px] flex items-center justify-center gap-1.5 cursor-not-allowed opacity-50";
+            }
+
+            if (job.phone && job.phone.trim()) {
+                callDirectBtn.setAttribute('href', `tel:${job.phone.trim()}`);
+                callDirectBtn.className = "bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 font-bold py-2 rounded-xl text-[11px] transition-all flex items-center justify-center gap-1.5 cursor-pointer";
+            } else {
+                callDirectBtn.setAttribute('href', '#');
+                callDirectBtn.className = "bg-slate-800 text-slate-500 border border-slate-700 font-bold py-2 rounded-xl text-[11px] flex items-center justify-center gap-1.5 cursor-not-allowed opacity-50";
+            }
 
             // ตรวจสอบสถานะเพื่อแมตช์สไตล์ Timeline และกระดานใหญ่
             let currentStatus = job.status || "Active";
@@ -881,11 +912,9 @@
         async function changeJobStatusDirectly() {
             if (!selectedActiveJobId) return;
             const selectedStatusValue = document.getElementById('qvStatusSelector').value;
-            let dbStatus = "Active";
             if (selectedStatusValue === "ปิดงาน") {
                 const job = allJobs.find(j => j.id === selectedActiveJobId);
                 if (job) {
-                    // หากกดเลือกปิดงาน ให้ปรับยอดชำระเป็นจ่ายเต็มออโต้
                     let total = Number(job.total || 0);
                     await supabaseClient.from('jobs').update({ paid: total, status: 'Closed' }).eq('id', selectedActiveJobId);
                     alert("💵 ปรับสถานะงานเป็นจ่ายครบถ้วนและปิดงานเรียบร้อยครับ!");

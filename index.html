@@ -3,15 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v7.3.5</title>
-    <!-- Tailwind CSS v4 -->
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v7.5.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Font Awesome Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- 📅 Flatpickr Library -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -51,7 +47,6 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row">
 
-    <!-- Sidebar (no-print) -->
     <aside class="w-full md:w-64 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 p-6 flex flex-col justify-between no-print">
         <div>
             <div class="flex items-center gap-3 mb-8">
@@ -59,7 +54,6 @@
                 <span class="text-xl font-semibold tracking-wider bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">I'M OIL PHOTO</span>
             </div>
 
-            <!-- ปุ่มสลับโหมดใช้งานจริง -->
             <div class="bg-slate-950 p-1 rounded-xl border border-slate-800 flex gap-1 mb-6 text-xs font-bold">
                 <button onclick="toggleViewMode('public')" id="btnViewPublic" class="flex-1 bg-amber-500 text-slate-950 py-2 rounded-lg transition-all cursor-pointer text-center">🌐 หน้าบ้าน</button>
                 <button onclick="toggleViewMode('admin')" id="btnViewAdmin" class="flex-1 text-slate-400 py-2 rounded-lg transition-all cursor-pointer text-center">🔒 หลังบ้าน</button>
@@ -78,10 +72,8 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="flex-1 p-4 md:p-8 space-y-12 overflow-y-auto max-w-7xl mx-auto w-full">
 
-        <!-- DASHBOARD -->
         <section id="dashboard" class="space-y-6 no-print">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -90,7 +82,6 @@
                 </div>
             </div>
 
-            <!-- ระบบตั้งเป้าหมายรายได้ประจำเดือน -->
             <div id="adminGoalSection" class="hidden bg-gradient-to-r from-slate-900 to-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-3">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div class="space-y-0.5">
@@ -122,7 +113,6 @@
             </div>
         </section>
 
-        <!-- BOOKING GENERATOR SECTION -->
         <section id="quotation" class="space-y-6">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div><h2 class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-calendar-check mr-2"></i>ระบบออกเอกสารจองคิว & ใบเสร็จรับเงินมัดจำ</h2></div>
@@ -133,7 +123,6 @@
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                <!-- ฟอร์มกรอกข้อมูลคิวงานฝั่งซ้าย -->
                 <div class="lg:col-span-5 space-y-4 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl no-print">
                     <div class="bg-slate-950 p-4 rounded-xl border border-dashed border-amber-500/30 space-y-2">
                         <span class="text-xs font-bold text-amber-400 block"><i class="fa-solid fa-wallet"></i> บัญชีพร้อมเพย์รับเงินของคุณสุพจน์</span>
@@ -156,7 +145,6 @@
                         <div><label class="block text-sm text-slate-400 mb-2">ชำระเงินมัดจำแล้ว (บาท)</label><input type="number" id="paidDeposit" value="1000" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200"></div>
                     </div>
                     
-                    <!-- ส่วนปุ่มจัดการ ออกบิล, พิมพ์, คัดลอก และดาวน์โหลดรูปภาพ -->
                     <div class="space-y-2 pt-2">
                         <div class="grid grid-cols-2 gap-2">
                             <button type="button" onclick="copyBriefToClipboard()" class="bg-[#00c755]/10 text-[#00c755] border border-[#00c755]/30 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs"><i class="fa-solid fa-copy"></i> 💬 คัดลอกส่งแชท</button>
@@ -164,13 +152,11 @@
                         </div>
                     </div>
 
-                    <!-- 🛠️ 🎯 [จุดอัปเกรดออโต้ v6.8.0]: เรียกยิงระบบ API ของ Vercel ตรงๆ ผูกลิงก์สมบูรณ์ -->
                     <div class="pt-2 border-t border-slate-800/80">
                         <button type="button" onclick="sendFlexMessageToLineDirectly()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"><i class="fa-brands fa-line text-lg"></i> 🚀 ยิงการ์ดบิลสีดาร์กเข้า LINE อัตโนมัติ</button>
                     </div>
                 </div>
 
-                <!-- ส่วนพรีวิวใบจองโทน Luxury สีขาว-น้ำเงินเข้ม -->
                 <div class="lg:col-span-7 w-full flex justify-center">
                     <div id="pdfCaptureArea" class="w-full max-w-[620px] bg-white p-6 rounded-2xl border border-slate-200 shadow-2xl space-y-5 text-slate-800 box-border">
                         
@@ -224,7 +210,6 @@
                             </div>
                         </div>
 
-                        <!-- บอร์ดแสดงเลขพร้อมเพย์ -->
                         <div id="receiptQrContainer" class="hidden bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center justify-between gap-3 text-xs">
                             <div>
                                 <div class="text-sm font-bold text-slate-900">บัญชีพร้อมเพย์โอนมัดจำ: <span id="ppAccountLabelText" class="text-emerald-700 font-mono text-base">064-550-3701</span></div>
@@ -240,7 +225,6 @@
             </div>
         </section>
 
-        <!-- CALENDAR SECTION -->
         <hr class="border-slate-800 no-print">
         <section id="calendar" class="space-y-6 no-print">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -270,7 +254,6 @@
             </div>
         </section>
 
-        <!-- FINANCE MANAGEMENT -->
         <hr class="border-slate-800 no-print" id="lineFinance">
         <section id="finance" class="space-y-6 no-print">
             <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
@@ -285,7 +268,6 @@
             </div>
         </section>
 
-        <!-- CUSTOMERS -->
         <hr class="border-slate-800 no-print" id="lineCustomers">
         <section id="customers" class="space-y-6 no-print">
             <div id="customerGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -293,11 +275,9 @@
 
     </main>
 
-    <!-- ⚡ MODAL QUICK VIEW ดีไซน์พรีเมียมสีดาร์กตามภาพ image_91e76a.png -->
     <div id="quickViewModal" onclick="if(event.target === this) closeQuickViewModal()" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center hidden no-print p-4 overflow-y-auto">
         <div class="bg-[#15171e] text-slate-200 w-full max-w-4xl rounded-2xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col" onclick="event.stopPropagation()">
             
-            <!-- Top Nav Header -->
             <div class="px-6 py-4 bg-[#111319] border-b border-slate-800 flex justify-between items-center">
                 <div class="space-y-1">
                     <div class="flex items-center gap-3">
@@ -316,12 +296,9 @@
                 </div>
             </div>
 
-            <!-- Content Body Grid Layout -->
             <div class="p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-[#15171e]">
                 
-                <!-- Left Side: Status & Timeline Panel -->
                 <div class="lg:col-span-7 space-y-6">
-                    <!-- Current Status Block -->
                     <div class="bg-[#1a1d26] border border-slate-800/80 rounded-2xl p-5 relative overflow-hidden">
                         <div class="flex justify-between items-start">
                             <div class="space-y-1">
@@ -329,36 +306,31 @@
                                 <h3 id="qvCurrentStatusText" class="text-3xl font-black text-emerald-400 tracking-tight">--</h3>
                                 <p id="qvStatusTimeNotes" class="text-xs text-slate-400">--</p>
                             </div>
-                            <span id="qvStatusStatusChip" class="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full border border-emerald-500/20">ปิดงาน</span>
+                            <span id="qvStatusStatusChip" class="text-[10px] font-bold px-3 py-1 rounded-full border">--</span>
                         </div>
                         <div class="mt-4 bg-slate-900/60 text-emerald-400 border border-emerald-500/10 rounded-xl py-3 px-4 text-center text-xs font-semibold">
-                            <i class="fa-solid fa-circle-check mr-1.5"></i> คิวงานนี้จัดการเสร็จเรียบร้อยแล้ว
+                            <i class="fa-solid fa-circle-check mr-1.5"></i> คิวงานนี้ผูกระบบ Cloud สื่อสาร Realtime 100%
                         </div>
                     </div>
 
-                    <!-- History Timeline Card -->
                     <div class="bg-[#1a1d26] border border-slate-800/80 rounded-2xl p-5 space-y-4">
                         <h4 class="text-xs font-bold text-slate-400 tracking-wider uppercase border-b border-slate-800/60 pb-2"><i class="fa-solid fa-clock-rotate-left mr-1.5 text-slate-500"></i> ประวัติสถานะคิวงาน</h4>
                         <div class="relative pl-6 space-y-5 border-l border-slate-800">
-                            <!-- Step 1 -->
                             <div class="relative">
                                 <span class="absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold"><i class="fa-solid fa-check"></i></span>
                                 <div class="text-xs font-bold text-slate-200">สร้างงาน ✓</div>
                                 <div id="tlStep1Date" class="text-[10px] text-slate-500 mt-0.5">-- • สร้างดีลสำเร็จในคลาวด์</div>
                             </div>
-                            <!-- Step 2 -->
                             <div class="relative">
                                 <span class="absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold"><i class="fa-solid fa-check"></i></span>
                                 <div class="text-xs font-bold text-slate-200">รอถ่าย ✓</div>
                                 <div id="tlStep2Date" class="text-[10px] text-slate-500 mt-0.5">-- • ล็อคมัดจำเรียบร้อย</div>
                             </div>
-                            <!-- Step 3 -->
                             <div class="relative">
                                 <span class="absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold"><i class="fa-solid fa-check"></i></span>
                                 <div class="text-xs font-bold text-slate-200">ถ่ายเสร็จ ➔ รอส่งงาน ✓</div>
                                 <div id="tlStep3Date" class="text-[10px] text-slate-500 mt-0.5">-- • ออกกองถ่ายทำเรียบร้อย</div>
                             </div>
-                            <!-- Step 4 -->
                             <div class="relative">
                                 <span class="absolute -left-[30px] top-0.5 bg-amber-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-amber-500/20"></span>
                                 <div class="text-xs font-bold text-amber-400">ปิดงาน • ตอนนี้</div>
@@ -368,9 +340,7 @@
                     </div>
                 </div>
 
-                <!-- Right Side: Finance & Action Controls Panel -->
                 <div class="lg:col-span-5 space-y-4">
-                    <!-- Finance Panel Card -->
                     <div class="bg-[#1a1d26] border border-slate-800/80 rounded-2xl p-5 space-y-4">
                         <div class="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-coins text-amber-500"></i> การชำระเงิน</div>
                         <div class="w-full bg-slate-950 h-2 rounded-full p-0.5 overflow-hidden">
@@ -382,7 +352,6 @@
                         </div>
                         <button onclick="pullToInvoiceForm()" class="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"><i class="fa-solid fa-file-invoice"></i> ออกใบเรียกเก็บยอดชำระเพิ่มเติม</button>
                         
-                        <!-- ✨ แผงปุ่มสำหรับติดต่อทักแชทลูกค้าด่วน / โทรหาลูกค้า (เพิ่มเข้ามาใหม่ตามคำขอ) -->
                         <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/50">
                             <a id="qvChatWithCustomerBtn" href="#" target="_blank" class="bg-[#00c755]/10 hover:bg-[#00c755]/20 text-[#00c755] border border-[#00c755]/20 font-bold py-2 rounded-xl text-[11px] transition-all flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-comment-dots text-xs"></i> 💬 ทักแชทหาลูกค้า
@@ -393,7 +362,6 @@
                         </div>
                     </div>
 
-                    <!-- Quick Action Buttons Box -->
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="alert('บันทึกค่าใช้จ่ายเสริมสำเร็จเรียบร้อย')" class="bg-[#1a1d26] hover:bg-[#20242e] border border-slate-800 py-4 rounded-2xl transition-all text-center flex flex-col items-center justify-center gap-2 cursor-pointer group">
                             <span class="w-10 h-10 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center text-sm group-hover:scale-110 transition-all shadow-md"><i class="fa-solid fa-receipt"></i></span>
@@ -405,14 +373,13 @@
                         </button>
                     </div>
 
-                    <!-- Status Selector Panel -->
                     <div class="bg-[#1a1d26] border border-slate-800/80 rounded-2xl p-4 space-y-2">
                         <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block flex items-center gap-1.5"><i class="fa-solid fa-circle-notch text-slate-400"></i> สถานะงาน</span>
                         <select id="qvStatusSelector" onchange="changeJobStatusDirectly()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-200 focus:outline-none cursor-pointer">
                             <option value="สร้างงาน">สร้างงานในคลาวด์</option>
                             <option value="รอถ่าย">รอคิววันงานจริง</option>
                             <option value="รอส่งงาน">ถ่ายเสร็จ ➔ รอส่งงาน</option>
-                            <option value="ปิดงาน" selected>ปิดงาน (จ่ายครบถ้วน)</option>
+                            <option value="ปิดงาน">ปิดงาน (จ่ายครบถ้วน)</option>
                         </select>
                     </div>
                 </div>
@@ -421,7 +388,6 @@
         </div>
     </div>
 
-    <!-- JOB EDIT/ADD MODAL -->
     <div id="jobModal" onclick="if(event.target === this) closeJobModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
             <div class="bg-slate-950 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
@@ -458,7 +424,6 @@
         </div>
     </div>
 
-    <!-- SCRIPTS CORE LOGIC -->
     <script>
         const SUPABASE_URL = 'https://ihvtdaehpjmqwazpaghp.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_Eeu7tjWSA8qMcaBOVpCX2A_dAn3yNGL';
@@ -849,23 +814,30 @@
                 callDirectBtn.className = "bg-slate-800 text-slate-500 border border-slate-700 font-bold py-2 rounded-xl text-[11px] flex items-center justify-center gap-1.5 cursor-not-allowed opacity-50";
             }
 
-            // ตรวจสอบสถานะเพื่อแมตช์สไตล์ Timeline และกระดานใหญ่
+            // 📊 [ปรับปรุงการคำนวณสถานะ]: ตรวจสอบสถานะจริงจากฐานข้อมูลคลาวด์
             let currentStatus = job.status || "Active";
             let statusText = "รอถ่ายคิวงาน";
             let statusNotes = "อยู่ระหว่างรอถึงกำหนดการวันจัดงานจริง";
+            let statusChip = document.getElementById('qvStatusStatusChip');
 
             if (currentStatus === "Closed" || remaining === 0) {
                 statusText = "ปิดงาน";
-                statusNotes = "โอนยอดครบถ้วน - ส่งงานเรียบร้อยแล้ว";
+                statusNotes = "โอนยอดครบถ้วน - จัดส่งไฟล์รูปภาพเรียบร้อยแล้ว";
                 document.getElementById('qvStatusSelector').value = "ปิดงาน";
-            } else if (paid > 0 && paid < total) {
+                statusChip.innerText = "ปิดงาน";
+                statusChip.className = "bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full border border-emerald-500/20";
+            } else if (currentStatus === "Pending_Delivery") {
+                statusText = "ถ่ายเสร็จ ➔ รอส่งงาน";
+                statusNotes = "ออกกองถ่ายทำเรียบร้อย อยู่ระหว่างขั้นตอนโพรเซสแต่งรูปภาพ";
+                document.getElementById('qvStatusSelector').value = "รอส่งงาน";
+                statusChip.innerText = "รอส่งงาน";
+                statusChip.className = "bg-sky-500/10 text-sky-400 text-[10px] font-bold px-3 py-1 rounded-full border border-sky-500/20";
+            } else {
                 statusText = "มัดจำแล้ว ➔ รอถ่าย";
                 statusNotes = "ล็อคคิวคลาวด์เรียบร้อย อยู่ในสถานะเตรียมความพร้อมก่อนออกกอง";
                 document.getElementById('qvStatusSelector').value = "รอถ่าย";
-            } else {
-                statusText = "สร้างงานสำเร็จ";
-                statusNotes = "ข้อมูลเข้าระบบเรียบร้อยแล้ว";
-                document.getElementById('qvStatusSelector').value = "สร้างงาน";
+                statusChip.innerText = "รอถ่าย";
+                statusChip.className = "bg-amber-500/10 text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full border border-amber-500/20";
             }
 
             document.getElementById('qvCurrentStatusText').innerText = statusText;
@@ -909,20 +881,45 @@
             loadJobToInvoiceEditor(targetId);
         }
 
+        // ⚙️ ⚡ [ฟังก์ชันซ่อมแซม]: สั่งเซฟสถานะงานลง Cloud Supabase จริงๆ และรีเฟรชหน้าจอ Realtime
         async function changeJobStatusDirectly() {
-            if (!selectedActiveJobId) return;
+            if (!selectedActiveJobId || !supabaseClient) return;
+            
             const selectedStatusValue = document.getElementById('qvStatusSelector').value;
+            let dbStatus = "Active";
+            
             if (selectedStatusValue === "ปิดงาน") {
-                const job = allJobs.find(j => j.id === selectedActiveJobId);
-                if (job) {
-                    let total = Number(job.total || 0);
-                    await supabaseClient.from('jobs').update({ paid: total, status: 'Closed' }).eq('id', selectedActiveJobId);
-                    alert("💵 ปรับสถานะงานเป็นจ่ายครบถ้วนและปิดงานเรียบร้อยครับ!");
-                    loadJobsFromCloud();
-                    return;
-                }
+                dbStatus = "Closed";
+            } else if (selectedStatusValue === "รอส่งงาน") {
+                dbStatus = "Pending_Delivery";
+            } else if (selectedStatusValue === "รอถ่าย") {
+                dbStatus = "Active";
             }
-            alert("⚙️ อัปเดตโครงสร้างประวัติสถานะลงระบบประมวลผลสำเร็จ!");
+
+            try {
+                // อัปเดตสถานะงานกลับไปเซฟบนฐานข้อมูล Supabase
+                let updateData = { status: dbStatus };
+                
+                // หากเลือกปิดงาน ให้ปรับยอดเป็นจ่ายครบถ้วนอัตโนมัติ
+                if (dbStatus === "Closed") {
+                    const job = allJobs.find(j => j.id === selectedActiveJobId);
+                    if (job) updateData.paid = Number(job.total || 0);
+                }
+
+                const { error } = await supabaseClient
+                    .from('jobs')
+                    .update(updateData)
+                    .eq('id', selectedActiveJobId);
+
+                if (!error) {
+                    await loadJobsFromCloud();
+                    alert(`⚙️ อัปเดตสถานะคิวงานเป็น [${selectedStatusValue}] ลงคลาวด์เรียบร้อย!`);
+                } else {
+                    alert("❌ เกิดข้อผิดพลาดฝั่งฐานข้อมูล ไม่สามารถบันทึกได้");
+                }
+            } catch (err) {
+                console.error("System error: ", err);
+            }
         }
 
         // 🚀 ⚡ ยิงการ์ดบิลเข้าแอป LINE โดยตรง

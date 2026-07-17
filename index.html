@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v11.0.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v12.0.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -72,9 +72,13 @@
             </nav>
         </div>
         
-        <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 no-print">
-            <div class="text-slate-500 text-[10px] flex items-center gap-2">
-                <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span>ระบบคลาวด์มัดจำ Realtime</span>
+        <!-- 🚨 แผงปุ่มเรียกเลขาเตือนงานวันพรุ่งนี้ด้วยตัวเอง ข้ามระบบบล็อกป๊อปอัพถาวร -->
+        <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 no-print hidden" id="sidebarAdminControls">
+            <button onclick="triggerTomorrowReminderDirectly()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 shadow-md shadow-amber-500/10">
+                <i class="fa-brands fa-line text-sm"></i> 🔔 เลขาเช็คคิวงานวันพรุ่งนี้
+            </button>
+            <div class="text-slate-500 text-[10px] flex items-center gap-2 pt-1">
+                <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span>ระบบคลาวด์เชื่อมต่อปกติ</span>
             </div>
         </div>
     </aside>
@@ -162,7 +166,6 @@
                         </div>
                     </div>
 
-                    <!-- 🚀 ปุ่มสีเขียวระบบแชร์ถาวร มั่นใจไม่มีวันพัง เด้งเปิดแอป LINE ให้คุณออยเลือกแชทส่งบิลได้ใน 1 วินาที! -->
                     <div class="pt-2 border-t border-slate-800/80">
                         <button type="button" onclick="sendFlexMessageToLineDirectly()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white font-black py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer text-sm active:scale-[0.98]"><i class="fa-brands fa-line text-lg"></i> 🚀 ยิงการ์ดบิลสีดาร์กเข้า LINE อัตโนมัติ</button>
                     </div>
@@ -492,6 +495,7 @@
             const goalSec = document.getElementById('adminGoalSection');
             const sideNav = document.getElementById('sidebarNavLinks');
             const quotSec = document.getElementById('quotation');
+            const sideAdmin = document.getElementById('sidebarAdminControls');
 
             currentSystemView = mode;
             if (mode === 'public') {
@@ -501,7 +505,7 @@
                 stats.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 hidden"; 
                 btnAdd.classList.add('hidden'); goalSec.classList.add('hidden'); quotSec.classList.add('hidden'); sideNav.classList.add('hidden');
                 menuCal.classList.add('hidden'); menuFin.classList.add('hidden'); menuCust.classList.add('hidden');
-                secFin.classList.add('hidden'); secCust.classList.add('hidden');
+                secFin.classList.add('hidden'); secCust.classList.add('hidden'); sideAdmin.classList.add('hidden');
             } else {
                 btnAdm.className = "flex-1 bg-amber-500 text-slate-950 py-2 rounded-lg text-center cursor-pointer";
                 btnPub.className = "flex-1 text-slate-400 py-2 rounded-lg transition-all text-center cursor-pointer";
@@ -509,7 +513,7 @@
                 stats.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"; 
                 btnAdd.classList.remove('hidden'); goalSec.classList.remove('hidden'); quotSec.classList.remove('hidden'); sideNav.classList.remove('hidden');
                 menuCal.classList.remove('hidden'); menuFin.classList.remove('hidden'); menuCust.classList.remove('hidden');
-                secFin.classList.remove('hidden'); secCust.classList.remove('hidden');
+                secFin.classList.remove('hidden'); secCust.classList.remove('hidden'); sideAdmin.classList.remove('hidden');
             }
             refreshUI();
         }
@@ -591,7 +595,6 @@
             if (!supabaseClient) return;
             let { data, error } = await supabaseClient.from('jobs').select('*').order('date', { ascending: true });
             if (!error) { allJobs = data || []; filterJobsByMonth(); }
-            runAutomatedLineCronTask();
         }
 
         function filterJobsByMonth() {
@@ -951,10 +954,14 @@
             } catch (err) { console.error(err); }
         }
 
-        // 🤖 ฟังก์ชันช่วยดีดแชทจำหน้าคิวงานเตือนวันพรุ่งนี้ผ่านลิงก์แท้มาตรฐาน
-        async function runAutomatedLineCronTask() {
-            if(allJobs.length === 0) return;
+        // 🎯 🔔 [ฟังก์ชันปุ่มเลขาตรวจเช็คคิวงานวันพรุ่งนี้ตัวจริง]: มั่นใจเด้งเปิดแอป LINE ทันที ปลอดภัยจากระบบบล็อกของเบราว์เซอร์
+        function triggerTomorrowReminderDirectly() {
+            if (allJobs.length === 0) {
+                alert("❌ ระบบยังดึงข้อมูลคิวงานจาก Cloud ไม่เสร็จ หรือฐานข้อมูลว่างเปล่าครับ");
+                return;
+            }
 
+            // คำนวณหาวันพรุ่งนี้ตามเวลาประเทศไทยเป๊ะ ๆ (GMT+7)
             const nowInThailand = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
             nowInThailand.setDate(nowInThailand.getDate() + 1);
             
@@ -963,24 +970,30 @@
             const day = String(nowInThailand.getDate()).padStart(2, '0');
             const tomorrowStr = `${year}-${month}-${day}`;
 
+            // คัดเลือกคิวงานที่ตรงกับวันพรุ่งนี้
             const tomorrowJobs = allJobs.filter(j => j.date === tomorrowStr);
-            if(tomorrowJobs.length === 0) return;
-
-            const todayKey = new Date().toISOString().split('T')[0] + "_line_sent";
-            if(localStorage.getItem(todayKey)) return; 
-
-            for(let job of tomorrowJobs) {
-                let remaining = Number(job.total || 0) - Number(job.paid || 0);
-                let textMessage = `🚨 [I'M OIL PHOTO] แจ้งเตือนคิวงานวันพรุ่งนี้ครับคุณออย!\n━━━━━━━━━━━━━━━━━━━━\n👤 คุณลูกค้า: ${job.title}\n🎓 ประเภท: งาน${job.status_notes || 'ทั่วไป'}\n🕒 เวลาเริ่ม: ${job.time || 'ตามบรีฟ'} น.\n📍 สถานที่: ${job.location || '-'}\n\n💰 ยอดคงเหลือเก็บหน้างาน: ฿${remaining.toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nเตรียมอุปกรณ์คิวงานร่างทองวันพรุ่งนี้นะครับช่างภาพ! 🔥📸`;
-
-                try {
-                    window.open(`https://line.me/R/share?text=${encodeURIComponent(textMessage)}`, '_blank');
-                } catch(e) { console.error(e); }
+            
+            if (tomorrowJobs.length === 0) {
+                alert(`🌴 พรุ่งนี้วันที่ ${day}/${month}/${year + 543} คุณออยไม่มีคิวงานจัดเก็บในคลาวด์เลยครับ พักผ่อนได้สบาย ๆ ครับ!`);
+                return;
             }
-            localStorage.setItem(todayKey, "true");
+
+            // หากเจองาน ประกอบร่างข้อความสไตล์ Luxury เตรียมเปิดแอป LINE
+            let finalReminderMessage = `🚨 [I'M OIL PHOTO] ตรวจพบคุณออยมีคิวงานวันพรุ่งนี้ครับ!\n━━━━━━━━━━━━━━━━━━━━`;
+            
+            tomorrowJobs.forEach((job, index) => {
+                let remaining = Number(job.total || 0) - Number(job.paid || 0);
+                finalReminderMessage += `\n📌 คิวงานที่ ${index + 1}:\n• ชื่อลูกค้า: ${job.title}\n• ประเภทงาน: งาน${job.status_notes || 'ทั่วไป'}\n• เวลาเริ่มงาน: ${job.time || 'ตามบรีฟ'} น.\n• สถานที่นัดกอง: ${job.location || '-'}\n• ยอดค้างชำระหน้างาน: ฿${remaining.toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━`;
+            });
+            
+            finalReminderMessage += `\nเตรียมเช็คแบตเตอรี่ กล้อง และเลนส์ให้พร้อมน้าคราบบบตากล้องร่างทอง! 📸🔥🚀`;
+
+            // เปิดแอป LINE ส่งหาห้องแชทตัวเองได้ทันทีใน 1 วินาที ชัวร์ 100%
+            const lineShareUrl = `https://line.me/R/share?text=${encodeURIComponent(finalReminderMessage)}`;
+            window.open(lineShareUrl, '_blank');
         }
 
-        // 🚀 ⚡ [ฟังก์ชันปุ่มสีเขียวร่างทองถาวร]: ใช้ระบบ LINE Share Link มาตรฐานแกนกลางแท้ ปลอดภัย ไร้สิทธิ์เออร์เรอร์ 100%
+        // ฟังก์ชันปุ่มสีเขียวแชร์ลิงก์ส่งบิลตามปกติ
         function sendFlexMessageToLineDirectly() {
             const name = document.getElementById('custName').value || 'ไม่ระบุชื่อ';
             const phone = document.getElementById('custPhone').value || 'ไม่ระบุเบอร์';

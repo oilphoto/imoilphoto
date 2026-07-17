@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v8.0.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v8.2.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -210,7 +210,7 @@
                                 <div class="text-[10px] font-bold text-slate-400 tracking-wider uppercase border-b border-slate-200 pb-1">บัญชีและค่าบริการ</div>
                                 <div class="space-y-1">
                                     <span class="text-[11px] text-slate-400 block font-medium">ราคาเต็มแพ็กเกจ:</span>
-                                    <div class="flex justify-between items-baseline"><span id="prevTotal" class="text-2xl font-black text-[#0a192f] font-mono">฿4,000</span><span class="text-[10px] font-bold text-slate-400">บาท</span></div>
+                                    <div class="flex justify-between items-baseline"><span id="prevTotal" class="text-2xl font-black text-[#0a192f] font-mono">฿4,000</span><span class="text-[10px] font-bold text-slate-400">Total</span></div>
                                 </div>
                                 <div class="space-y-1 border-t border-slate-200 pt-2">
                                     <span class="text-[11px] text-slate-400 block font-medium">มัดจำล็อคคิวแล้ว:</span>
@@ -292,6 +292,19 @@
         </section>
 
     </main>
+
+    <!-- ⚡ MODAL ทางเลือกเวลาเจอคิวงานซ้อน (เพิ่มใหม่ล่าสุด) -->
+    <div id="multipleJobsResolverModal" onclick="if(event.target === this) closeMultipleJobsModal()" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[60] flex items-center justify-center hidden no-print p-4">
+        <div class="bg-[#111319] border border-slate-800 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
+            <div class="bg-slate-950 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
+                <div class="flex items-center gap-2 text-amber-400 font-bold text-xs"><i class="fa-solid fa-list-ol"></i> <span id="multiResolverModalTitle">ตรวจพบมีคิวงานซ้อนในวันนี้</span></div>
+                <button onclick="closeMultipleJobsModal()" class="text-slate-400 hover:text-slate-200 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="multipleJobsListButtonsContainer" class="p-5 space-y-2 max-h-[60vh] overflow-y-auto">
+                <!-- รายชื่อปุ่มจะเด้งขึ้นมาตรงนี้ออโต้ -->
+            </div>
+        </div>
+    </div>
 
     <!-- ⚡ MODAL QUICK VIEW ดีไซน์พรีเมียมสีดาร์กพร้อมประวัติ Timeline ไล่สีอัจฉริยะตามสถานะจริง -->
     <div id="quickViewModal" onclick="if(event.target === this) closeQuickViewModal()" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center hidden no-print p-4 overflow-y-auto">
@@ -376,7 +389,7 @@
                             <div class="space-y-0.5"><span class="text-slate-500 block text-[10px]">ชำระแล้ว</span><span id="qvPaidAmountText" class="font-bold text-emerald-400 text-sm">฿0</span></div>
                             <div class="space-y-0.5 text-right"><span class="text-slate-500 block text-[10px]">คงเหลือ</span><span id="qvPendingAmountText" class="font-bold text-amber-500 text-sm">฿0</span></div>
                         </div>
-                        <!-- 📉 พรีวิวกำไรสุทธิ (แสดงค่าที่หักลบต้นทุนแล้ว) -->
+                        <!-- 📉 พรีวิวกำไรสุทธิ -->
                         <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs">
                             <span class="text-slate-400 font-medium"><i class="fa-solid fa-money-bill-trend-up text-emerald-400"></i> กำไรสุทธิของคิวงานนี้:</span>
                             <span id="qvNetProfitText" class="font-black text-emerald-400 text-sm">฿0</span>
@@ -396,7 +409,6 @@
 
                     <!-- Quick Action Buttons Box -->
                     <div class="grid grid-cols-2 gap-3">
-                        <!-- 🛠️ ปุ่มบันทึกค่าใช้จ่าย (เปิดลิงก์เปิดหน้าต่างกรอกจริง) -->
                         <button onclick="openCostManagementModal()" class="bg-[#1a1d26] hover:bg-[#20242e] border border-slate-800 py-4 rounded-2xl transition-all text-center flex flex-col items-center justify-center gap-2 cursor-pointer group">
                             <span class="w-10 h-10 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center text-sm group-hover:scale-110 transition-all shadow-md"><i class="fa-solid fa-receipt"></i></span>
                             <span class="text-xs font-medium text-rose-400">บันทึกค่าใช้จ่าย</span>
@@ -423,7 +435,7 @@
         </div>
     </div>
 
-    <!-- 📥 🛠️ [หน้าต่างใหม่เด้งซ้อน]: หน้าจอตัวเลือกบันทึกต้นทุนแยกหมวดหมู่ย่อยใช้งานจริงได้ 100% -->
+    <!-- 📥 🛠️ หน้าต่างบันทึกบัญชีต้นทุน -->
     <div id="costExpenseModal" onclick="if(event.target === this) closeCostManagementModal()" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center hidden no-print p-4">
         <div class="bg-[#111319] border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
             <div class="bg-slate-950 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
@@ -485,7 +497,6 @@
                     <div><label class="block text-xs text-slate-400 mb-1.5">ราคาเต็ม</label><input type="number" id="mTotal" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200"></div>
                     <div><label class="block text-xs text-slate-400 mb-1.5">ยอดมัดจำ</label><input type="number" id="mPaid" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200"></div>
                 </div>
-                <!-- 🔗 ช่องกรอกอินพุตลิงก์ส่งงาน Google Drive -->
                 <div><label class="block text-xs text-slate-400 mb-1.5">ลิงก์ส่งงาน (Google Drive / ลิงก์รูปภาพ)</label><input type="text" id="mDriveLink" placeholder="https://drive.google.com/..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200"></div>
             </div>
             <div class="bg-slate-950 px-6 py-4 border-t border-slate-800 flex justify-end gap-3"><button onclick="closeJobModal()" class="bg-slate-800 text-slate-300 text-sm px-4 py-2 rounded-xl">ยกเลิก</button><button onclick="submitJobModal()" class="bg-amber-500 text-slate-950 text-sm font-bold px-5 py-2 rounded-xl">💾 บันทึกข้อมูล</button></div>
@@ -654,6 +665,51 @@
         function changeSystemMonth() { filterJobsByMonth(); }
         function refreshUI() { renderCalendarGrid(); renderTodayJobs(); renderFinanceTable(); renderCustomers(); renderCalendarBadges(); updateGoalProgressBar(); updateDashboard(); }
 
+        // 🛠️ 🎯 [จุดอัปเกรดอัจฉริยะ]: เพิ่มระบบแยกคิวงานซ้อนเวลาคุณออยกดปุ่มวันที่ปฏิทิน
+        function handleCalendarDayClick(dayStr) {
+            let dayJobs = filteredJobs.filter(j => j.date === dayStr);
+            if (dayJobs.length === 0) return;
+            
+            if (dayJobs.length === 1) {
+                // มีงานเดียว เด้งดูงานคนนั้นทันที
+                openQuickViewModal(dayJobs[0].id);
+            } else {
+                // มีมากกว่า 1 งาน เด้งทางเลือกขึ้นมาให้จิ้ม
+                openMultipleJobsResolverModal(dayStr, dayJobs);
+            }
+        }
+
+        function openMultipleJobsResolverModal(dayStr, dayJobs) {
+            const container = document.getElementById('multipleJobsListButtonsContainer');
+            container.innerHTML = '';
+            
+            const parts = dayStr.split('-');
+            document.getElementById('multiResolverModalTitle').innerText = `คิวงานซ้อนประจำวันที่ ${parts[2]}/${parts[1]}`;
+            
+            dayJobs.forEach(job => {
+                let btn = document.createElement('button');
+                btn.className = "w-full bg-[#1a1d26] hover:bg-[#252936] text-left p-3.5 rounded-xl border border-slate-800 flex justify-between items-center transition-all cursor-pointer group";
+                btn.innerHTML = `
+                    <div class="space-y-0.5">
+                        <div class="font-bold text-slate-100 group-hover:text-amber-400 text-xs">${job.title}</div>
+                        <div class="text-[10px] text-slate-400">🕒 เวลา: ${job.time || 'ตามบรีฟ'} • งาน${job.status_notes || 'ทั่วไป'}</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-600 group-hover:text-amber-400 transition-all"></i>
+                `;
+                btn.onclick = function() {
+                    closeMultipleJobsModal();
+                    openQuickViewModal(job.id);
+                };
+                container.appendChild(btn);
+            });
+            
+            document.getElementById('multipleJobsResolverModal').classList.remove('hidden');
+        }
+
+        function closeMultipleJobsModal() {
+            document.getElementById('multipleJobsResolverModal').classList.add('hidden');
+        }
+
         function renderCalendarGrid() {
             const grid = document.getElementById('calendarGrid'); if(!grid) return; grid.innerHTML = '';
             const selectedYear = document.getElementById('globalYearSelect').value; const selectedMonth = document.getElementById('globalMonthSelect').value;
@@ -684,7 +740,9 @@
                         else if (type === "งานบวช") dayDiv.className = "p-2 bg-amber-950/40 text-amber-500 font-bold rounded-lg relative cursor-pointer border border-amber-500/40 shadow-md h-16 flex flex-col justify-between items-start";
                         else dayDiv.className = "p-2 bg-emerald-950/50 text-emerald-400 font-bold rounded-lg relative cursor-pointer border border-emerald-500/40 shadow-md h-16 flex flex-col justify-between items-start";
 
-                        dayDiv.setAttribute('onclick', `openQuickViewModal(${dayJobs[0].id})`);
+                        // 🎯 ปรับปรุงจุดส่งพารามิเตอร์ให้ครอบคลุมระบบวันซ้อน
+                        dayDiv.setAttribute('onclick', `handleCalendarDayClick('${dayStr}')`);
+                        
                         let dotContainer = document.createElement('div');
                         dotContainer.className = "flex flex-wrap gap-1 mt-1 w-full";
                         dayJobs.forEach(job => {
@@ -849,7 +907,7 @@
             let remaining = total - paid;
             let percentPaid = total > 0 ? (paid / total) * 100 : 0;
 
-            // 💰 [ระบบคำนวณกำไรสุทธิ]: ดึงค่าต้นทุนสะสม (เก็บไว้ที่ฟิลด์ facebook_notes ชั่วคราว) มาหักลบราคาเต็ม
+            // 💰 [ระบบคำนวณกำไรสุทธิ]: ดึงค่าต้นทุนสะสม มาหักลบราคาเต็ม
             let accumulatedCost = Number(job.facebook_notes || 0);
             let netProfitValue = total - accumulatedCost;
 
@@ -1008,7 +1066,6 @@
             loadJobToInvoiceEditor(targetId);
         }
 
-        // ⚙️ ⚡ [ฟังก์ชันซ่อมแซม]: สั่งเซฟสถานะงานลง Cloud Supabase จริงๆ และรีเฟรชหน้าจอ Realtime
         async function changeJobStatusDirectly() {
             if (!selectedActiveJobId || !supabaseClient) return;
             
@@ -1046,7 +1103,6 @@
             }
         }
 
-        // 🚗 🍔 [ฟังก์ชันเปิด-ปิด หน้าต่างกรอกค่าใช้จ่ายย่อย]:
         function openCostManagementModal() {
             document.getElementById('costAmountInput').value = "";
             document.getElementById('costCategorySelector').value = "ค่าน้ามัน / ค่าเดินทาง (รถส่วนตัว)";
@@ -1056,7 +1112,6 @@
             document.getElementById('costExpenseModal').classList.add('hidden');
         }
 
-        // 🚀 💾 [ฟังก์ชันบันทึกต้นทุนรายจ่ายลง Cloud Supabase]: คำนวณและสะสมต้นทุนจริงอัปเดต Realtime
         async function submitCostExpenseToCloud() {
             if (!selectedActiveJobId || !supabaseClient) return;
 
@@ -1068,7 +1123,6 @@
                 return;
             }
 
-            // ค้นหาคิวงานปัจจุบันเพื่อดึงยอดต้นทุนเก่ามาสะสมบวกเพิ่ม
             const currentJob = allJobs.find(j => j.id === selectedActiveJobId);
             if (!currentJob) return;
 
@@ -1076,18 +1130,17 @@
             let newTotalCostValue = oldCostAccumulated + costAmount;
 
             try {
-                // บันทึกสะสมยอดต้นทุนลง Cloud (ใช้ฟิลด์ facebook_notes เป็นที่พักเก็บค่าตัวเลข)
                 const { error } = await supabaseClient
                     .from('jobs')
                     .update({ facebook_notes: String(newTotalCostValue) })
                     .eq('id', selectedActiveJobId);
 
                 if (!error) {
-                    alert(`💸 บันทึกต้นทุนหมวด [${selectedCategoryText}] ยอด ฿${costAmount.toLocaleString()} สำเร็จ! ระบบหักลบกำไรสุทธิ Realtime เรียบร้อยครับ`);
+                    alert(`💸 บันทึกต้นทุนหมวด [${selectedCategoryText}] ยอด ฿${costAmount.toLocaleString()} สำเร็จ!`);
                     closeCostManagementModal();
-                    await loadJobsFromCloud(); // สั่งรีเฟรชหน้าจอตัวเลขทันที
+                    await loadJobsFromCloud(); 
                 } else {
-                    alert("❌ เกิดข้อผิดพลาด ไม่สามารถเชื่อมต่อเพื่อบันทึกบัญชีรายจ่ายได้");
+                    alert("❌ เกิดข้อผิดพลาด ไม่สามารถบันทึกได้");
                 }
             } catch (err) {
                 console.error("Expense error:", err);

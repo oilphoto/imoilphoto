@@ -74,7 +74,7 @@
         
         <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 no-print">
             <div class="text-slate-500 text-[10px] flex items-center gap-2">
-                <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span>ระบบคลาวด์ Realtime</span>
+                <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span>ระบบคลาวด์มัดจำ Realtime</span>
             </div>
         </div>
     </aside>
@@ -157,12 +157,12 @@
                     
                     <div class="space-y-2 pt-2">
                         <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="copyBriefToClipboard()" class="bg-[#00c755]/10 text-[#00c755] border border-[#00c755]/30 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs"><i class="fa-solid fa-copy"></i> 💬 คัดลอกสรุปข้อความ</button>
+                            <button type="button" onclick="copyBriefToClipboard()" class="bg-[#00c755]/10 text-[#00c755] border border-[#00c755]/30 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs"><i class="fa-solid fa-copy"></i> 💬 คัดลอกสรุปส่งแชท</button>
                             <button type="button" onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs"><i class="fa-solid fa-print"></i> พิมพ์ / PDF / รูปภาพ</button>
                         </div>
                     </div>
 
-                    <!-- 🟢 ปุ่มเขียวอมตะร่างทอง ดีดเปิดแอป LINE เลือกส่งให้ลูกค้าหรือตัวเองทันที ไม่พึ่งบอท ไร้สิทธิ์พัง 100% -->
+                    <!-- 🚀 ปุ่มสีเขียวระบบแชร์ถาวร มั่นใจไม่มีวันพัง เด้งเปิดแอป LINE ให้คุณออยเลือกแชทส่งบิลได้ใน 1 วินาที! -->
                     <div class="pt-2 border-t border-slate-800/80">
                         <button type="button" onclick="sendFlexMessageToLineDirectly()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white font-black py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer text-sm active:scale-[0.98]"><i class="fa-brands fa-line text-lg"></i> 🚀 ยิงการ์ดบิลสีดาร์กเข้า LINE อัตโนมัติ</button>
                     </div>
@@ -714,7 +714,6 @@
                 let actionBtnHTML = remaining > 0 ? `<button onclick="quickFinishJob(${job.id}, ${job.total})" class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded hover:bg-emerald-500 hover:text-slate-950 transition-all cursor-pointer">เสร็จงาน</button>` : `<span class="text-xs text-slate-500">✅ จ่ายครบ</span>`;
                 let driveBtnHTML = (job.staff && job.staff.trim().startsWith('http')) ? `<a href="${job.staff.trim()}" target="_blank" class="text-xs bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-bold px-3 py-1 rounded-xl shadow-md"><i class="fa-solid fa-images"></i> รูปภาพ</a>` : `<span class="text-xs text-slate-600 select-none">ยังไม่ส่งงาน</span>`;
                 
-                // สำหรับปุ่มแชร์แชทในแถวตารางรายเดือน
                 let lineMsg = `📸 I'M OIL PHOTO - สรุปคิวงานออกกอง\n━━━━━━━━━━━━━━━\n🎓 งาน: งาน${jobType}\n👤 ลูกค้า: ${job.title}\n📅 วันที่: ${job.date}\n💰 ยอดเต็ม: ฿${Number(job.total).toLocaleString()}\n💵 มัดจำแล้ว: ฿${Number(job.paid).toLocaleString()}\n🚨 ค้างจ่ายหน้างาน: ฿${remaining.toLocaleString()} บาท`;
                 let lineUrl = `https://line.me/R/share?text=${encodeURIComponent(lineMsg)}`;
 
@@ -952,7 +951,7 @@
             } catch (err) { console.error(err); }
         }
 
-        // 🤖 ฟังก์ชันเลขาแจ้งเตือนแชร์คิวงานล่วงหน้าวันพรุ่งนี้
+        // 🤖 ฟังก์ชันช่วยดีดแชทจำหน้าคิวงานเตือนวันพรุ่งนี้ผ่านลิงก์แท้มาตรฐาน
         async function runAutomatedLineCronTask() {
             if(allJobs.length === 0) return;
 
@@ -981,7 +980,7 @@
             localStorage.setItem(todayKey, "true");
         }
 
-        // 🚀 ⚡ [ปุ่มสีเขียวร่างทองถาวร]: ใช้ระบบ LINE Share Link มาตรฐานแกนกลางแท้ ปลอดภัย ไร้สิทธิ์เออร์เรอร์ 100%
+        // 🚀 ⚡ [ฟังก์ชันปุ่มสีเขียวร่างทองถาวร]: ใช้ระบบ LINE Share Link มาตรฐานแกนกลางแท้ ปลอดภัย ไร้สิทธิ์เออร์เรอร์ 100%
         function sendFlexMessageToLineDirectly() {
             const name = document.getElementById('custName').value || 'ไม่ระบุชื่อ';
             const phone = document.getElementById('custPhone').value || 'ไม่ระบุเบอร์';
@@ -993,11 +992,9 @@
             const deposit = Number(document.getElementById('paidDeposit').value || 0);
             const pending = total - deposit;
 
-            // 🎨 ฟอร์แมตความหรูหราของข้อความบิลสรุปงานส่งเข้า LINE
             let briefText = `📸 [I'M OIL PHOTO] ใบยืนยันการจองคิวงานถ่ายภาพ\n━━━━━━━━━━━━━━━━━━━━\n🎫 ข้อมูลนัดหมายคุณลูกค้า\n• ชื่อผู้จอง: ${name}\n• เบอร์ติดต่อ: ${phone}\n• ประเภทงาน: ${packageType}\n• วันที่ถ่ายงาน: ${date}\n• ช่วงเวลา: ${time}\n• สถานที่นัดกอง: ${location}\n\n💰 รายละเอียดค่าบริการการเงิน\n• ราคาเต็มแพ็กเกจ: ฿${total.toLocaleString()} บาท\n• มัดจำล็อคคิวแล้ว: ฿${deposit.toLocaleString()} บาท\n• 🚨 ยอดคงเหลือจ่ายหน้างาน: ฿${pending.toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nขอบพระคุณที่ไว้วางใจให้ดูแลความทรงจำสำคัญครับ! 📸✨`;
 
             try {
-                // เรียกเปิดหน้าแชร์มาตรฐานของ LINE ทะลุเข้าแอปทันที ปลอดภัยแน่นอน
                 const lineShareUrl = `https://line.me/R/share?text=${encodeURIComponent(briefText)}`;
                 window.open(lineShareUrl, '_blank');
             } catch (err) { 

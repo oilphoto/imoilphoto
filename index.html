@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v9.7.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v11.0.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -73,11 +73,8 @@
         </div>
         
         <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 no-print">
-            <button onclick="openLineConfigModal()" class="w-full bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 py-2 px-3 rounded-xl text-[11px] font-bold flex items-center justify-center gap-2 transition-all cursor-pointer">
-                <i class="fa-brands fa-line text-[#06C755]"></i> ⚙️ ตั้งค่าเลขา LINE OA เตือนงาน
-            </button>
             <div class="text-slate-500 text-[10px] flex items-center gap-2">
-                <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> <span id="syncStatusText">กำลังเชื่อมต่อ Cloud...</span>
+                <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span>ระบบคลาวด์ Realtime</span>
             </div>
         </div>
     </aside>
@@ -160,11 +157,12 @@
                     
                     <div class="space-y-2 pt-2">
                         <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="copyBriefToClipboard()" class="bg-[#00c755]/10 text-[#00c755] border border-[#00c755]/30 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs"><i class="fa-solid fa-copy"></i> 💬 คัดลอกส่งแชท</button>
+                            <button type="button" onclick="copyBriefToClipboard()" class="bg-[#00c755]/10 text-[#00c755] border border-[#00c755]/30 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs"><i class="fa-solid fa-copy"></i> 💬 คัดลอกสรุปข้อความ</button>
                             <button type="button" onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs"><i class="fa-solid fa-print"></i> พิมพ์ / PDF / รูปภาพ</button>
                         </div>
                     </div>
 
+                    <!-- 🟢 ปุ่มเขียวอมตะร่างทอง ดีดเปิดแอป LINE เลือกส่งให้ลูกค้าหรือตัวเองทันที ไม่พึ่งบอท ไร้สิทธิ์พัง 100% -->
                     <div class="pt-2 border-t border-slate-800/80">
                         <button type="button" onclick="sendFlexMessageToLineDirectly()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white font-black py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer text-sm active:scale-[0.98]"><i class="fa-brands fa-line text-lg"></i> 🚀 ยิงการ์ดบิลสีดาร์กเข้า LINE อัตโนมัติ</button>
                     </div>
@@ -415,23 +413,6 @@
         </div>
     </div>
 
-    <!-- หน้าต่างแสดงสถานะระบบเลขา -->
-    <div id="lineConfigModal" onclick="if(event.target === this) closeLineConfigModal()" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[70] flex items-center justify-center hidden no-print p-4">
-        <div class="bg-[#111319] border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
-            <div class="bg-slate-950 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
-                <div class="flex items-center gap-2 text-[#06C755] font-bold text-xs"><i class="fa-brands fa-line text-lg"></i> <span>สถานะระบบเลขาปลุกหน้าจอล็อค LINE OA</span></div>
-                <button onclick="closeLineConfigModal()" class="text-slate-400 hover:text-slate-200 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="p-5 space-y-4 text-xs">
-                <p class="text-emerald-400 leading-relaxed font-bold">🟢 ระบบเลขาอัตโนมัติเปิดใช้งานและล็อกค่าความปลอดภัยไว้เรียบร้อยแล้ว:</p>
-                <p class="text-slate-400 leading-relaxed">ตัวเซิร์ฟเวอร์หลักหลังบ้านจะคอยแสกนฐานข้อมูล Supabase ทุกวันและทำการแจ้งเตือนคิวงานล่วงหน้าให้คุณออยส่วนตัวผ่าน LINE API โดยตรงอย่างแม่นยำ</p>
-            </div>
-            <div class="bg-slate-950 px-5 py-3 border-t border-slate-800 flex justify-end gap-2">
-                <button onclick="closeLineConfigModal()" class="bg-[#06C755] text-white font-bold px-5 py-1.5 rounded-xl shadow-md">ระบบล็อคเรียบร้อย</button>
-            </div>
-        </div>
-    </div>
-
     <!-- JOB EDIT/ADD MODAL -->
     <div id="jobModal" onclick="if(event.target === this) closeJobModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
@@ -471,10 +452,6 @@
 
     <!-- SCRIPTS CORE LOGIC -->
     <script>
-        // 🔒 ล็อกสเปกชุดกุญแจความปลอดภัย Token ล่าสุดของคุณออยแบบเป็นทางการ
-        const FIXED_LINE_TOKEN = "FEp9jFAgrN7QTSehZbFBaxLbWzo4i3Bcbxl6xm9rJXCxjZ/tFzyNpk7ZoQvaNsT60wUKILv9I8P1XL5HEOg661ODgPcJkGvW77RKpt7iUYy4a93/ZCzkrCtY/JlHfO/2XLSdm/TFP4c0WI9vdtlElQdB04t89/1O/w1cDnyilFU=";
-        const FIXED_LINE_USER_ID = "U8cc52a7dc02f7a0260b509861030b794";
-
         const SUPABASE_URL = 'https://ihvtdaehpjmqwazpaghp.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_Eeu7tjWSA8qMcaBOVpCX2A_dAn3yNGL';
         let supabaseClient = null; let allJobs = []; let filteredJobs = [];
@@ -485,7 +462,6 @@
             try {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 document.getElementById('syncStatusDot').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-                document.getElementById('syncStatusText').innerText = "เชื่อมต่อระบบ Cloud สำเร็จ";
                 
                 datePickerInstance = flatpickr("#mDate", { locale: "th", dateFormat: "Y-m-d", defaultDate: "2026-07-02", disableMobile: "true" });
                 timePickerInstance = flatpickr("#mTime", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "06:30", disableMobile: "true" });
@@ -737,6 +713,8 @@
                 let remaining = Number(job.total || 0) - Number(job.paid || 0); let jobType = job.status_notes || "อื่นๆ";
                 let actionBtnHTML = remaining > 0 ? `<button onclick="quickFinishJob(${job.id}, ${job.total})" class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded hover:bg-emerald-500 hover:text-slate-950 transition-all cursor-pointer">เสร็จงาน</button>` : `<span class="text-xs text-slate-500">✅ จ่ายครบ</span>`;
                 let driveBtnHTML = (job.staff && job.staff.trim().startsWith('http')) ? `<a href="${job.staff.trim()}" target="_blank" class="text-xs bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-bold px-3 py-1 rounded-xl shadow-md"><i class="fa-solid fa-images"></i> รูปภาพ</a>` : `<span class="text-xs text-slate-600 select-none">ยังไม่ส่งงาน</span>`;
+                
+                // สำหรับปุ่มแชร์แชทในแถวตารางรายเดือน
                 let lineMsg = `📸 I'M OIL PHOTO - สรุปคิวงานออกกอง\n━━━━━━━━━━━━━━━\n🎓 งาน: งาน${jobType}\n👤 ลูกค้า: ${job.title}\n📅 วันที่: ${job.date}\n💰 ยอดเต็ม: ฿${Number(job.total).toLocaleString()}\n💵 มัดจำแล้ว: ฿${Number(job.paid).toLocaleString()}\n🚨 ค้างจ่ายหน้างาน: ฿${remaining.toLocaleString()} บาท`;
                 let lineUrl = `https://line.me/R/share?text=${encodeURIComponent(lineMsg)}`;
 
@@ -974,10 +952,7 @@
             } catch (err) { console.error(err); }
         }
 
-        function openLineConfigModal() { document.getElementById('lineConfigModal').classList.remove('hidden'); }
-        function closeLineConfigModal() { document.getElementById('lineConfigModal').classList.add('hidden'); }
-
-        // 🤖 ฟังก์ชันเลขาเตือนงานล่วงหน้า 1 วัน อัปเดตวิธีคำนวณวันไทยตรงแบบ 100%
+        // 🤖 ฟังก์ชันเลขาแจ้งเตือนแชร์คิวงานล่วงหน้าวันพรุ่งนี้
         async function runAutomatedLineCronTask() {
             if(allJobs.length === 0) return;
 
@@ -999,7 +974,6 @@
                 let remaining = Number(job.total || 0) - Number(job.paid || 0);
                 let textMessage = `🚨 [I'M OIL PHOTO] แจ้งเตือนคิวงานวันพรุ่งนี้ครับคุณออย!\n━━━━━━━━━━━━━━━━━━━━\n👤 คุณลูกค้า: ${job.title}\n🎓 ประเภท: งาน${job.status_notes || 'ทั่วไป'}\n🕒 เวลาเริ่ม: ${job.time || 'ตามบรีฟ'} น.\n📍 สถานที่: ${job.location || '-'}\n\n💰 ยอดคงเหลือเก็บหน้างาน: ฿${remaining.toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nเตรียมอุปกรณ์คิวงานร่างทองวันพรุ่งนี้นะครับช่างภาพ! 🔥📸`;
 
-                // เปลี่ยนมาใช้ทางยิงตรงผ่านช่องทางหน้าบ้านแชร์ข้อความทันทีเพื่อความเสถียรสูงสุด
                 try {
                     window.open(`https://line.me/R/share?text=${encodeURIComponent(textMessage)}`, '_blank');
                 } catch(e) { console.error(e); }
@@ -1007,7 +981,7 @@
             localStorage.setItem(todayKey, "true");
         }
 
-        // 🚀 ⚡ [ปุ่มสีเขียวร่างทองเวอร์ชัน 2026]: ส่งสัญญาณผ่านโครงสร้างแชร์บิล Luxury ทะลุไลน์ตรง มั่นใจเด้งไม่มีติด CORS อีกต่อไป
+        // 🚀 ⚡ [ปุ่มสีเขียวร่างทองถาวร]: ใช้ระบบ LINE Share Link มาตรฐานแกนกลางแท้ ปลอดภัย ไร้สิทธิ์เออร์เรอร์ 100%
         function sendFlexMessageToLineDirectly() {
             const name = document.getElementById('custName').value || 'ไม่ระบุชื่อ';
             const phone = document.getElementById('custPhone').value || 'ไม่ระบุเบอร์';
@@ -1019,11 +993,11 @@
             const deposit = Number(document.getElementById('paidDeposit').value || 0);
             const pending = total - deposit;
 
-            // 🎨 ประกอบร่างโครงสร้างใบสรุปเงินหรูหราส่งแชทตรงทันที 
+            // 🎨 ฟอร์แมตความหรูหราของข้อความบิลสรุปงานส่งเข้า LINE
             let briefText = `📸 [I'M OIL PHOTO] ใบยืนยันการจองคิวงานถ่ายภาพ\n━━━━━━━━━━━━━━━━━━━━\n🎫 ข้อมูลนัดหมายคุณลูกค้า\n• ชื่อผู้จอง: ${name}\n• เบอร์ติดต่อ: ${phone}\n• ประเภทงาน: ${packageType}\n• วันที่ถ่ายงาน: ${date}\n• ช่วงเวลา: ${time}\n• สถานที่นัดกอง: ${location}\n\n💰 รายละเอียดค่าบริการการเงิน\n• ราคาเต็มแพ็กเกจ: ฿${total.toLocaleString()} บาท\n• มัดจำล็อคคิวแล้ว: ฿${deposit.toLocaleString()} บาท\n• 🚨 ยอดคงเหลือจ่ายหน้างาน: ฿${pending.toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nขอบพระคุณที่ไว้วางใจให้ดูแลความทรงจำสำคัญครับ! 📸✨`;
 
             try {
-                // ยิงแชร์ส่งแชทตรงเข้าแอป LINE โดยตรงเพื่อข้ามระบบตรวจสอบ CORS ของบราวเซอร์อย่างปลอดภัย 100%
+                // เรียกเปิดหน้าแชร์มาตรฐานของ LINE ทะลุเข้าแอปทันที ปลอดภัยแน่นอน
                 const lineShareUrl = `https://line.me/R/share?text=${encodeURIComponent(briefText)}`;
                 window.open(lineShareUrl, '_blank');
             } catch (err) { 

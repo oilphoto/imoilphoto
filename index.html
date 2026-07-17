@@ -1012,6 +1012,35 @@
             closeLineConfigModal(); runAutomatedLineCronTask();
         }
 
+        async function runAutomatedLineCronTask() {
+            const token = localStorage.getItem('oil_line_token');
+            const userId = localStorage.getItem('oil_line_userid');
+            if(!token || !userId || allJobs.length === 0) return;
+
+            const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            const tomorrowJobs = allJobs.filter(j => j.date === tomorrowStr);
+            if(tomorrowJobs.length === 0) return;
+
+            const todayKey = new Date().toISOString().split('T')[0] + "_line_sent";
+            if(localStorage.getItem(todayKey)) return; 
+
+            for(let job of tomorrowJobs) {
+                let remaining = Number(job.total || 0) - Number(job.paid || 0);
+                let textMessage = `🚨 [I'M OIL PHOTO] แจ้งเตือนคิวงานวันพรุ่งนี้ครับคุณออย!\n━━━━━━━━━━━━━━━━━━━━\n👤 คุณลูกค้า: ${job.title}\n🎓 ประเภท: งาน${job.status_notes || 'ทั่วไป'}\n🕒 เวลาเริ่ม: ${job.time || 'ตามบรีฟ'} น.\n📍 สถานที่: ${job.location || '-'}\n\n💰 ยอดคงเหลือเก็บหน้างาน: ฿${remaining.toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nเตรียมอุปกรณ์คิวงานร่างทองวันพรุ่งนี้นะครับช่างภาพ! 🔥📸`;
+
+                try {
+                    await fetch('https://api.line.me/v2/bot/message/push', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ to: userId, messages: [{ type: 'text', text: textMessage }] })
+                    });
+                } catch(e) { console.error(e); }
+            }
+            localStorage.setItem(todayKey, "true");
+        }
+
+        
         // 🚀 🤖 [ฟังก์ชันคำนวณเวลาไทย]: ปรับสูตรให้บอทมองเห็นวันพรุ่งนี้ตรงกับปฏิทินไทย 100%
         async function runAutomatedLineCronTask() {
             const token = localStorage.getItem('oil_line_token');
@@ -1048,7 +1077,10 @@
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ to: userId, messages: [{ type: 'text', text: textMessage }] })
                     });
-                } catch(e) { console.error("Line Push Error:", e); }
+           } catch(e) { console.error("Line Push Error:", e); }
             }
             localStorage.setItem(todayKey, "true");
         }
+    </script>
+</body>
+</html>

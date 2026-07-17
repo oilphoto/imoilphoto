@@ -1,90 +1,55 @@
+// 📁 api/send-line.js (สคริปต์ระบบเลขาแจ้งเตือนหลังบ้าน Vercel Serverless)
+const FIXED_LINE_TOKEN = "FEp9jFAgrN7QTSehZbFBaxLbWzo4i3Bcbxl6xm9rJXCxjZ/tFzyNpk7ZoQvaNsT60wUKILv9I8P1XL5HEOg661ODgPcJkGvW77RKpt7iUYy4a93/ZCzkrCtY/JlHfO/2XLSdm/TFP4c0WI9vdtlElQdB04t89/1O/w1cDnyilFU=";
+const FIXED_LINE_USER_ID = "U8cc52a7dc02f7a0260b509861030b794";
+
 export default async function handler(req, res) {
+    // ปลดล็อกหัวข้อความปลอดภัยรองรับคำสั่งหน้าบ้าน
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
     if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
+        return res.status(200).end();
     }
 
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+        return res.status(405).json({ error: 'Method Not Allowed' });
     }
-
-    // รับข้อมูลเพิ่มเติมคือ billUrl เพื่อนำมาใส่ในปุ่มกดดูบิลการจอง
-    const { name, phone, packageType, date, time, location, total, deposit, pending, billUrl } = req.body;
-    const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-
-    if (!LINE_TOKEN) {
-        return res.status(500).json({ error: 'Missing LINE Token in Vercel settings.' });
-    }
-
-    // กำหนดลิงก์ปลายทาง หากหน้าบ้านไม่ได้ส่งมา ให้ใช้ลิงก์หน้าหลักเป็นค่าเริ่มต้น
-    const targetUrl = billUrl || "https://imoilphoto.vercel.app";
-
-    const flexPayload = {
-        "type": "flex",
-        "altText": "📸 I'M OIL PHOTO - สรุปคิวงานจองออกกองด่วน!",
-        "contents": {
-            "type": "bubble",
-            "styles": { "header": { "backgroundColor": "#111827" }, "body": { "backgroundColor": "#1e2530" }, "footer": { "backgroundColor": "#1e2530" } },
-            "header": {
-                "type": "box", "layout": "vertical",
-                "contents": [
-                    { "type": "text", "text": "I'M OIL PHOTO", "color": "#f59e0b", "size": "xs", "weight": "bold" },
-                    { "type": "text", "text": "📸 บรีฟคิวงานออกกองร่างทอง", "color": "#ffffff", "size": "md", "weight": "bold", "margin": "sm" }
-                ]
-            },
-            "body": {
-                "type": "box", "layout": "vertical",
-                "contents": [
-                    { "type": "box", "layout": "horizontal", "margin": "md", "contents": [{ "type": "text", "text": "ประเภทงาน", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "🎓 " + packageType, "color": "#38bdf8", "size": "sm", "weight": "bold", "flex": 8 }] },
-                    { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "คุณลูกค้า", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": name, "color": "#ffffff", "size": "sm", "weight": "bold", "flex": 8 }] },
-                    { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "วันถ่ายงาน", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "📅 " + date, "color": "#ffffff", "size": "sm", "flex": 8 }] },
-                    { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "เวลาทำงาน", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "⏱️ " + time, "color": "#ffffff", "size": "sm", "flex": 8 }] },
-                    { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "สถานที่นัด", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "📍 " + location, "color": "#ffffff", "size": "sm", "wrap": true, "flex": 8 }] },
-                    { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "เบอร์โทร", "color": "#8a9aa8", "size": "sm", "flex": 4 }, { "type": "text", "text": "📞 " + phone, "color": "#ffffff", "size": "sm", "flex": 8 }] },
-                    { "type": "separator", "margin": "lg", "color": "#2d3848" },
-                    {
-                        "type": "box", "layout": "vertical", "margin": "lg", "backgroundColor": "#161b24", "cornerRadius": "md", "paddingAll": "md",
-                        "contents": [
-                            { "type": "box", "layout": "horizontal", "contents": [{ "type": "text", "text": "ราคาแพ็กเกจรวม", "color": "#8a9aa8", "size": "xs" }, { "type": "text", "text": "฿" + total.toLocaleString(), "color": "#ffffff", "size": "sm", "align": "end" }] },
-                            { "type": "box", "layout": "horizontal", "margin": "xs", "contents": [{ "type": "text", "text": "ชำระมัดจำแล้ว", "color": "#8a9aa8", "size": "xs" }, { "type": "text", "text": "- ฿" + deposit.toLocaleString(), "color": "#34d399", "size": "sm", "align": "end" }] },
-                            { "type": "separator", "margin": "sm", "color": "#2d3848" },
-                            { "type": "box", "layout": "horizontal", "margin": "sm", "contents": [{ "type": "text", "text": "ยอดเก็บหน้างาน", "color": "#f87171", "size": "sm", "weight": "bold" }, { "type": "text", "text": "฿" + pending.toLocaleString(), "color": "#f87171", "size": "md", "weight": "bold", "align": "end" }] }
-                        ]
-                    }
-                ]
-            },
-            "footer": {
-                "type": "box", "layout": "vertical", "spacing": "sm",
-                "contents": [
-                    { "type": "button", "style": "primary", "color": "#f59e0b", "height": "sm", "action": { "type": "uri", "label": "📄 ดูบิลการจอง", "uri": targetUrl } },
-                    { "type": "button", "style": "primary", "color": "#374151", "height": "sm", "action": { "type": "uri", "label": "📞 โทรออกหาลูกค้า", "uri": "tel:" + phone } }
-                ]
-            }
-        }
-    };
 
     try {
-        const response = await fetch('https://api.line.me/v2/bot/message/broadcast', {
+        const body = req.body;
+        let textMessage = "";
+
+        // ตรวจสอบว่าเป็นโหมดบอทสแกนเตือนงานล่วงหน้าอัตโนมัติหรือไม่
+        if (body.isReminder) {
+            textMessage = `🚨 [I'M OIL PHOTO] แจ้งเตือนคิวงานวันพรุ่งนี้ครับคุณออย!\n━━━━━━━━━━━━━━━━━━━━\n👤 คุณลูกค้า: ${body.name}\n🎓 ประเภท: งาน${body.packageType}\n🕒 เวลาเริ่ม: ${body.time} น.\n📍 สถานที่: ${body.location}\n\n💰 ยอดคงเหลือเก็บหน้างาน: ฿${Number(body.pending).toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nเตรียมอุปกรณ์คิวงานร่างทองวันพรุ่งนี้นะครับช่างภาพ! 🔥📸`;
+        } else {
+            // โหมดข้อความบิลปกติ
+            textMessage = `📸 [I'M OIL PHOTO] ใบยืนยันการจองคิวงานถ่ายภาพ\n━━━━━━━━━━━━━━━━━━━━\n🎫 ข้อมูลนัดหมายคุณลูกค้า\n• ชื่อผู้จอง: ${body.name}\n• เบอร์ติดต่อ: ${body.phone}\n• ประเภทงาน: ${body.packageType}\n• วันที่ถ่ายงาน: ${body.date}\n• ช่วงเวลา: ${body.time}\n• สถานที่นัดกอง: ${body.location}\n\n💰 รายละเอียดค่าบริการการเงิน\n• ราคาเต็มแพ็กเกจ: ฿${Number(body.total).toLocaleString()} บาท\n• มัดจำล็อคคิวแล้ว: ฿${Number(body.deposit).toLocaleString()} บาท\n• 🚨 ยอดคงเหลือจ่ายหน้างาน: ฿${Number(body.pending).toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nขอบพระคุณที่ไว้วางใจให้ดูแลความทรงจำสำคัญครับ! 📸✨`;
+        }
+
+        // ยิงคำสั่งทะลวงตรงเข้า Server ของ LINE มั่นใจผ่านฉลุย 100%
+        const lineResponse = await fetch('https://api.line.me/v2/bot/message/push', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${LINE_TOKEN}`
+                'Authorization': `Bearer ${FIXED_LINE_TOKEN}`
             },
-            body: JSON.stringify({ "messages": [flexPayload] })
+            body: JSON.stringify({
+                to: FIXED_LINE_USER_ID,
+                messages: [{ type: 'text', text: textMessage }]
+            })
         });
 
-        if (response.ok) {
-            return res.status(200).json({ success: true });
+        if (lineResponse.ok) {
+            return res.status(200).json({ success: true, message: 'Message sent successfully' });
         } else {
-            const errText = await response.text();
-            return res.status(response.status).json({ error: errText });
+            const errData = await lineResponse.text();
+            return res.status(500).json({ success: false, error: 'LINE API Error', details: errData });
         }
-    } catch (err) {
-        return res.status(500).json({ error: err.message });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
     }
 }

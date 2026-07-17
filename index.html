@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v8.5.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v9.2.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -21,7 +21,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Anuphan:wght=300;400;500;600;700&display=swap');
         body { font-family: 'Anuphan', sans-serif; }
         
-        /* 🖨️ CSS Print Mode Luxury */
         @media print {
             body * { visibility: hidden; }
             #pdfCaptureArea, #pdfCaptureArea * { visibility: visible; }
@@ -73,8 +72,15 @@
                 <a href="#customers" id="menuCustomers" class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-amber-400 rounded-xl transition-all"><i class="fa-solid fa-users w-5"></i> ฐานข้อมูลลูกค้า</a>
             </nav>
         </div>
-        <div class="mt-8 pt-4 border-t border-slate-800 text-xs text-slate-500 flex items-center gap-2">
-            <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> <span id="syncStatusText">กำลังเชื่อมต่อ Cloud...</span>
+        
+        <!-- แผงเปิดระบบเลขาแจ้งเตือน LINE OA ส่วนตัวลอยตัวด้านล่างไซด์บาร์ -->
+        <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 no-print">
+            <button onclick="openLineConfigModal()" class="w-full bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 py-2 px-3 rounded-xl text-[11px] font-bold flex items-center justify-center gap-2 transition-all cursor-pointer">
+                <i class="fa-brands fa-line text-[#06C755]"></i> ⚙️ ตั้งค่าเลขา LINE OA เตือนงาน
+            </button>
+            <div class="text-slate-500 text-[10px] flex items-center gap-2">
+                <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> <span id="syncStatusText">กำลังเชื่อมต่อ Cloud...</span>
+            </div>
         </div>
     </aside>
 
@@ -156,7 +162,6 @@
                         <div><label class="block text-sm text-slate-400 mb-2">ชำระเงินมัดจำแล้ว (บาท)</label><input type="number" id="paidDeposit" value="1000" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200"></div>
                     </div>
                     
-                    <!-- ส่วนปุ่มจัดการ ออกบิล, พิมพ์, คัดลอก และดาวน์โหลดรูปภาพ -->
                     <div class="space-y-2 pt-2">
                         <div class="grid grid-cols-2 gap-2">
                             <button type="button" onclick="copyBriefToClipboard()" class="bg-[#00c755]/10 text-[#00c755] border border-[#00c755]/30 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs"><i class="fa-solid fa-copy"></i> 💬 คัดลอกส่งแชท</button>
@@ -164,7 +169,6 @@
                         </div>
                     </div>
 
-                    <!-- 🛠️ 🎯 [จุดอัปเกรดออโต้ v6.8.0]: เรียกยิงระบบ API ของ Vercel ตรงๆ ผูกลิงก์สมบูรณ์ -->
                     <div class="pt-2 border-t border-slate-800/80">
                         <button type="button" onclick="sendFlexMessageToLineDirectly()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"><i class="fa-brands fa-line text-lg"></i> 🚀 ยิงการ์ดบิลสีดาร์กเข้า LINE อัตโนมัติ</button>
                     </div>
@@ -173,7 +177,6 @@
                 <!-- ส่วนพรีวิวใบจองโทน Luxury สีขาว-น้ำเงินเข้ม -->
                 <div class="lg:col-span-7 w-full flex justify-center">
                     <div id="pdfCaptureArea" class="w-full max-w-[620px] bg-white p-6 rounded-2xl border border-slate-200 shadow-2xl space-y-5 text-slate-800 box-border">
-                        
                         <div class="flex justify-between items-center border-b-2 border-[#0a192f] pb-3">
                             <div>
                                 <h2 class="text-2xl font-black tracking-wider text-[#0a192f] print-text-navy">I'M OIL PHOTO</h2>
@@ -224,7 +227,6 @@
                             </div>
                         </div>
 
-                        <!-- บอร์ดแสดงเลขพร้อมเพย์ -->
                         <div id="receiptQrContainer" class="hidden bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center justify-between gap-3 text-xs">
                             <div>
                                 <div class="text-sm font-bold text-slate-900">บัญชีพร้อมเพย์โอนมัดจำ: <span id="ppAccountLabelText" class="text-emerald-700 font-mono text-base">064-550-3701</span></div>
@@ -300,16 +302,15 @@
                 <div class="flex items-center gap-2 text-amber-400 font-bold text-xs"><i class="fa-solid fa-list-ol"></i> <span id="multiResolverModalTitle">ตรวจพบมีคิวงานซ้อนในวันนี้</span></div>
                 <button onclick="closeMultipleJobsModal()" class="text-slate-400 hover:text-slate-200 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="multipleJobsListButtonsContainer" class="p-5 space-y-2 max-h-[60vh] overflow-y-auto">
-            </div>
+            <div id="multipleJobsListButtonsContainer" class="p-5 space-y-2 max-h-[60vh] overflow-y-auto"></div>
         </div>
     </div>
 
-    <!-- ⚡ MODAL QUICK VIEW ดีไซน์พรีเมียมสีดาร์กพร้อมปุ่มปิดล็อกด้านล่างสุดสำหรับมือถือ -->
+    <!-- ⚡ MODAL QUICK VIEW ดีไซน์ดาร์กหรูหรา (คลีน-ลบปุ่มรายจ่ายและกำไรสุทธิออกแล้ว) -->
     <div id="quickViewModal" onclick="if(event.target === this) closeQuickViewModal()" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center hidden no-print p-4 overflow-y-auto">
         <div class="bg-[#15171e] text-slate-200 w-full max-w-4xl rounded-2xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col pb-[70px] md:pb-0" onclick="event.stopPropagation()">
             
-            <!-- Top Nav Header -->
+            <!-- Header -->
             <div class="px-6 py-4 bg-[#111319] border-b border-slate-800 flex justify-between items-center">
                 <div class="space-y-1">
                     <div class="flex items-center gap-3">
@@ -388,12 +389,10 @@
                             <div class="space-y-0.5"><span class="text-slate-500 block text-[10px]">ชำระแล้ว</span><span id="qvPaidAmountText" class="font-bold text-emerald-400 text-sm">฿0</span></div>
                             <div class="space-y-0.5 text-right"><span class="text-slate-500 block text-[10px]">คงเหลือ</span><span id="qvPendingAmountText" class="font-bold text-amber-500 text-sm">฿0</span></div>
                         </div>
-                        <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs">
-                            <span class="text-slate-400 font-medium"><i class="fa-solid fa-money-bill-trend-up text-emerald-400"></i> กำไรสุทธิของคิวงานนี้:</span>
-                            <span id="qvNetProfitText" class="font-black text-emerald-400 text-sm">฿0</span>
-                        </div>
+                        
                         <button onclick="pullToInvoiceForm()" class="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"><i class="fa-solid fa-file-invoice"></i> ออกใบเรียกเก็บยอดชำระเพิ่มเติม</button>
                         
+                        <!-- 💬 📞 แผงปุ่มสำหรับติดต่อทักแชทลูกค้าด่วน และโทรสายตรง -->
                         <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/50">
                             <a id="qvChatWithCustomerBtn" href="#" target="_blank" class="bg-[#00c755]/10 hover:bg-[#00c755]/20 text-[#00c755] border border-[#00c755]/20 font-bold py-2 rounded-xl text-[11px] transition-all flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-comment-dots text-xs"></i> 💬 ทักแชทหาลูกค้า
@@ -404,13 +403,9 @@
                         </div>
                     </div>
 
-                    <!-- Quick Action Buttons Box -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="openCostManagementModal()" class="bg-[#1a1d26] hover:bg-[#20242e] border border-slate-800 py-4 rounded-2xl transition-all text-center flex flex-col items-center justify-center gap-2 cursor-pointer group">
-                            <span class="w-10 h-10 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center text-sm group-hover:scale-110 transition-all shadow-md"><i class="fa-solid fa-receipt"></i></span>
-                            <span class="text-xs font-medium text-rose-400">บันทึกค่าใช้จ่าย</span>
-                        </button>
-                        <button id="qvFinishJobDirectBtn" class="bg-[#1a1d26] hover:bg-[#20242e] border border-slate-800 py-4 rounded-2xl transition-all text-center flex flex-col items-center justify-center gap-2 cursor-pointer group">
+                    <!-- Quick Action Buttons Box (เหลือปุ่มรับเงินเดี่ยว ๆ คลีน ๆ ตามภาพเดิม) -->
+                    <div class="w-full">
+                        <button id="qvFinishJobDirectBtn" class="w-full bg-[#1a1d26] hover:bg-[#20242e] border border-slate-800 py-4 rounded-2xl transition-all text-center flex flex-col items-center justify-center gap-2 cursor-pointer group">
                             <span class="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center text-sm group-hover:scale-110 transition-all shadow-md"><i class="fa-solid fa-money-bill-wave"></i></span>
                             <span class="text-xs font-medium text-emerald-400">รับเงิน</span>
                         </button>
@@ -421,52 +416,44 @@
                         <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block flex items-center gap-1.5"><i class="fa-solid fa-circle-notch text-slate-400"></i> สถานะงาน</span>
                         <select id="qvStatusSelector" onchange="changeJobStatusDirectly()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-200 focus:outline-none cursor-pointer">
                             <option value="สร้างงาน">สร้างงานในคลาวด์</option>
-                            <option value="รอถ่าย">รอคิววันงานจริง</option>
+                            <option value="call-back">รอคิววันงานจริง</option>
                             <option value="รอส่งงาน">ถ่ายเสร็จ ➔ รอส่งงาน</option>
                             <option value="ปิดงาน">ปิดงาน (จ่ายครบถ้วน)</option>
                         </select>
                     </div>
                 </div>
-
             </div>
             
-            <!-- 📌 ✖️ [ปุ่มปิดสำหรับมือถือ]: ปุ่มล็อกลอยตัวสีแดงด้านล่างสุดของโมดอล กดปิดง่ายในมือถือ -->
+            <!-- ✖ ปิดหน้าต่างขอบล่างสำหรับมือถือ -->
             <div class="block md:hidden fixed bottom-0 left-0 right-0 p-3 bg-slate-900 border-t border-slate-800 z-50 shadow-2xl">
-                <button onclick="closeQuickViewModal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-sm py-3 rounded-xl shadow-lg shadow-rose-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                <button onclick="closeQuickViewModal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-sm py-3 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-circle-xmark text-base"></i> ✖ ปิดหน้าต่างจัดการงาน
                 </button>
             </div>
-            
         </div>
     </div>
 
-    <!-- 📥 🛠️ หน้าต่างบันทึกบัญชีต้นทุน -->
-    <div id="costExpenseModal" onclick="if(event.target === this) closeCostManagementModal()" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center hidden no-print p-4">
+    <!-- 💡 🔔 หน้าต่างตั้งค่ากุญแจเลขา LINE OA -->
+    <div id="lineConfigModal" onclick="if(event.target === this) closeLineConfigModal()" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[70] flex items-center justify-center hidden no-print p-4">
         <div class="bg-[#111319] border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
             <div class="bg-slate-950 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
-                <div class="flex items-center gap-2 text-rose-400 font-bold text-sm"><i class="fa-solid fa-wallet"></i> <span>บันทึกบัญชีต้นทุน / รายจ่ายกองถ่าย</span></div>
-                <button onclick="closeCostManagementModal()" class="text-slate-400 hover:text-slate-200 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <div class="flex items-center gap-2 text-[#06C755] font-bold text-xs"><i class="fa-brands fa-line text-lg"></i> <span>ตั้งค่าระบบเลขาปลุกหน้าจอล็อค LINE OA</span></div>
+                <button onclick="closeLineConfigModal()" class="text-slate-400 hover:text-slate-200 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="p-5 space-y-4 text-xs">
+                <p class="text-slate-400 leading-relaxed">💡 กรอกรหัสข้อมูลที่ได้จากเว็บ LINE Developers เพื่อให้คลาวด์เปิดระบบสแกนคิวงานเด้งทักแชทหาคุณออยส่วนตัวล่วงหน้า 1 วันโดยอัตโนมัติ:</p>
                 <div>
-                    <label class="block text-slate-400 mb-1.5 font-medium">ประเภทรายการจ่าย</label>
-                    <select id="costCategorySelector" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 font-medium cursor-pointer">
-                        <option value="ค่าน้ามัน / ค่าเดินทาง (รถส่วนตัว)">🚗 ค่าน้ำมัน / ค่าเดินทาง (รถส่วนตัว)</option>
-                        <option value="ค่าเดินทาง (BTS / MRT)">🚇 ค่าเดินทาง (BTS / MRT)</option>
-                        <option value="ค่าเดินทาง (รถเมล์)">🚌 ค่าเดินทาง (รถเมล์)</option>
-                        <option value="ค่าเดินทาง (Grab)">🚕 ค่าเดินทาง (Grab)</option>
-                        <option value="ค่าอาหารกองถ่าย">🍔 ค่าอาหาร / เครื่องดื่ม</option>
-                        <option value="ค่าตัวผู้ช่วย / ช่างภาพทีมสอง">👥 ค่าแรงทีมงาน / ผู้ช่วย</option>
-                    </select>
+                    <label class="block text-slate-400 mb-1">LINE Channel Access Token</label>
+                    <input type="text" id="lineTokenInput" placeholder="วาง Token ลับยาวๆ ตรงนี้" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-[11px] text-slate-200 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1.5 font-medium">ยอดจำนวนเงิน (บาท)</label>
-                    <input type="number" id="costAmountInput" placeholder="0.00" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-rose-400 font-mono font-bold focus:outline-none focus:border-rose-500">
+                    <label class="block text-slate-400 mb-1">Your User ID ส่วนตัวของคุณออย (ขึ้นต้นด้วยตัว U)</label>
+                    <input type="text" id="lineUserIdInput" placeholder="U0123456789abcdef..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-[11px] text-amber-400 focus:outline-none">
                 </div>
             </div>
             <div class="bg-slate-950 px-5 py-3 border-t border-slate-800 flex justify-end gap-2">
-                <button onclick="closeCostManagementModal()" class="bg-slate-800 text-slate-300 px-3 py-1.5 rounded-xl">ยกเลิก</button>
-                <button onclick="submitCostExpenseToCloud()" class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-4 py-1.5 rounded-xl transition-all shadow-md shadow-rose-500/10">💾 บันทึกรายจ่าย</button>
+                <button onclick="closeLineConfigModal()" class="bg-slate-800 text-slate-300 px-3 py-1.5 rounded-xl">ปิด</button>
+                <button onclick="saveLineSettingsAndTriggerWarning()" class="bg-[#06C755] hover:bg-[#05b34c] text-white font-bold px-4 py-1.5 rounded-xl shadow-md">🔥 บันทึก & เปิดระบบเลขา</button>
             </div>
         </div>
     </div>
@@ -512,7 +499,8 @@
     <script>
         const SUPABASE_URL = 'https://ihvtdaehpjmqwazpaghp.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_Eeu7tjWSA8qMcaBOVpCX2A_dAn3yNGL';
-        let supabaseClient = null; let allJobs = []; let filteredJobs = []; let currentModalMode = 'add'; let activeTemplateMode = 'booking';
+        let supabaseClient = null; let allJobs = []; let filteredJobs = [];
+        let currentModalMode = 'add'; let activeTemplateMode = 'booking';
         let currentSystemView = 'public'; let datePickerInstance = null; let timePickerInstance = null; let selectedActiveJobId = null;
 
         async function initSystem() {
@@ -530,9 +518,10 @@
 
                 document.getElementById('globalYearSelect').value = currentYear;
                 document.getElementById('globalMonthSelect').value = currentMonth;
+                document.getElementById('currentInvoiceDate').innerText = `${timeData.getDate().toString().padStart(2, '0')}/${currentMonth}/${currentYear}`;
 
-                const currentDay = timeData.getDate().toString().padStart(2, '0');
-                document.getElementById('currentInvoiceDate').innerText = `${currentDay}/${currentMonth}/${currentYear}`;
+                if(localStorage.getItem('oil_line_token')) document.getElementById('lineTokenInput').value = localStorage.getItem('oil_line_token');
+                if(localStorage.getItem('oil_line_userid')) document.getElementById('lineUserIdInput').value = localStorage.getItem('oil_line_userid');
 
                 await loadJobsFromCloud();
                 setupLivePreviewListeners();
@@ -602,8 +591,7 @@
                 const el = document.getElementById(id);
                 if (el) el.addEventListener('input', syncInputToPreview);
             });
-            const sel = document.getElementById('custPackageSelect');
-            if (sel) sel.addEventListener('change', syncInputToPreview);
+            document.getElementById('custPackageSelect').addEventListener('change', syncInputToPreview);
         }
 
         function switchTemplateMode(mode) { activeTemplateMode = mode; syncInputToPreview(); }
@@ -652,14 +640,13 @@
             if (!supabaseClient) return;
             let { data, error } = await supabaseClient.from('jobs').select('*').order('date', { ascending: true });
             if (!error) { allJobs = data || []; filterJobsByMonth(); }
+            runAutomatedLineCronTask();
         }
 
         function filterJobsByMonth() {
             const selectedYear = document.getElementById('globalYearSelect').value;
             const selectedMonth = document.getElementById('globalMonthSelect').value; 
             filteredJobs = allJobs.filter(job => job.date && job.date.split('-')[0] === selectedYear && job.date.split('-')[1] === selectedMonth);
-            const monthNames = { "01": "มกราคม", "02": "กุมภาพันธ์", "03": "มีนาคม", "04": "เมษายน", "05": "พฤษภาคม", "06": "มิถุนายน", "07": "กรกฎาคม", "08": "สิงหาคม", "09": "กันยายน", "10": "ตุลาคม", "11": "พฤศจิกายน", "12": "ธันวาคม" };
-            document.getElementById('calendarMonthTitle').innerText = `${monthNames[selectedMonth]} พ.ศ. ${parseInt(selectedYear) + 543}`;
             if (selectedActiveJobId) {
                 const updatedJob = allJobs.find(j => j.id === selectedActiveJobId);
                 if (updatedJob) openQuickViewModal(selectedActiveJobId);
@@ -682,35 +669,22 @@
         }
 
         function openMultipleJobsResolverModal(dayStr, dayJobs) {
-            const container = document.getElementById('multipleJobsListButtonsContainer');
-            container.innerHTML = '';
-            
+            const container = document.getElementById('multipleJobsListButtonsContainer'); container.innerHTML = '';
             const parts = dayStr.split('-');
             document.getElementById('multiResolverModalTitle').innerText = `คิวงานซ้อนประจำวันที่ ${parts[2]}/${parts[1]}`;
             
             dayJobs.forEach(job => {
                 let btn = document.createElement('button');
                 btn.className = "w-full bg-[#1a1d26] hover:bg-[#252936] text-left p-3.5 rounded-xl border border-slate-800 flex justify-between items-center transition-all cursor-pointer group";
-                btn.innerHTML = `
-                    <div class="space-y-0.5">
-                        <div class="font-bold text-slate-100 group-hover:text-amber-400 text-xs">${job.title}</div>
-                        <div class="text-[10px] text-slate-400">🕒 เวลา: ${job.time || 'ตามบรีฟ'} • งาน${job.status_notes || 'ทั่วไป'}</div>
-                    </div>
-                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-600 group-hover:text-amber-400 transition-all"></i>
-                `;
-                btn.onclick = function() {
-                    closeMultipleJobsModal();
-                    openQuickViewModal(job.id);
-                };
+                btn.innerHTML = `<div class="space-y-0.5"><div class="font-bold text-slate-100 group-hover:text-amber-400 text-xs">${job.title}</div><div class="text-[10px] text-slate-400">🕒 เวลา: ${job.time || 'ตามบรีฟ'} • งาน${job.status_notes || 'ทั่วไป'}</div></div><i class="fa-solid fa-chevron-right text-[10px] text-slate-600 group-hover:text-amber-400 transition-all"></i>`;
+                btn.onclick = function() { closeMultipleJobsModal(); openQuickViewModal(job.id); };
                 container.appendChild(btn);
             });
             
             document.getElementById('multipleJobsResolverModal').classList.remove('hidden');
         }
 
-        function closeMultipleJobsModal() {
-            document.getElementById('multipleJobsResolverModal').classList.add('hidden');
-        }
+        function closeMultipleJobsModal() { document.getElementById('multipleJobsResolverModal').classList.add('hidden'); }
 
         function renderCalendarGrid() {
             const grid = document.getElementById('calendarGrid'); if(!grid) return; grid.innerHTML = '';
@@ -898,7 +872,6 @@
             alert("⚡ AI สกัดข้อมูลดิบลงฟอร์มให้เบื้องต้นเรียบร้อยครับคุณออย!");
         }
 
-        // ⚡ [ฟังก์ชัน Quick View ดีไซน์หรูสไตล์แผงควบคุม]: โชว์สถานะพร้อมปุ่มแชทสื่อสารหาลูกค้าด่วน
         function openQuickViewModal(jobId) {
             selectedActiveJobId = jobId;
             const job = allJobs.find(j => j.id === jobId); if (!job) return;
@@ -908,23 +881,15 @@
             let remaining = total - paid;
             let percentPaid = total > 0 ? (paid / total) * 100 : 0;
 
-            // 💰 [ระบบคำนวณกำไรสุทธิ]: ดึงค่าต้นทุนสะสม มาหักลบราคาเต็ม
-            let accumulatedCost = Number(job.facebook_notes || 0);
-            let netProfitValue = total - accumulatedCost;
-
-            // ผูกข้อมูลฝั่ง Header
             document.getElementById('qvCustomerName').innerText = job.title || 'ไม่ระบุชื่อ';
             document.getElementById('qvJobCode').innerText = `JOB-2026-${String(job.id).padStart(3, '0')}`;
             document.getElementById('qvJobDateBadge').innerText = job.date || '--';
             document.getElementById('qvJobType').innerText = job.status_notes || 'ถ่ายภาพทั่วไป';
 
-            // ผูกข้อมูลกระดานการเงิน และกำไรสุทธิ
             document.getElementById('qvPaidAmountText').innerText = `฿${paid.toLocaleString()}`;
             document.getElementById('qvPendingAmountText').innerText = `฿${remaining.toLocaleString()}`;
-            document.getElementById('qvNetProfitText').innerText = `฿${netProfitValue.toLocaleString()}`;
             document.getElementById('qvFinanceProgressBar').style.width = `${percentPaid}%`;
 
-            // ดึงลิงก์แชทสื่อสารและเบอร์โทรศัพท์ลงชุดปุ่มติดต่อด่วน
             const chatLinkBtn = document.getElementById('qvChatWithCustomerBtn');
             const callDirectBtn = document.getElementById('qvCallCustomerDirectBtn');
 
@@ -946,27 +911,22 @@
                 callDirectBtn.className = "bg-slate-800 text-slate-500 border border-slate-700 font-bold py-2 rounded-xl text-[11px] flex items-center justify-center gap-1.5 cursor-not-allowed opacity-50";
             }
 
-            // 📊 [ปรับปรุงการคำนวณสถานะ]: ตรวจสอบสถานะจริงจากฐานข้อมูลคลาวด์
             let currentStatus = job.status || "Active";
             let statusText = "รอถ่ายคิวงาน";
-            let statusNotes = "อยู่ระหว่างรอถึงกำหนดการวันจัดงานจริง";
             let statusChip = document.getElementById('qvStatusStatusChip');
 
             if (currentStatus === "Closed" || remaining === 0) {
                 statusText = "ปิดงาน";
-                statusNotes = "โอนยอดครบถ้วน - จัดส่งไฟล์รูปภาพเรียบร้อยแล้ว";
                 document.getElementById('qvStatusSelector').value = "ปิดงาน";
                 statusChip.innerText = "ปิดงาน";
                 statusChip.className = "bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full border border-emerald-500/20";
             } else if (currentStatus === "Pending_Delivery") {
                 statusText = "ถ่ายเสร็จ ➔ รอส่งงาน";
-                statusNotes = "ออกกองถ่ายทำเรียบร้อย อยู่ระหว่างขั้นตอนโพรเซสแต่งรูปภาพ";
                 document.getElementById('qvStatusSelector').value = "รอส่งงาน";
                 statusChip.innerText = "รอส่งงาน";
                 statusChip.className = "bg-sky-500/10 text-sky-400 text-[10px] font-bold px-3 py-1 rounded-full border border-sky-500/20";
             } else {
                 statusText = "มัดจำแล้ว ➔ รอถ่าย";
-                statusNotes = "ล็อคคิวคลาวด์เรียบร้อย อยู่ในสถานะเตรียมความพร้อมก่อนออกกอง";
                 document.getElementById('qvStatusSelector').value = "รอถ่าย";
                 statusChip.innerText = "รอถ่าย";
                 statusChip.className = "bg-amber-500/10 text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full border border-amber-500/20";
@@ -975,23 +935,20 @@
             document.getElementById('qvCurrentStatusText').innerText = statusText;
             document.getElementById('qvStatusTimeNotes').innerText = `อัปเดตล่าสุด: นัดหมายช่วงเวลา ${job.time || 'ตามบรีฟ'}`;
             
-            // ตั้งปุ่มด่วนสำหรับปุ่มรับเงิน
             const finishBtn = document.getElementById('qvFinishJobDirectBtn');
             if (remaining > 0) {
                 finishBtn.setAttribute('onclick', `quickFinishJob(${job.id}, ${total})`);
-                finishBtn.className = "bg-[#1a1d26] hover:bg-[#20242e] border border-slate-800 py-4 rounded-2xl transition-all text-center flex flex-col items-center justify-center gap-2 cursor-pointer group";
+                finishBtn.className = "w-full bg-[#1a1d26] hover:bg-[#20242e] border border-slate-800 py-4 rounded-2xl transition-all text-center flex flex-col items-center justify-center gap-2 cursor-pointer group";
             } else {
                 finishBtn.setAttribute('onclick', "alert('คิวงานนี้ชำระเงินครบเสร็จสิ้นแล้วครับคุณออย')");
-                finishBtn.className = "bg-[#1a1d26] opacity-40 border border-slate-800 py-4 rounded-2xl text-center flex flex-col items-center justify-center gap-2 cursor-not-allowed";
+                finishBtn.className = "w-full bg-[#1a1d26] opacity-40 border border-slate-800 py-4 rounded-2xl text-center flex flex-col items-center justify-center gap-2 cursor-not-allowed";
             }
 
-            // แสดงวันที่จำลองในส่วน Timeline
             document.getElementById('tlStep1Date').innerText = `${job.date} • สร้างดีลสำเร็จในคลาวด์`;
             document.getElementById('tlStep2Date').innerText = `${job.date} • ล็อคมัดจำเรียบร้อย`;
             document.getElementById('tlStep3Date').innerText = `${job.date} • นัดกองสถานที่: ${job.location || 'ตามตกลง'}`;
             document.getElementById('tlStep4Date').innerText = remaining === 0 ? `${job.date} • จบกองปิดดีลร่างทอง` : `ค้างชำระหน้างานอีก ฿${remaining.toLocaleString()}`;
 
-            // 🎨 [ระบบแปรผันสี Timeline และติ๊กถูกอัจฉริยะ]
             const b1 = document.getElementById('tlBlock1'); const d1 = document.getElementById('tlDot1'); const t1 = document.getElementById('tlTitle1');
             const b2 = document.getElementById('tlBlock2'); const d2 = document.getElementById('tlDot2'); const t2 = document.getElementById('tlTitle2');
             const b3 = document.getElementById('tlBlock3'); const d3 = document.getElementById('tlDot3'); const t3 = document.getElementById('tlTitle3');
@@ -1002,83 +959,34 @@
             [d1, d2, d3, d4].forEach(d => { d.className = "absolute -left-[30px] top-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold bg-slate-800 text-slate-600 ring-0"; d.innerHTML = ""; });
 
             if (currentStatus === "Closed" || remaining === 0) {
-                [b1, b2, b3].forEach(b => b.classList.replace('text-slate-500', 'text-slate-300'));
-                [t1, t2, t3].forEach(t => t.classList.replace('text-slate-500', 'text-slate-200'));
+                [b1, b2, b3].forEach(b => b.className = "relative text-slate-300"); [t1, t2, t3].forEach(t => t.className = "text-xs font-bold text-slate-200");
                 [d1, d2, d3].forEach(d => { d.className = "absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold shadow-md shadow-emerald-500/10"; d.innerHTML = "<i class='fa-solid fa-check'></i>"; });
-                
-                b4.className = "relative text-amber-400 font-medium";
-                t4.className = "text-xs font-bold text-amber-400";
-                d4.className = "absolute -left-[30px] top-0.5 bg-amber-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-amber-500/20";
-                t4.innerHTML = "ปิดงาน • ตอนนี้";
-            } 
-            else if (currentStatus === "Pending_Delivery") {
-                [b1, b2].forEach(b => b.classList.replace('text-slate-500', 'text-slate-300'));
-                [t1, t2].forEach(t => t.classList.replace('text-slate-500', 'text-slate-200'));
+                b4.className = "relative text-amber-400 font-medium"; t4.className = "text-xs font-bold text-amber-400"; d4.className = "absolute -left-[30px] top-0.5 bg-amber-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-amber-500/20"; t4.innerHTML = "ปิดงาน • ตอนนี้";
+            } else if (currentStatus === "Pending_Delivery") {
+                [b1, b2].forEach(b => b.className = "relative text-slate-300"); [t1, t2].forEach(t => t.className = "text-xs font-bold text-slate-200");
                 [d1, d2].forEach(d => { d.className = "absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold shadow-md"; d.innerHTML = "<i class='fa-solid fa-check'></i>"; });
-
-                b3.className = "relative text-amber-400 font-medium";
-                t3.className = "text-xs font-bold text-amber-400";
-                d3.className = "absolute -left-[30px] top-0.5 bg-amber-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-amber-500/20";
-                t3.innerHTML = "ถ่ายเสร็จ ➔ รอส่งงาน • ตอนนี้";
-                t4.innerHTML = "ปิดงาน";
-            } 
-            else if (currentStatus === "Active" && paid > 0) {
-                b1.classList.replace('text-slate-500', 'text-slate-300');
-                t1.classList.replace('text-slate-500', 'text-slate-200');
-                d1.className = "absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold shadow-md"; d1.innerHTML = "<i class='fa-solid fa-check'></i>";
-
-                b2.className = "relative text-amber-400 font-medium";
-                t2.className = "text-xs font-bold text-amber-400";
-                d2.className = "absolute -left-[30px] top-0.5 bg-amber-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-amber-500/20";
-                t2.innerHTML = "รอถ่าย • ตอนนี้";
-                t3.innerHTML = "ถ่ายเสร็จ ➔ รอส่งงาน";
-                t4.innerHTML = "ปิดงาน";
-            } 
-            else {
-                b1.className = "relative text-amber-400 font-medium";
-                t1.className = "text-xs font-bold text-amber-400";
-                d1.className = "absolute -left-[30px] top-0.5 bg-amber-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-amber-500/20";
-                t1.innerHTML = "สร้างงาน • ตอนนี้";
-                t2.innerHTML = "รอถ่าย";
-                t3.innerHTML = "ถ่ายเสร็จ ➔ รอส่งงาน";
-                t4.innerHTML = "ปิดงาน";
+                b3.className = "relative text-amber-400 font-medium"; t3.className = "text-xs font-bold text-amber-400"; d3.className = "absolute -left-[30px] top-0.5 bg-amber-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-amber-500/20"; t3.innerHTML = "ถ่ายเสร็จ ➔ รอส่งงาน • ตอนนี้"; t4.innerHTML = "ปิดงาน";
+            } else if (currentStatus === "Active" && paid > 0) {
+                b1.className = "relative text-slate-300"; t1.className = "text-xs font-bold text-slate-200"; d1.className = "absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold shadow-md"; d1.innerHTML = "<i class='fa-solid fa-check'></i>";
+                b2.className = "relative text-amber-400 font-medium"; t2.className = "text-xs font-bold text-amber-400"; d2.className = "absolute -left-[30px] top-0.5 bg-amber-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-amber-500/20"; t2.innerHTML = "รอถ่าย • ตอนนี้"; t3.innerHTML = "ถ่ายเสร็จ ➔ รอส่งงาน"; t4.innerHTML = "ปิดงาน";
+            } else {
+                b1.className = "relative text-amber-400 font-medium"; t1.className = "text-xs font-bold text-amber-400"; d1.className = "absolute -left-[30px] top-0.5 bg-amber-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-amber-500/20"; t1.innerHTML = "สร้างงาน • ตอนนี้"; t2.innerHTML = "รอถ่าย"; t3.innerHTML = "ถ่ายเสร็จ ➔ รอส่งงาน"; t4.innerHTML = "ปิดงาน";
             }
 
             document.getElementById('quickViewModal').classList.remove('hidden');
         }
 
-        function closeQuickViewModal() { 
-            document.getElementById('quickViewModal').classList.add('hidden'); 
-            selectedActiveJobId = null;
-        }
-
-        function editJobFromQuickView() {
-            if (!selectedActiveJobId) return;
-            const targetId = selectedActiveJobId;
-            closeQuickViewModal();
-            openJobModal('edit', targetId);
-        }
-
-        function pullToInvoiceForm() {
-            if (!selectedActiveJobId) return;
-            const targetId = selectedActiveJobId;
-            closeQuickViewModal();
-            loadJobToInvoiceEditor(targetId);
-        }
+        function closeQuickViewModal() { document.getElementById('quickViewModal').classList.add('hidden'); selectedActiveJobId = null; }
+        function editJobFromQuickView() { const targetId = selectedActiveJobId; closeQuickViewModal(); openJobModal('edit', targetId); }
+        function pullToInvoiceForm() { const targetId = selectedActiveJobId; closeQuickViewModal(); loadJobToInvoiceEditor(targetId); }
 
         async function changeJobStatusDirectly() {
             if (!selectedActiveJobId || !supabaseClient) return;
-            
             const selectedStatusValue = document.getElementById('qvStatusSelector').value;
             let dbStatus = "Active";
-            
-            if (selectedStatusValue === "ปิดงาน") {
-                dbStatus = "Closed";
-            } else if (selectedStatusValue === "รอส่งงาน") {
-                dbStatus = "Pending_Delivery";
-            } else if (selectedStatusValue === "รอถ่าย") {
-                dbStatus = "Active";
-            }
+            if (selectedStatusValue === "ปิดงาน") dbStatus = "Closed";
+            else if (selectedStatusValue === "รอส่งงาน") dbStatus = "Pending_Delivery";
+            else if (selectedStatusValue === "รอถ่าย") dbStatus = "Active";
 
             try {
                 let updateData = { status: dbStatus };
@@ -1086,65 +994,50 @@
                     const job = allJobs.find(j => j.id === selectedActiveJobId);
                     if (job) updateData.paid = Number(job.total || 0);
                 }
-
-                const { error } = await supabaseClient
-                    .from('jobs')
-                    .update(updateData)
-                    .eq('id', selectedActiveJobId);
-
-                if (!error) {
-                    await loadJobsFromCloud();
-                    alert(`⚙️ อัปเดตสถานะคิวงานเป็น [${selectedStatusValue}] ลงคลาวด์เรียบร้อย!`);
-                } else {
-                    alert("❌ เกิดข้อผิดพลาดฝั่งฐานข้อมูล ไม่สามารถบันทึกได้");
-                }
-            } catch (err) {
-                console.error("System error: ", err);
-            }
+                const { error } = await supabaseClient.from('jobs').update(updateData).eq('id', selectedActiveJobId);
+                if (!error) { await loadJobsFromCloud(); alert(`⚙️ อัปเดตสถานะคิวงานเป็น [${selectedStatusValue}] ลงคลาวด์เรียบร้อย!`); }
+            } catch (err) { console.error(err); }
         }
 
-        function openCostManagementModal() {
-            document.getElementById('costAmountInput').value = "";
-            document.getElementById('costCategorySelector').value = "ค่าน้ามัน / ค่าเดินทาง (รถส่วนตัว)";
-            document.getElementById('costExpenseModal').classList.remove('hidden');
+        function openLineConfigModal() { document.getElementById('lineConfigModal').classList.remove('hidden'); }
+        function closeLineConfigModal() { document.getElementById('lineConfigModal').classList.add('hidden'); }
+
+        function saveLineSettingsAndTriggerWarning() {
+            const token = document.getElementById('lineTokenInput').value;
+            const uid = document.getElementById('lineUserIdInput').value;
+            if(!token || !uid) { alert("กรุณากรอกรหัสข้อมูลให้ครบถ้วนก่อนนะครับคุณออย"); return; }
+            localStorage.setItem('oil_line_token', token.trim());
+            localStorage.setItem('oil_line_userid', uid.trim());
+            alert("🎯 บันทึกสิทธิ์และผูกระบบเลขา LINE OA ทักข้อความเรียบร้อยครับ!");
+            closeLineConfigModal(); runAutomatedLineCronTask();
         }
-        function closeCostManagementModal() {
-            document.getElementById('costExpenseModal').classList.add('hidden');
-        }
 
-        async function submitCostExpenseToCloud() {
-            if (!selectedActiveJobId || !supabaseClient) return;
+        async function runAutomatedLineCronTask() {
+            const token = localStorage.getItem('oil_line_token');
+            const userId = localStorage.getItem('oil_line_userid');
+            if(!token || !userId || allJobs.length === 0) return;
 
-            const selectedCategoryText = document.getElementById('costCategorySelector').value;
-            const costAmount = Number(document.getElementById('costAmountInput').value || 0);
+            const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            const tomorrowJobs = allJobs.filter(j => j.date === tomorrowStr);
+            if(tomorrowJobs.length === 0) return;
 
-            if (costAmount <= 0) {
-                alert("กรุณากรอกจำนวนเงินรายจ่ายที่ถูกต้องด้วยครับคุณออย");
-                return;
+            const todayKey = new Date().toISOString().split('T')[0] + "_line_sent";
+            if(localStorage.getItem(todayKey)) return; 
+
+            for(let job of tomorrowJobs) {
+                let remaining = Number(job.total || 0) - Number(job.paid || 0);
+                let textMessage = `🚨 [I'M OIL PHOTO] แจ้งเตือนคิวงานวันพรุ่งนี้ครับคุณออย!\n━━━━━━━━━━━━━━━━━━━━\n👤 คุณลูกค้า: ${job.title}\n🎓 ประเภท: งาน${job.status_notes || 'ทั่วไป'}\n🕒 เวลาเริ่ม: ${job.time || 'ตามบรีฟ'} น.\n📍 สถานที่: ${job.location || '-'}\n\n💰 ยอดคงเหลือเก็บหน้างาน: ฿${remaining.toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nเตรียมอุปกรณ์คิวงานร่างทองวันพรุ่งนี้นะครับช่างภาพ! 🔥📸`;
+
+                try {
+                    await fetch('https://api.line.me/v2/bot/message/push', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ to: userId, messages: [{ type: 'text', text: textMessage }] })
+                    });
+                } catch(e) { console.error(e); }
             }
-
-            const currentJob = allJobs.find(j => j.id === selectedActiveJobId);
-            if (!currentJob) return;
-
-            let oldCostAccumulated = Number(currentJob.facebook_notes || 0);
-            let newTotalCostValue = oldCostAccumulated + costAmount;
-
-            try {
-                const { error } = await supabaseClient
-                    .from('jobs')
-                    .update({ facebook_notes: String(newTotalCostValue) })
-                    .eq('id', selectedActiveJobId);
-
-                if (!error) {
-                    alert(`💸 บันทึกต้นทุนหมวด [${selectedCategoryText}] ยอด ฿${costAmount.toLocaleString()} สำเร็จ!`);
-                    closeCostManagementModal();
-                    await loadJobsFromCloud(); 
-                } else {
-                    alert("❌ เกิดข้อผิดพลาด ไม่สามารถบันทึกได้");
-                }
-            } catch (err) {
-                console.error("Expense error:", err);
-            }
+            localStorage.setItem(todayKey, "true");
         }
 
         async function sendFlexMessageToLineDirectly() {
@@ -1159,15 +1052,9 @@
             const pending = total - deposit;
 
             const payload = { name, phone, packageType, date, time, location, total, deposit, pending, billUrl: window.location.href };
-
             try {
-                const response = await fetch('/api/send-line', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                const response = await fetch('/api/send-line', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (response.ok) alert("🎯 การ์ดบิลสีดาร์ก Luxury ยิงตรงเข้าแอป LINE OA สำเร็จ!");
-                else alert("❌ เกิดข้อผิดพลาดฝั่ง LINE Server");
             } catch (err) { alert("💻 ขัดข้องทางระบบเครือข่าย"); }
         }
     </script>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v9.5.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v9.6.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -139,7 +139,6 @@
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                <!-- ฟอร์มกรอกข้อมูลคิวงานฝั่งซ้าย -->
                 <div class="lg:col-span-5 space-y-4 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl no-print">
                     <div class="bg-slate-950 p-4 rounded-xl border border-dashed border-amber-500/30 space-y-2">
                         <span class="text-xs font-bold text-amber-400 block"><i class="fa-solid fa-wallet"></i> บัญชีพร้อมเพย์รับเงินของคุณสุพจน์</span>
@@ -169,13 +168,12 @@
                         </div>
                     </div>
 
-                    <!-- 🛠️ 🎯 ปุ่มสีเขียวตัวปัญหาอัปเกรดระบบเชื่อมต่อโค้ดใหม่ยิงตรงเข้า LINE OA ไม่ผ่านตัวกลางแล้ว -->
+                    <!-- ปุ่มสีเขียว ปรับปรุงตรรกะใหม่ วิ่งผ่าน Vercel Server API ปลอดภัยจาก CORS 100% -->
                     <div class="pt-2 border-t border-slate-800/80">
                         <button type="button" onclick="sendFlexMessageToLineDirectly()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white font-black py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer text-sm active:scale-[0.98]"><i class="fa-brands fa-line text-lg"></i> 🚀 ยิงการ์ดบิลสีดาร์กเข้า LINE อัตโนมัติ</button>
                     </div>
                 </div>
 
-                <!-- ส่วนพรีวิวใบจองโทน Luxury สีขาว-น้ำเงินเข้ม -->
                 <div class="lg:col-span-7 w-full flex justify-center">
                     <div id="pdfCaptureArea" class="w-full max-w-[620px] bg-white p-6 rounded-2xl border border-slate-200 shadow-2xl space-y-5 text-slate-800 box-border">
                         <div class="flex justify-between items-center border-b-2 border-[#0a192f] pb-3">
@@ -371,7 +369,6 @@
                     </div>
                 </div>
 
-                <!-- Right Side: Finance & Action Controls Panel -->
                 <div class="lg:col-span-5 space-y-4">
                     <div class="bg-[#1a1d26] border border-slate-800/80 rounded-2xl p-5 space-y-4">
                         <div class="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-coins text-amber-500"></i> การชำระเงิน</div>
@@ -404,7 +401,7 @@
 
                     <!-- Status Selector Panel -->
                     <div class="bg-[#1a1d26] border border-slate-800/80 rounded-2xl p-4 space-y-2">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block flex items-center gap-1.5"><i class="fa-solid fa-circle-notch text-slate-400"></i> สถานะงาน</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block flex items-center gap-1.5"><i class="fa-solid fa-circle-notch text-slate-400"></i> Status คิวงาน</span>
                         <select id="qvStatusSelector" onchange="changeJobStatusDirectly()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-200 focus:outline-none cursor-pointer">
                             <option value="สร้างงาน">สร้างงานในคลาวด์</option>
                             <option value="call-back">รอคิววันงานจริง</option>
@@ -415,7 +412,6 @@
                 </div>
             </div>
             
-            <!-- ✖ ปิดหน้าต่างขอบล่างสำหรับมือถือ -->
             <div class="block md:hidden fixed bottom-0 left-0 right-0 p-3 bg-slate-900 border-t border-slate-800 z-50 shadow-2xl">
                 <button onclick="closeQuickViewModal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-sm py-3 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-circle-xmark text-base"></i> ✖ ปิดหน้าต่างจัดการงาน
@@ -424,7 +420,7 @@
         </div>
     </div>
 
-    <!-- 💡 🔔 หน้าต่างตั้งค่ากุญแจเลขา LINE OA -->
+    <!-- หน้าต่างตั้งค่ากุญแจเลขา LINE OA -->
     <div id="lineConfigModal" onclick="if(event.target === this) closeLineConfigModal()" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[70] flex items-center justify-center hidden no-print p-4">
         <div class="bg-[#111319] border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
             <div class="bg-slate-950 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
@@ -432,19 +428,18 @@
                 <button onclick="closeLineConfigModal()" class="text-slate-400 hover:text-slate-200 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="p-5 space-y-4 text-xs">
-                <p class="text-slate-400 leading-relaxed">💡 กรอกรหัสข้อมูลที่ได้จากเว็บ LINE Developers เพื่อให้คลาวด์เปิดระบบสแกนคิวงานเด้งทักแชทหาคุณออยส่วนตัวล่วงหน้า 1 วันโดยอัตโนมัติ:</p>
+                <p class="text-slate-400 leading-relaxed">💡 ระบบได้ทำการฝังรหัสชุดล่าสุดของคุณออยลงสู่โครงสร้างเว็บแกนกลางอย่างเสถียรเรียบร้อยครับ:</p>
                 <div>
                     <label class="block text-slate-400 mb-1">LINE Channel Access Token</label>
-                    <input type="text" id="lineTokenInput" placeholder="วาง Token ลับยาวๆ ตรงนี้" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-[11px] text-slate-200 focus:outline-none">
+                    <input type="text" id="lineTokenInput" disabled class="w-full bg-slate-900/50 border border-slate-800 rounded-xl p-2.5 font-mono text-[11px] text-slate-400 opacity-60 select-none">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1">Your User ID ส่วนตัวของคุณออย (ขึ้นต้นด้วยตัว U)</label>
-                    <input type="text" id="lineUserIdInput" placeholder="U0123456789abcdef..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 font-mono text-[11px] text-amber-400 focus:outline-none">
+                    <label class="block text-slate-400 mb-1">Your User ID (ขึ้นต้นด้วยตัว U)</label>
+                    <input type="text" id="lineUserIdInput" disabled class="w-full bg-slate-900/50 border border-slate-800 rounded-xl p-2.5 font-mono text-[11px] text-slate-400 opacity-60 select-none">
                 </div>
             </div>
             <div class="bg-slate-950 px-5 py-3 border-t border-slate-800 flex justify-end gap-2">
-                <button onclick="closeLineConfigModal()" class="bg-slate-800 text-slate-300 px-3 py-1.5 rounded-xl">ปิด</button>
-                <button onclick="saveLineSettingsAndTriggerWarning()" class="bg-[#06C755] hover:bg-[#05b34c] text-white font-bold px-4 py-1.5 rounded-xl shadow-md">🔥 บันทึก & เปิดระบบเลขา</button>
+                <button onclick="closeLineConfigModal()" class="bg-[#06C755] text-white font-bold px-5 py-1.5 rounded-xl shadow-md">ระบบเปิดทำงานอยู่ล็อกเรียบร้อย</button>
             </div>
         </div>
     </div>
@@ -515,7 +510,6 @@
                 document.getElementById('globalMonthSelect').value = currentMonth;
                 document.getElementById('currentInvoiceDate').innerText = `${timeData.getDate().toString().padStart(2, '0')}/${currentMonth}/${currentYear}`;
 
-                // ทำการสำรองสิทธิ์ลงหน่วยความจำเผื่อแผงเลขาใช้งาน
                 localStorage.setItem('oil_line_token', FIXED_LINE_TOKEN);
                 localStorage.setItem('oil_line_userid', FIXED_LINE_USER_ID);
                 
@@ -735,7 +729,6 @@
             }
         }
 
-        // ส่วนฟังก์ชันที่เหลือคงสิทธิ์ตามเดิม
         function renderCalendarBadges() {
             const container = document.getElementById('calendarBadgesContainer'); if(!container) return;
             if (currentSystemView === 'public') {
@@ -1007,6 +1000,7 @@
             closeLineConfigModal(); runAutomatedLineCronTask();
         }
 
+        // 🚀 🤖 ระบบเลขาทำงานฝั่งหน้าบ้าน แสแกนเวลาไทยและเรียกส่งเข้า Vercel Serverless Function ไร้ปัญหา CORS
         async function runAutomatedLineCronTask() {
             if(allJobs.length === 0) return;
 
@@ -1026,20 +1020,33 @@
 
             for(let job of tomorrowJobs) {
                 let remaining = Number(job.total || 0) - Number(job.paid || 0);
-                let textMessage = `🚨 [I'M OIL PHOTO] แจ้งเตือนคิวงานวันพรุ่งนี้ครับคุณออย!\n━━━━━━━━━━━━━━━━━━━━\n👤 คุณลูกค้า: ${job.title}\n🎓 ประเภท: งาน${job.status_notes || 'ทั่วไป'}\n🕒 เวลาเริ่ม: ${job.time || 'ตามบรีฟ'} น.\n📍 สถานที่: ${job.location || '-'}\n\n💰 ยอดคงเหลือเก็บหน้างาน: ฿${remaining.toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nเตรียมอุปกรณ์คิวงานร่างทองวันพรุ่งนี้นะครับช่างภาพ! 🔥📸`;
-
+                
+                // แพ็คเกจข้อมูลเตือนงาน ยิงตรงเข้า Server API หลังบ้านของ Vercel
                 try {
-                    await fetch('https://api.line.me/v2/bot/message/push', {
+                    await fetch('/api/send-line', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${FIXED_LINE_TOKEN}` },
-                        body: JSON.stringify({ to: FIXED_LINE_USER_ID, messages: [{ type: 'text', text: textMessage }] })
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            customToken: FIXED_LINE_TOKEN,
+                            customUserId: FIXED_LINE_USER_ID,
+                            name: job.title || 'ไม่ระบุชื่อ',
+                            phone: job.phone || '-',
+                            packageType: job.status_notes || 'ถ่ายภาพ',
+                            date: job.date || '-',
+                            time: job.time || 'ตามบรีฟ',
+                            location: job.location || '-',
+                            total: Number(job.total || 0),
+                            deposit: Number(job.paid || 0),
+                            pending: remaining,
+                            isReminder: true // บ่งบอกว่าเป็นข้อความเตือนงานล่วงหน้า 1 วัน
+                        })
                     });
                 } catch(e) { console.error(e); }
             }
             localStorage.setItem(todayKey, "true");
         }
 
-        // 🚀 ⚡ [ฟังก์ชันตัวแก้ไขจุดตายปุ่มเขียว]: ต่อวงจรหน้าบ้านตรงดิ่ง ไม่ผ่านระบบเวิร์สเซิลตัวเก่า มั่นใจเด้งชัวร์ 100%
+        // 🚀 ⚡ [ฟังก์ชันปุ่มเขียวเสถียรสุดยอด]: ส่งกุญแจลับแพ็คคู่กับข้อมูล วิ่งอ้อมหลบ CORS ผ่านระบบ Server API หลังบ้าน
         async function sendFlexMessageToLineDirectly() {
             const name = document.getElementById('custName').value || 'ไม่ระบุชื่อ';
             const phone = document.getElementById('custPhone').value || 'ไม่ระบุเบอร์';
@@ -1051,30 +1058,35 @@
             const deposit = Number(document.getElementById('paidDeposit').value || 0);
             const pending = total - deposit;
 
-            // 🎨 ประกอบร่างข้อความบรีฟงานโทน Luxury เรียงแถวสวยงามส่งเข้า LINE
-            let textMessage = `📸 [I'M OIL PHOTO] ใบยืนยันการจองคิวงานถ่ายภาพ\n━━━━━━━━━━━━━━━━━━━━\n🎫 ข้อมูลนัดหมายคุณลูกค้า\n• ชื่อผู้จอง: ${name}\n• เบอร์ติดต่อ: ${phone}\n• ประเภทงาน: ${packageType}\n• วันที่ถ่ายงาน: ${date}\n• ช่วงเวลา: ${time}\n• สถานที่นัดกอง: ${location}\n\n💰 รายละเอียดค่าบริการการเงิน\n• ราคาเต็มแพ็กเกจ: ฿${total.toLocaleString()} บาท\n• มัดจำล็อคคิวแล้ว: ฿${deposit.toLocaleString()} บาท\n• 🚨 ยอดคงเหลือจ่ายหน้างาน: ฿${pending.toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nขอบพระคุณที่ไว้วางใจให้ดูแลความทรงจำสำคัญครับ! 📸✨`;
+            // แพ็คกุญแจสำคัญส่งทะลวงหลังบ้าน Vercel ตัวเก่าที่คุณออยยิงติดชัวร์ ๆ
+            const payload = { 
+                customToken: FIXED_LINE_TOKEN,
+                customUserId: FIXED_LINE_USER_ID,
+                name, 
+                phone, 
+                packageType, 
+                date, 
+                time, 
+                location, 
+                total, 
+                deposit, 
+                pending, 
+                billUrl: window.location.href 
+            };
 
             try {
-                // เรียกส่งตรงเข้า LINE OA API 
-                const response = await fetch('https://api.line.me/v2/bot/message/push', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'Authorization': `Bearer ${FIXED_LINE_TOKEN}` 
-                    },
-                    body: JSON.stringify({ 
-                        to: FIXED_LINE_USER_ID, 
-                        messages: [{ type: 'text', text: textMessage }] 
-                    })
+                const response = await fetch('/api/send-line', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
                 });
                 
                 if (response.ok) {
-                    alert("🎯 ปุ่มสีเขียวเปิดระบบร่างทองสำเร็จ! ดีดข้อความใบจองเข้า LINE เรียบร้อยครับคุณออย!");
+                    alert("🎯 การ์ดบิลสีดาร์ก Luxury วิ่งทะลุระบบ Server เด้งเข้าแอป LINE ส่วนตัวสำเร็จแล้วครับคุณออย!");
                 } else {
-                    alert("❌ เกิดสิทธิ์ขัดข้องฝั่ง LINE Server กรุณาตรวจสอบการแอดไลน์ OA เพื่อนสนิทอีกครั้งครับ");
+                    alert("❌ สิทธิ์ส่งข้อความติดขัดที่ Server ฝั่ง LINE กรุณาตรวจสอบการเปิดประตูคุยกับ LINE OA อีกครั้งครับ");
                 }
             } catch (err) { 
-                console.error(err);
                 alert("💻 ขัดข้องทางระบบเครือข่าย กรุณาลองใหม่อีกครั้งครับ"); 
             }
         }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v8.2.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v8.5.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -293,7 +293,7 @@
 
     </main>
 
-    <!-- ⚡ MODAL ทางเลือกเวลาเจอคิวงานซ้อน (เพิ่มใหม่ล่าสุด) -->
+    <!-- ⚡ MODAL ทางเลือกเวลาเจอคิวงานซ้อน -->
     <div id="multipleJobsResolverModal" onclick="if(event.target === this) closeMultipleJobsModal()" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[60] flex items-center justify-center hidden no-print p-4">
         <div class="bg-[#111319] border border-slate-800 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
             <div class="bg-slate-950 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
@@ -301,14 +301,13 @@
                 <button onclick="closeMultipleJobsModal()" class="text-slate-400 hover:text-slate-200 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div id="multipleJobsListButtonsContainer" class="p-5 space-y-2 max-h-[60vh] overflow-y-auto">
-                <!-- รายชื่อปุ่มจะเด้งขึ้นมาตรงนี้ออโต้ -->
             </div>
         </div>
     </div>
 
-    <!-- ⚡ MODAL QUICK VIEW ดีไซน์พรีเมียมสีดาร์กพร้อมประวัติ Timeline ไล่สีอัจฉริยะตามสถานะจริง -->
+    <!-- ⚡ MODAL QUICK VIEW ดีไซน์พรีเมียมสีดาร์กพร้อมปุ่มปิดล็อกด้านล่างสุดสำหรับมือถือ -->
     <div id="quickViewModal" onclick="if(event.target === this) closeQuickViewModal()" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center hidden no-print p-4 overflow-y-auto">
-        <div class="bg-[#15171e] text-slate-200 w-full max-w-4xl rounded-2xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+        <div class="bg-[#15171e] text-slate-200 w-full max-w-4xl rounded-2xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col pb-[70px] md:pb-0" onclick="event.stopPropagation()">
             
             <!-- Top Nav Header -->
             <div class="px-6 py-4 bg-[#111319] border-b border-slate-800 flex justify-between items-center">
@@ -389,14 +388,12 @@
                             <div class="space-y-0.5"><span class="text-slate-500 block text-[10px]">ชำระแล้ว</span><span id="qvPaidAmountText" class="font-bold text-emerald-400 text-sm">฿0</span></div>
                             <div class="space-y-0.5 text-right"><span class="text-slate-500 block text-[10px]">คงเหลือ</span><span id="qvPendingAmountText" class="font-bold text-amber-500 text-sm">฿0</span></div>
                         </div>
-                        <!-- 📉 พรีวิวกำไรสุทธิ -->
                         <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs">
                             <span class="text-slate-400 font-medium"><i class="fa-solid fa-money-bill-trend-up text-emerald-400"></i> กำไรสุทธิของคิวงานนี้:</span>
                             <span id="qvNetProfitText" class="font-black text-emerald-400 text-sm">฿0</span>
                         </div>
                         <button onclick="pullToInvoiceForm()" class="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"><i class="fa-solid fa-file-invoice"></i> ออกใบเรียกเก็บยอดชำระเพิ่มเติม</button>
                         
-                        <!-- 💬 📞 แผงปุ่มสำหรับติดต่อทักแชทลูกค้าด่วน และโทรสายตรง -->
                         <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/50">
                             <a id="qvChatWithCustomerBtn" href="#" target="_blank" class="bg-[#00c755]/10 hover:bg-[#00c755]/20 text-[#00c755] border border-[#00c755]/20 font-bold py-2 rounded-xl text-[11px] transition-all flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-comment-dots text-xs"></i> 💬 ทักแชทหาลูกค้า
@@ -432,6 +429,14 @@
                 </div>
 
             </div>
+            
+            <!-- 📌 ✖️ [ปุ่มปิดสำหรับมือถือ]: ปุ่มล็อกลอยตัวสีแดงด้านล่างสุดของโมดอล กดปิดง่ายในมือถือ -->
+            <div class="block md:hidden fixed bottom-0 left-0 right-0 p-3 bg-slate-900 border-t border-slate-800 z-50 shadow-2xl">
+                <button onclick="closeQuickViewModal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-sm py-3 rounded-xl shadow-lg shadow-rose-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-xmark text-base"></i> ✖ ปิดหน้าต่างจัดการงาน
+                </button>
+            </div>
+            
         </div>
     </div>
 
@@ -665,16 +670,13 @@
         function changeSystemMonth() { filterJobsByMonth(); }
         function refreshUI() { renderCalendarGrid(); renderTodayJobs(); renderFinanceTable(); renderCustomers(); renderCalendarBadges(); updateGoalProgressBar(); updateDashboard(); }
 
-        // 🛠️ 🎯 [จุดอัปเกรดอัจฉริยะ]: เพิ่มระบบแยกคิวงานซ้อนเวลาคุณออยกดปุ่มวันที่ปฏิทิน
         function handleCalendarDayClick(dayStr) {
             let dayJobs = filteredJobs.filter(j => j.date === dayStr);
             if (dayJobs.length === 0) return;
             
             if (dayJobs.length === 1) {
-                // มีงานเดียว เด้งดูงานคนนั้นทันที
                 openQuickViewModal(dayJobs[0].id);
             } else {
-                // มีมากกว่า 1 งาน เด้งทางเลือกขึ้นมาให้จิ้ม
                 openMultipleJobsResolverModal(dayStr, dayJobs);
             }
         }
@@ -740,7 +742,6 @@
                         else if (type === "งานบวช") dayDiv.className = "p-2 bg-amber-950/40 text-amber-500 font-bold rounded-lg relative cursor-pointer border border-amber-500/40 shadow-md h-16 flex flex-col justify-between items-start";
                         else dayDiv.className = "p-2 bg-emerald-950/50 text-emerald-400 font-bold rounded-lg relative cursor-pointer border border-emerald-500/40 shadow-md h-16 flex flex-col justify-between items-start";
 
-                        // 🎯 ปรับปรุงจุดส่งพารามิเตอร์ให้ครอบคลุมระบบวันซ้อน
                         dayDiv.setAttribute('onclick', `handleCalendarDayClick('${dayStr}')`);
                         
                         let dotContainer = document.createElement('div');
@@ -990,13 +991,12 @@
             document.getElementById('tlStep3Date').innerText = `${job.date} • นัดกองสถานที่: ${job.location || 'ตามตกลง'}`;
             document.getElementById('tlStep4Date').innerText = remaining === 0 ? `${job.date} • จบกองปิดดีลร่างทอง` : `ค้างชำระหน้างานอีก ฿${remaining.toLocaleString()}`;
 
-            // 🎨 [ระบบแปรผันสี Timeline และติ๊กถูกอัจฉริยะ]: เปลี่ยนสีข้อความและไอคอนตามสถานะปัจจุบันของคุณออยกำหนด
+            // 🎨 [ระบบแปรผันสี Timeline และติ๊กถูกอัจฉริยะ]
             const b1 = document.getElementById('tlBlock1'); const d1 = document.getElementById('tlDot1'); const t1 = document.getElementById('tlTitle1');
             const b2 = document.getElementById('tlBlock2'); const d2 = document.getElementById('tlDot2'); const t2 = document.getElementById('tlTitle2');
             const b3 = document.getElementById('tlBlock3'); const d3 = document.getElementById('tlDot3'); const t3 = document.getElementById('tlTitle3');
             const b4 = document.getElementById('tlBlock4'); const d4 = document.getElementById('tlDot4'); const t4 = document.getElementById('tlTitle4');
 
-            // ล้างค่าสีคลาสเก่าทั้งหมดเพื่อคำนวณใหม่
             [b1, b2, b3, b4].forEach(b => b.className = "relative text-slate-500");
             [t1, t2, t3, t4].forEach(t => t.className = "text-xs font-bold text-slate-500");
             [d1, d2, d3, d4].forEach(d => { d.className = "absolute -left-[30px] top-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold bg-slate-800 text-slate-600 ring-0"; d.innerHTML = ""; });
@@ -1147,7 +1147,6 @@
             }
         }
 
-        // 🚀 ⚡ ยิงการ์ดบิลเข้าแอป LINE โดยตรง
         async function sendFlexMessageToLineDirectly() {
             const name = document.getElementById('custName').value || 'ไม่ระบุชื่อ';
             const phone = document.getElementById('custPhone').value || 'ไม่ระบุเบอร์';

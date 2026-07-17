@@ -1012,16 +1012,29 @@
             closeLineConfigModal(); runAutomatedLineCronTask();
         }
 
+        // 🚀 🤖 [ฟังก์ชันคำนวณเวลาไทย]: ปรับสูตรให้บอทมองเห็นวันพรุ่งนี้ตรงกับปฏิทินไทย 100%
         async function runAutomatedLineCronTask() {
             const token = localStorage.getItem('oil_line_token');
             const userId = localStorage.getItem('oil_line_userid');
-            if(!token || !userId || allJobs.length === 0) return;
+            if(!token || !userId || allJobs.length === 0) return; 
 
-            const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            // 🕒 ดึงเวลาปัจจุบันในโซนประเทศไทย (GMT+7)
+            const nowInThailand = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
+            
+            // บวกเวลาล่วงหน้าไปอีก 1 วัน เพื่อหาค่า "วันพรุ่งนี้" ของประเทศไทย
+            nowInThailand.setDate(nowInThailand.getDate() + 1);
+            
+            // แปลงค่าให้ออกมาเป็นรูปแบบ YYYY-MM-DD (เช่น 2026-07-18)
+            const year = nowInThailand.getFullYear();
+            const month = String(nowInThailand.getMonth() + 1).padStart(2, '0');
+            const day = String(nowInThailand.getDate()).padStart(2, '0');
+            const tomorrowStr = `${year}-${month}-${day}`;
+
+            // คัดแยกหาคิวงานที่ตรงกับวันพรุ่งนี้ของไทย
             const tomorrowJobs = allJobs.filter(j => j.date === tomorrowStr);
-            if(tomorrowJobs.length === 0) return;
+            if(tomorrowJobs.length === 0) return; 
 
+            // สร้างกุญแจล็อกไม่ให้บอทยิงซ้ำซากในวันเดียวกัน
             const todayKey = new Date().toISOString().split('T')[0] + "_line_sent";
             if(localStorage.getItem(todayKey)) return; 
 
@@ -1035,28 +1048,7 @@
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ to: userId, messages: [{ type: 'text', text: textMessage }] })
                     });
-                } catch(e) { console.error(e); }
+                } catch(e) { console.error("Line Push Error:", e); }
             }
             localStorage.setItem(todayKey, "true");
         }
-
-        async function sendFlexMessageToLineDirectly() {
-            const name = document.getElementById('custName').value || 'ไม่ระบุชื่อ';
-            const phone = document.getElementById('custPhone').value || 'ไม่ระบุเบอร์';
-            const packageType = document.getElementById('custPackageSelect').value || 'งานถ่ายภาพ';
-            const date = document.getElementById('custDate').value || 'ไม่ระบุวัน';
-            const time = document.getElementById('custTime').value || 'ช่วงเช้า';
-            const location = document.getElementById('custLocation').value || 'ไม่ระบุสถานที่';
-            const total = Number(document.getElementById('packPrice').value || 0);
-            const deposit = Number(document.getElementById('paidDeposit').value || 0);
-            const pending = total - deposit;
-
-            const payload = { name, phone, packageType, date, time, location, total, deposit, pending, billUrl: window.location.href };
-            try {
-                const response = await fetch('/api/send-line', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (response.ok) alert("🎯 การ์ดบิลสีดาร์ก Luxury ยิงตรงเข้าแอป LINE OA สำเร็จ!");
-            } catch (err) { alert("💻 ขัดข้องทางระบบเครือข่าย"); }
-        }
-    </script>
-</body>
-</html>

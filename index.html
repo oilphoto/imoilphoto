@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v16.0.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v17.0.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -244,6 +244,7 @@
                 </div>
                 <button onclick="openJobModal('add')" id="btnAddNewJobAdmin" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm px-5 py-2.5 rounded-xl transition-all cursor-pointer"><i class="fa-solid fa-plus mr-2"></i>เพิ่มคิวงานใหม่เข้าระบบ Cloud</button>
             </div>
+            <!-- แถบสัญลักษณ์สีปฏิทิน (เพิ่มสัญลักษณ์สีม่วงสำหรับงานปิดงาน) -->
             <div id="calendarBadgesContainer" class="flex flex-wrap gap-4 bg-slate-900 p-3.5 rounded-xl border border-slate-800 text-xs"></div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-2 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
@@ -462,7 +463,7 @@
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 document.getElementById('syncStatusDot').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
                 
-                datePickerInstance = flatpickr("#mDate", { locale: "th", dateFormat: "Y-m-d", defaultDate: "2026-07-02", disableMobile: "true" });
+                datePickerInstance = flatpickr("#mDate", { locale: "th", dateFormat: "Y-m-d", defaultDate: "2026-08-01", disableMobile: "true" });
                 timePickerInstance = flatpickr("#mTime", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "06:30", disableMobile: "true" });
 
                 const timeData = new Date();
@@ -595,7 +596,6 @@
             }
         }
 
-        // 🎯 🛠️ ฟังก์ชันกรองแม่นยำสูง 100%: แปลงวันที่จริง เปรียบเทียบเดือนและปีตรงเป๊ะ ไม่มีติดเดือนอื่นมาแน่นอน!
         function filterJobsByMonth() {
             const targetYear = parseInt(document.getElementById('globalYearSelect').value);
             const targetMonth = parseInt(document.getElementById('globalMonthSelect').value); 
@@ -603,10 +603,8 @@
             filteredJobs = allJobs.filter(job => {
                 if (!job.date) return false;
                 
-                // แปลงสตริงเป็น Object วันที่จริง ป้องกันปัญหาเรื่องเลข 0 นำหน้าหรือรูปฟอร์แมตต่างกัน
                 const d = new Date(job.date);
                 if (isNaN(d.getTime())) {
-                    // กรณีใส่วันที่มาเป็นสตริง YYYY-MM-DD
                     const parts = job.date.split('-');
                     if(parts.length >= 2) {
                         return parseInt(parts[0]) === targetYear && parseInt(parts[1]) === targetMonth;
@@ -665,6 +663,7 @@
 
         function closeMultipleJobsModal() { document.getElementById('multipleJobsResolverModal').classList.add('hidden'); }
 
+        // 🎯 🛠️ ฟังก์ชันวาดปฏิทินแบบแยกสถานะสีม่วงสำหรับงานที่ "ปิดงานแล้ว" 💜
         function renderCalendarGrid() {
             const selectedYearLabel = document.getElementById('globalYearSelect').value;
             document.getElementById('calendarMonthTitle').innerText = `พ.ศ. ${parseInt(selectedYearLabel) + 543}`;
@@ -692,23 +691,41 @@
                     dayDiv.innerHTML = `<span>${day}</span>`;
                     
                     if (dayJobs.length > 0) {
-                        let type = dayJobs[0].status_notes || "อื่นๆ";
-                        if (type.includes("รับปริญญา")) dayDiv.className = "p-2 bg-sky-950/50 text-sky-400 font-bold rounded-lg relative cursor-pointer border border-sky-500/40 shadow-md h-16 flex flex-col justify-between items-start";
-                        else if (type === "งานแต่งงาน") dayDiv.className = "p-2 bg-pink-950/50 text-pink-400 font-bold rounded-lg relative cursor-pointer border border-pink-500/40 shadow-md h-16 flex flex-col justify-between items-start";
-                        else if (type === "งานบวช") dayDiv.className = "p-2 bg-amber-950/40 text-amber-500 font-bold rounded-lg relative cursor-pointer border border-amber-500/40 shadow-md h-16 flex flex-col justify-between items-start";
-                        else dayDiv.className = "p-2 bg-emerald-950/50 text-emerald-400 font-bold rounded-lg relative cursor-pointer border border-emerald-500/40 shadow-md h-16 flex flex-col justify-between items-start";
+                        let primaryJob = dayJobs[0];
+                        let remaining = Number(primaryJob.total || 0) - Number(primaryJob.paid || 0);
+                        let isClosed = (primaryJob.status === "Closed" || remaining === 0);
+                        let type = primaryJob.status_notes || "อื่นๆ";
+
+                        // 💜 ตรวจสอบสถานะการปิดงานก่อน หากปิดงานแล้วให้เปลี่ยนเป็นสีม่วงทันที!
+                        if (isClosed) {
+                            dayDiv.className = "p-2 bg-purple-950/60 text-purple-300 font-bold rounded-lg relative cursor-pointer border border-purple-500/40 shadow-md h-16 flex flex-col justify-between items-start";
+                        } else if (type.includes("รับปริญญา")) {
+                            dayDiv.className = "p-2 bg-sky-950/50 text-sky-400 font-bold rounded-lg relative cursor-pointer border border-sky-500/40 shadow-md h-16 flex flex-col justify-between items-start";
+                        } else if (type === "งานแต่งงาน") {
+                            dayDiv.className = "p-2 bg-pink-950/50 text-pink-400 font-bold rounded-lg relative cursor-pointer border border-pink-500/40 shadow-md h-16 flex flex-col justify-between items-start";
+                        } else if (type === "งานบวช") {
+                            dayDiv.className = "p-2 bg-amber-950/40 text-amber-500 font-bold rounded-lg relative cursor-pointer border border-amber-500/40 shadow-md h-16 flex flex-col justify-between items-start";
+                        } else {
+                            dayDiv.className = "p-2 bg-emerald-950/50 text-emerald-400 font-bold rounded-lg relative cursor-pointer border border-emerald-500/40 shadow-md h-16 flex flex-col justify-between items-start";
+                        }
 
                         dayDiv.setAttribute('onclick', `handleCalendarDayClick('${dayStr}')`);
                         
                         let dotContainer = document.createElement('div');
                         dotContainer.className = "flex flex-wrap gap-1 mt-1 w-full";
                         dayJobs.forEach(job => {
+                            let jobRemaining = Number(job.total || 0) - Number(job.paid || 0);
+                            let jobIsClosed = (job.status === "Closed" || jobRemaining === 0);
                             let jobType = job.status_notes || "อื่นๆ";
                             let dot = document.createElement('span'); dot.className = "w-2 h-2 rounded-full block";
-                            if (jobType.includes("รับปริญญา")) dot.classList.add('bg-sky-400');
+                            
+                            // 💜 กำหนดจุดสีม่วงสว่างให้งานที่ปิดแล้ว
+                            if (jobIsClosed) dot.classList.add('bg-purple-400');
+                            else if (jobType.includes("รับปริญญา")) dot.classList.add('bg-sky-400');
                             else if (jobType === "งานแต่งงาน") dot.classList.add('bg-pink-400');
                             else if (jobType === "งานบวช") dot.classList.add('bg-amber-500');
                             else dot.classList.add('bg-emerald-400');
+                            
                             dotContainer.appendChild(dot);
                         });
                         dayDiv.appendChild(dotContainer);
@@ -718,12 +735,13 @@
             }
         }
 
+        // 💜 ปรับเพิ่มแท็กสัญลักษณ์สีม่วงด้านบนปฏิทิน
         function renderCalendarBadges() {
             const container = document.getElementById('calendarBadgesContainer'); if(!container) return;
             if (currentSystemView === 'public') {
                 container.innerHTML = `<span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-emerald-500 shadow-md"></span> ✅ ว่างจองคิวได้</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-rose-500 shadow-md"></span> ❌ คิวงานเต็มแล้ว</span>`;
             } else {
-                container.innerHTML = `<span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-sky-400 shadow-md"></span> 🎓 รับปริญญา/นอกรอบ</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-pink-400 shadow-md"></span> 👰 งานแต่งงาน</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-amber-500 shadow-md"></span> 🙏 งานบวช</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-emerald-400 shadow-md"></span> 📸 อื่นๆ / ทั่วไป</span>`;
+                container.innerHTML = `<span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-sky-400 shadow-md"></span> 🎓 รับปริญญา/นอกรอบ</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-pink-400 shadow-md"></span> 👰 งานแต่งงาน</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-amber-500 shadow-md"></span> 🙏 งานบวช</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-emerald-400 shadow-md"></span> 📸 อื่นๆ / ทั่วไป</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-purple-400 shadow-md"></span> 💜 ปิดงานเรียบร้อย</span>`;
             }
         }
 
@@ -738,7 +756,6 @@
             });
         }
 
-        // 🎯 🛠️ ฟังก์ชันวาดตารางการเงินที่ดึงเฉพาะรายการใน `filteredJobs` ประจำเดือนนั้น ๆ มาแสดง 100%
         function renderFinanceTable() {
             const tbody = document.getElementById('financeTableBody'); if(!tbody) return; tbody.innerHTML = '';
             
@@ -825,7 +842,7 @@
                 document.getElementById('mTitle').value = ""; document.getElementById('mPhone').value = ""; document.getElementById('mFb').value = "";
                 document.getElementById('mLocation').value = ""; document.getElementById('mTotal').value = ""; document.getElementById('mPaid').value = "";
                 document.getElementById('mDriveLink').value = ""; document.getElementById('aiRawText').value = "";
-                datePickerInstance.setDate("2026-07-02"); timePickerInstance.setDate("06:30");
+                datePickerInstance.setDate("2026-08-01"); timePickerInstance.setDate("06:30");
             } else if (mode === 'edit' && jobId) {
                 document.getElementById('modalTitle').innerText = "⚙️ ตั้งค่าและแก้ไขข้อมูลคิวงาน";
                 const job = allJobs.find(j => j.id === jobId);
@@ -835,7 +852,7 @@
                     document.getElementById('mFb').value = job.facebook || ""; document.getElementById('mLocation').value = job.location || "";
                     document.getElementById('mTotal').value = job.total || ""; document.getElementById('mPaid').value = job.paid || "";
                     document.getElementById('mDriveLink').value = job.staff || "";
-                    datePickerInstance.setDate(job.date || "2026-07-02"); timePickerInstance.setDate(job.time || "06:30");
+                    datePickerInstance.setDate(job.date || "2026-08-01"); timePickerInstance.setDate(job.time || "06:30");
                 }
             }
         }
@@ -909,7 +926,7 @@
                 statusText = "ปิดงาน";
                 document.getElementById('qvStatusSelector').value = "ปิดงาน";
                 statusChip.innerText = "ปิดงาน";
-                statusChip.className = "bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full border border-emerald-500/20";
+                statusChip.className = "bg-purple-500/20 text-purple-300 text-[10px] font-bold px-3 py-1 rounded-full border border-purple-500/30";
             } else if (currentStatus === "Pending_Delivery") {
                 statusText = "ถ่ายเสร็จ ➔ รอส่งงาน";
                 document.getElementById('qvStatusSelector').value = "รอส่งงาน";
@@ -951,7 +968,7 @@
             if (currentStatus === "Closed" || remaining === 0) {
                 [b1, b2, b3].forEach(b => b.className = "relative text-slate-300"); [t1, t2, t3].forEach(t => t.className = "text-xs font-bold text-slate-200");
                 [d1, d2, d3].forEach(d => { d.className = "absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold shadow-md shadow-emerald-500/10"; d.innerHTML = "<i class='fa-solid fa-check'></i>"; });
-                b4.className = "relative text-amber-400 font-medium"; t4.className = "text-xs font-bold text-amber-400"; d4.className = "absolute -left-[30px] top-0.5 bg-amber-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-amber-500/20"; t4.innerHTML = "ปิดงาน • ตอนนี้";
+                b4.className = "relative text-purple-400 font-medium"; t4.className = "text-xs font-bold text-purple-400"; d4.className = "absolute -left-[30px] top-0.5 bg-purple-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-purple-500/20"; t4.innerHTML = "ปิดงาน • ตอนนี้";
             } else if (currentStatus === "Pending_Delivery") {
                 [b1, b2].forEach(b => b.className = "relative text-slate-300"); [t1, t2].forEach(t => t.className = "text-xs font-bold text-slate-200");
                 [d1, d2].forEach(d => { d.className = "absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold shadow-md"; d.innerHTML = "<i class='fa-solid fa-check'></i>"; });
@@ -989,7 +1006,6 @@
             } catch (err) { console.error(err); }
         }
 
-        // 🚀 ⚡ [ปุ่มสีเขียวระบบลิงก์แกนกลางถาวร]: มั่นใจใช้งานได้ยาวนาน ปลอดภัย ไร้สิทธิ์เออร์เรอร์ 100%
         function sendFlexMessageToLineDirectly() {
             const name = document.getElementById('custName').value || 'ไม่ระบุชื่อ';
             const phone = document.getElementById('custPhone').value || 'ไม่ระบุเบอร์';

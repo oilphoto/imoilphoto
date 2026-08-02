@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v15.0.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v16.0.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -595,16 +595,26 @@
             }
         }
 
-        // 🎯 🛠️ ฟังก์ชันกรองเฉพาะคิวงานประจำเดือนที่เลือก ตัวการหลักซ่อมตารางการเงิน!
+        // 🎯 🛠️ ฟังก์ชันกรองแม่นยำสูง 100%: แปลงวันที่จริง เปรียบเทียบเดือนและปีตรงเป๊ะ ไม่มีติดเดือนอื่นมาแน่นอน!
         function filterJobsByMonth() {
-            const selectedYear = document.getElementById('globalYearSelect').value;
-            const selectedMonth = document.getElementById('globalMonthSelect').value; 
+            const targetYear = parseInt(document.getElementById('globalYearSelect').value);
+            const targetMonth = parseInt(document.getElementById('globalMonthSelect').value); 
             
-            // กรองเอาเฉพาะคิวงานที่ตรงกับ ปี-เดือน ที่เลือกใน Select box
             filteredJobs = allJobs.filter(job => {
-                if (!job.date || !job.date.includes('-')) return false;
-                const parts = job.date.split('-');
-                return parts[0] === selectedYear && parts[1] === selectedMonth;
+                if (!job.date) return false;
+                
+                // แปลงสตริงเป็น Object วันที่จริง ป้องกันปัญหาเรื่องเลข 0 นำหน้าหรือรูปฟอร์แมตต่างกัน
+                const d = new Date(job.date);
+                if (isNaN(d.getTime())) {
+                    // กรณีใส่วันที่มาเป็นสตริง YYYY-MM-DD
+                    const parts = job.date.split('-');
+                    if(parts.length >= 2) {
+                        return parseInt(parts[0]) === targetYear && parseInt(parts[1]) === targetMonth;
+                    }
+                    return false;
+                }
+                
+                return d.getFullYear() === targetYear && (d.getMonth() + 1) === targetMonth;
             });
 
             if (selectedActiveJobId) {
@@ -728,7 +738,7 @@
             });
         }
 
-        // 🎯 🛠️ ฟังก์ชันวาดตารางการเงินที่ใช้รายการ `filteredJobs` ประจำเดือนนั้น ๆ แบบเป๊ะ ๆ 100%
+        // 🎯 🛠️ ฟังก์ชันวาดตารางการเงินที่ดึงเฉพาะรายการใน `filteredJobs` ประจำเดือนนั้น ๆ มาแสดง 100%
         function renderFinanceTable() {
             const tbody = document.getElementById('financeTableBody'); if(!tbody) return; tbody.innerHTML = '';
             

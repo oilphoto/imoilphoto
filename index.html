@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v19.0.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v20.0.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -663,7 +663,7 @@
 
         function closeMultipleJobsModal() { document.getElementById('multipleJobsResolverModal').classList.add('hidden'); }
 
-        // 🟡 🛠️ ฟังก์ชันวาดปฏิทินที่เปลี่ยนโทนสีงานปิดแล้วเป็น "สีเหลืองทอง" 🟡
+        // 🔴 🌸 ฟังก์ชันวาดปฏิทิน (แต่งงาน = ชมพูอ่อน, ปิดงาน = สีแดง) 🔴 🌸
         function renderCalendarGrid() {
             const selectedYearLabel = document.getElementById('globalYearSelect').value;
             document.getElementById('calendarMonthTitle').innerText = `พ.ศ. ${parseInt(selectedYearLabel) + 543}`;
@@ -696,13 +696,13 @@
                         let isClosed = (primaryJob.status === "Closed" || remaining === 0);
                         let type = primaryJob.status_notes || "อื่นๆ";
 
-                        // 💛 ตรวจสอบสถานะการปิดงาน หากปิดแล้วให้เปลี่ยนเป็น "สีเหลืองทอง" ทันที!
+                        // 🔴 ปรับเป็นสีแดงสำหรับงานที่ปิดแล้ว / 🌸 ปรับเป็นสีชมพูอ่อนสำหรับงานแต่งงาน
                         if (isClosed) {
-                            dayDiv.className = "p-2 bg-amber-950/80 text-amber-300 font-bold rounded-lg relative cursor-pointer border border-amber-500/50 shadow-md h-16 flex flex-col justify-between items-start";
+                            dayDiv.className = "p-2 bg-red-950/80 text-red-400 font-bold rounded-lg relative cursor-pointer border border-red-500/50 shadow-md h-16 flex flex-col justify-between items-start";
                         } else if (type.includes("รับปริญญา")) {
                             dayDiv.className = "p-2 bg-sky-950/50 text-sky-400 font-bold rounded-lg relative cursor-pointer border border-sky-500/40 shadow-md h-16 flex flex-col justify-between items-start";
                         } else if (type === "งานแต่งงาน") {
-                            dayDiv.className = "p-2 bg-pink-950/50 text-pink-400 font-bold rounded-lg relative cursor-pointer border border-pink-500/40 shadow-md h-16 flex flex-col justify-between items-start";
+                            dayDiv.className = "p-2 bg-pink-950/40 text-pink-300 font-bold rounded-lg relative cursor-pointer border border-pink-300/40 shadow-md h-16 flex flex-col justify-between items-start";
                         } else if (type === "งานบวช") {
                             dayDiv.className = "p-2 bg-amber-950/40 text-amber-500 font-bold rounded-lg relative cursor-pointer border border-amber-500/40 shadow-md h-16 flex flex-col justify-between items-start";
                         } else {
@@ -726,10 +726,10 @@
                             let jobType = job.status_notes || "อื่นๆ";
                             let dot = document.createElement('span'); dot.className = "w-2 h-2 rounded-full block";
                             
-                            // 💛 จุดสีเหลืองทองสำหรับงานปิดเรียบร้อย
-                            if (jobIsClosed) dot.classList.add('bg-amber-400');
+                            // 🔴 จุดสีแดงสำหรับปิดงาน / 🌸 จุดสีชมพูอ่อนสำหรับงานแต่งงาน
+                            if (jobIsClosed) dot.classList.add('bg-red-500');
                             else if (jobType.includes("รับปริญญา")) dot.classList.add('bg-sky-400');
-                            else if (jobType === "งานแต่งงาน") dot.classList.add('bg-pink-400');
+                            else if (jobType === "งานแต่งงาน") dot.classList.add('bg-pink-300');
                             else if (jobType === "งานบวช") dot.classList.add('bg-amber-500');
                             else dot.classList.add('bg-emerald-400');
                             
@@ -738,11 +738,11 @@
 
                         dotContainer.appendChild(dotsRow);
 
-                        // 💛 แสดงข้อความคำว่า "💛 ปิดงาน" สีเหลืองทอง
+                        // 🔴 แสดงข้อความคำว่า "🔴 ปิดงาน" สีแดง
                         if (hasClosedJob) {
                             let labelText = document.createElement('span');
-                            labelText.className = "text-[9px] font-black text-amber-300 leading-none tracking-tighter truncate block mt-0.5";
-                            labelText.innerText = "💛 ปิดงาน";
+                            labelText.className = "text-[9px] font-black text-red-400 leading-none tracking-tighter truncate block mt-0.5";
+                            labelText.innerText = "🔴 ปิดงาน";
                             dotContainer.appendChild(labelText);
                         }
 
@@ -753,13 +753,13 @@
             }
         }
 
-        // 💛 แถบป้ายสัญลักษณ์สีเหลืองทอง
+        // 🔴 🌸 แถบป้ายสัญลักษณ์สีปฏิทิน
         function renderCalendarBadges() {
             const container = document.getElementById('calendarBadgesContainer'); if(!container) return;
             if (currentSystemView === 'public') {
                 container.innerHTML = `<span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-emerald-500 shadow-md"></span> ✅ ว่างจองคิวได้</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-rose-500 shadow-md"></span> ❌ คิวงานเต็มแล้ว</span>`;
             } else {
-                container.innerHTML = `<span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-sky-400 shadow-md"></span> 🎓 รับปริญญา/นอกรอบ</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-pink-400 shadow-md"></span> 👰 งานแต่งงาน</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-amber-500 shadow-md"></span> 🙏 งานบวช</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-emerald-400 shadow-md"></span> 📸 อื่นๆ / ทั่วไป</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-amber-400 shadow-md"></span> 💛 ปิดงานเรียบร้อย</span>`;
+                container.innerHTML = `<span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-sky-400 shadow-md"></span> 🎓 รับปริญญา/นอกรอบ</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-pink-300 shadow-md"></span> 👰 งานแต่งงาน (ชมพูอ่อน)</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-amber-500 shadow-md"></span> 🙏 งานบวช</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-emerald-400 shadow-md"></span> 📸 อื่นๆ / ทั่วไป</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-red-500 shadow-md"></span> 🔴 ปิดงานเรียบร้อย</span>`;
             }
         }
 
@@ -784,7 +784,7 @@
 
             filteredJobs.forEach((job) => {
                 let remaining = Number(job.total || 0) - Number(job.paid || 0); let jobType = job.status_notes || "อื่นๆ";
-                let actionBtnHTML = remaining > 0 ? `<button onclick="quickFinishJob(${job.id}, ${job.total})" class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded hover:bg-emerald-500 hover:text-slate-950 transition-all cursor-pointer">เสร็จงาน</button>` : `<span class="text-xs text-amber-300 font-bold"><i class="fa-solid fa-check text-amber-400 mr-1"></i> จ่ายครบ (ปิดงาน)</span>`;
+                let actionBtnHTML = remaining > 0 ? `<button onclick="quickFinishJob(${job.id}, ${job.total})" class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded hover:bg-emerald-500 hover:text-slate-950 transition-all cursor-pointer">เสร็จงาน</button>` : `<span class="text-xs text-red-400 font-bold"><i class="fa-solid fa-check text-red-400 mr-1"></i> จ่ายครบ (ปิดงาน)</span>`;
                 let driveBtnHTML = (job.staff && job.staff.trim().startsWith('http')) ? `<a href="${job.staff.trim()}" target="_blank" class="text-xs bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-bold px-3 py-1 rounded-xl shadow-md"><i class="fa-solid fa-images"></i> รูปภาพ</a>` : `<span class="text-xs text-slate-600 select-none">ยังไม่ส่งงาน</span>`;
                 
                 let lineMsg = `📸 I'M OIL PHOTO - สรุปคิวงานออกกอง\n━━━━━━━━━━━━━━━\n🎓 งาน: งาน${jobType}\n👤 ลูกค้า: ${job.title}\n📅 วันที่: ${job.date}\n💰 ยอดเต็ม: ฿${Number(job.total).toLocaleString()}\n💵 มัดจำแล้ว: ฿${Number(job.paid).toLocaleString()}\n🚨 ค้างจ่ายหน้างาน: ฿${remaining.toLocaleString()} บาท`;
@@ -812,7 +812,7 @@
             const grid = document.getElementById('customerGrid'); if(!grid) return; grid.innerHTML = '';
             filteredJobs.forEach(job => {
                 let card = document.createElement('div'); card.className = "bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3";
-                let jobType = job.status_notes || "อื่นๆ"; let typeColor = "text-sky-400"; if (jobType === "งานแต่งงาน") typeColor = "text-pink-400"; else if (jobType === "งานบวช") typeColor = "text-amber-500";
+                let jobType = job.status_notes || "อื่นๆ"; let typeColor = "text-sky-400"; if (jobType === "งานแต่งงาน") typeColor = "text-pink-300"; else if (jobType === "งานบวช") typeColor = "text-amber-500";
                 let thaiDateStr = "ยังไม่ได้ระบุ"; if (job.date && job.date.includes('-')) { const parts = job.date.split('-'); thaiDateStr = `${parts[2]}/${parts[1]}/${parseInt(parts[0]) + 543}`; }
                 let phoneHTML = job.phone ? `<p class="text-slate-300 flex items-center gap-2"><i class="fa-solid fa-phone text-amber-500 text-xs"></i> <span>เบอร์โทร: <a href="tel:${job.phone}" class="text-slate-200 hover:underline font-mono">${job.phone}</a></span></p>` : `<p class="text-slate-500 flex items-center gap-2"><i class="fa-solid fa-phone text-xs"></i> <span>เบอร์โทร: ไม่ระบุ</span></p>`;
                 let fbHTML = job.facebook && job.facebook.trim() ? `<p class="text-slate-300 truncate flex items-center gap-2"><i class="fa-solid fa-link text-sky-400 text-xs"></i> <span>ลิงก์บันทึกไว้: <a href="${job.facebook.trim().startsWith('http') ? job.facebook.trim() : 'https://' + job.facebook.trim()}" target="_blank" class="text-sky-400 hover:underline text-[11px] font-mono">${job.facebook}</a></span></p>` : `<p class="text-slate-500 flex items-center gap-2"><i class="fa-solid fa-link text-xs"></i> <span>ลิงก์: ไม่ได้ระบุ</span></p>`;
@@ -944,7 +944,7 @@
                 statusText = "ปิดงาน";
                 document.getElementById('qvStatusSelector').value = "ปิดงาน";
                 statusChip.innerText = "ปิดงาน";
-                statusChip.className = "bg-amber-500/20 text-amber-300 text-[10px] font-bold px-3 py-1 rounded-full border border-amber-500/30";
+                statusChip.className = "bg-red-500/20 text-red-300 text-[10px] font-bold px-3 py-1 rounded-full border border-red-500/30";
             } else if (currentStatus === "Pending_Delivery") {
                 statusText = "ถ่ายเสร็จ ➔ รอส่งงาน";
                 document.getElementById('qvStatusSelector').value = "รอส่งงาน";
@@ -986,7 +986,7 @@
             if (currentStatus === "Closed" || remaining === 0) {
                 [b1, b2, b3].forEach(b => b.className = "relative text-slate-300"); [t1, t2, t3].forEach(t => t.className = "text-xs font-bold text-slate-200");
                 [d1, d2, d3].forEach(d => { d.className = "absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold shadow-md shadow-emerald-500/10"; d.innerHTML = "<i class='fa-solid fa-check'></i>"; });
-                b4.className = "relative text-amber-400 font-medium"; t4.className = "text-xs font-bold text-amber-400"; d4.className = "absolute -left-[30px] top-0.5 bg-amber-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-amber-500/20"; t4.innerHTML = "ปิดงาน • ตอนนี้";
+                b4.className = "relative text-red-400 font-medium"; t4.className = "text-xs font-bold text-red-400"; d4.className = "absolute -left-[30px] top-0.5 bg-red-500 text-slate-950 w-4 h-4 rounded-full ring-4 ring-red-500/20"; t4.innerHTML = "ปิดงาน • ตอนนี้";
             } else if (currentStatus === "Pending_Delivery") {
                 [b1, b2].forEach(b => b.className = "relative text-slate-300"); [t1, t2].forEach(t => t.className = "text-xs font-bold text-slate-200");
                 [d1, d2].forEach(d => { d.className = "absolute -left-[30px] top-0.5 bg-emerald-500 text-slate-950 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold shadow-md"; d.innerHTML = "<i class='fa-solid fa-check'></i>"; });

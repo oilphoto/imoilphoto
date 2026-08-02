@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v13.0.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v14.0.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -271,7 +271,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm text-slate-300">
                         <thead class="bg-slate-950 text-xs text-slate-400 uppercase border-b border-slate-800">
-                            <tr><th class="p-4">ชื่องาน/ลูกค้า</th><th class="p-4">สถานที่</th><th class="p-4">ยอดเต็ม</th><th class="p-4">มัดจำแล้ว</th><th class="p-4">คงเหลือ</th><th class="p-4">Access Code</th><th class="p-4 text-center">จัดการคิวงาน & ส่งงาน</th></tr>
+                            <tr><th class="p-4">ชื่องาน/ลูกค้า</th><th class="p-4">สถานที่</th><th class="p-4">ยอดเต็ม</th><th class="p-4">มัดจำแล้ว</th><th class="p-4">คงเหลือ</th><th class="p-4">ACCESS CODE</th><th class="p-4 text-center">จัดการคิวงาน & ส่งงาน</th></tr>
                         </thead>
                         <tbody id="financeTableBody" class="divide-y divide-slate-800/60"></tbody>
                     </table>
@@ -590,9 +590,9 @@
             if (!supabaseClient) return;
             let { data, error } = await supabaseClient.from('jobs').select('*').order('date', { ascending: true });
             if (!error) { allJobs = data || []; filterJobsByMonth(); }
-            runAutomatedLineCronTask();
         }
 
+        // 🛠️ แก้ไขซ่อมจุดเปลี่ยนเดือน: สั่งกรองข้อมูลและวาดตารางการเงินใหม่ตามเดือนที่เลือกชัวร์ 100%
         function filterJobsByMonth() {
             const selectedYear = document.getElementById('globalYearSelect').value;
             const selectedMonth = document.getElementById('globalMonthSelect').value; 
@@ -605,7 +605,17 @@
         }
 
         function changeSystemMonth() { filterJobsByMonth(); }
-        function refreshUI() { renderCalendarGrid(); renderTodayJobs(); renderFinanceTable(); renderCustomers(); renderCalendarBadges(); updateGoalProgressBar(); updateDashboard(); }
+        
+        // 💡 ฟังก์ชันรีเฟรชหน้าจอ สั่งวาดทั้งปฏิทิน และตารางการเงินใหม่ทุกครั้ง
+        function refreshUI() { 
+            renderCalendarGrid(); 
+            renderTodayJobs(); 
+            renderFinanceTable(); 
+            renderCustomers(); 
+            renderCalendarBadges(); 
+            updateGoalProgressBar(); 
+            updateDashboard(); 
+        }
 
         function handleCalendarDayClick(dayStr) {
             let dayJobs = filteredJobs.filter(j => j.date === dayStr);
@@ -637,7 +647,6 @@
         function closeMultipleJobsModal() { document.getElementById('multipleJobsResolverModal').classList.add('hidden'); }
 
         function renderCalendarGrid() {
-            // 💡 บรรทัดที่เพิ่มเพื่อซ่อม พ.ศ. หัวปฏิทินที่หายไปให้กลับคืนมาครับ
             const selectedYearLabel = document.getElementById('globalYearSelect').value;
             document.getElementById('calendarMonthTitle').innerText = `พ.ศ. ${parseInt(selectedYearLabel) + 543}`;
 
@@ -710,8 +719,13 @@
             });
         }
 
+        // 🛠️ วาดตารางการเงินที่กรองตามรายการ `filteredJobs` ประจำเดือนนั้น ๆ เป๊ะ ๆ 
         function renderFinanceTable() {
             const tbody = document.getElementById('financeTableBody'); if(!tbody) return; tbody.innerHTML = '';
+            if (filteredJobs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500 text-xs">ไม่มีคิวงานในเดือนนี้</td></tr>`;
+                return;
+            }
             filteredJobs.forEach((job) => {
                 let remaining = Number(job.total || 0) - Number(job.paid || 0); let jobType = job.status_notes || "อื่นๆ";
                 let actionBtnHTML = remaining > 0 ? `<button onclick="quickFinishJob(${job.id}, ${job.total})" class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded hover:bg-emerald-500 hover:text-slate-950 transition-all cursor-pointer">เสร็จงาน</button>` : `<span class="text-xs text-slate-500">✅ จ่ายครบ</span>`;
@@ -740,7 +754,7 @@
 
         function renderCustomers() {
             const grid = document.getElementById('customerGrid'); if(!grid) return; grid.innerHTML = '';
-            allJobs.forEach(job => {
+            filteredJobs.forEach(job => {
                 let card = document.createElement('div'); card.className = "bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3";
                 let jobType = job.status_notes || "อื่นๆ"; let typeColor = "text-sky-400"; if (jobType === "งานแต่งงาน") typeColor = "text-pink-400"; else if (jobType === "งานบวช") typeColor = "text-amber-500";
                 let thaiDateStr = "ยังไม่ได้ระบุ"; if (job.date && job.date.includes('-')) { const parts = job.date.split('-'); thaiDateStr = `${parts[2]}/${parts[1]}/${parseInt(parts[0]) + 543}`; }
@@ -952,35 +966,6 @@
                 const { error } = await supabaseClient.from('jobs').update(updateData).eq('id', selectedActiveJobId);
                 if (!error) { await loadJobsFromCloud(); alert(`⚙️ อัปเดตสถานะคิวงานเป็น [${selectedStatusValue}] ลงคลาวด์เรียบร้อย!`); }
             } catch (err) { console.error(err); }
-        }
-
-        // ระบบทางเลือกแชร์คิวงานผ่านลิงก์แท้มาตรฐาน
-        async function runAutomatedLineCronTask() {
-            if(allJobs.length === 0) return;
-
-            const nowInThailand = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
-            nowInThailand.setDate(nowInThailand.getDate() + 1);
-            
-            const year = nowInThailand.getFullYear();
-            const month = String(nowInThailand.getMonth() + 1).padStart(2, '0');
-            const day = String(nowInThailand.getDate()).padStart(2, '0');
-            const tomorrowStr = `${year}-${month}-${day}`;
-
-            const tomorrowJobs = allJobs.filter(j => j.date === tomorrowStr);
-            if(tomorrowJobs.length === 0) return;
-
-            const todayKey = new Date().toISOString().split('T')[0] + "_line_sent";
-            if(localStorage.getItem(todayKey)) return; 
-
-            for(let job of tomorrowJobs) {
-                let remaining = Number(job.total || 0) - Number(job.paid || 0);
-                let textMessage = `🚨 [I'M OIL PHOTO] แจ้งเตือนคิวงานวันพรุ่งนี้ครับคุณออย!\n━━━━━━━━━━━━━━━━━━━━\n👤 คุณลูกค้า: ${job.title}\n🎓 ประเภท: งาน${job.status_notes || 'ทั่วไป'}\n🕒 เวลาเริ่ม: ${job.time || 'ตามบรีฟ'} น.\n📍 สถานที่: ${job.location || '-'}\n\n💰 ยอดคงเหลือเก็บหน้างาน: ฿${remaining.toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nเตรียมอุปกรณ์คิวงานร่างทองวันพรุ่งนี้นะครับช่างภาพ! 🔥📸`;
-
-                try {
-                    window.open(`https://line.me/R/share?text=${encodeURIComponent(textMessage)}`, '_blank');
-                } catch(e) { console.error(e); }
-            }
-            localStorage.setItem(todayKey, "true");
         }
 
         // 🚀 ⚡ [ปุ่มสีเขียวระบบลิงก์แกนกลางถาวร]: มั่นใจใช้งานได้ยาวนาน ปลอดภัย ไร้สิทธิ์เออร์เรอร์ 100%

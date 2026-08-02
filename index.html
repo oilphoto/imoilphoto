@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v17.0.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v18.0.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -244,7 +244,7 @@
                 </div>
                 <button onclick="openJobModal('add')" id="btnAddNewJobAdmin" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm px-5 py-2.5 rounded-xl transition-all cursor-pointer"><i class="fa-solid fa-plus mr-2"></i>เพิ่มคิวงานใหม่เข้าระบบ Cloud</button>
             </div>
-            <!-- แถบสัญลักษณ์สีปฏิทิน (เพิ่มสัญลักษณ์สีม่วงสำหรับงานปิดงาน) -->
+            <!-- แถบสัญลักษณ์สีปฏิทิน -->
             <div id="calendarBadgesContainer" class="flex flex-wrap gap-4 bg-slate-900 p-3.5 rounded-xl border border-slate-800 text-xs"></div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-2 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
@@ -663,7 +663,7 @@
 
         function closeMultipleJobsModal() { document.getElementById('multipleJobsResolverModal').classList.add('hidden'); }
 
-        // 🎯 🛠️ ฟังก์ชันวาดปฏิทินแบบแยกสถานะสีม่วงสำหรับงานที่ "ปิดงานแล้ว" 💜
+        // 🎯 🛠️ ฟังก์ชันวาดปฏิทินที่เพิ่มตัวอักษร "💜 ปิดงาน" ด้านล่างวันที่มีงานปิดสำเร็จ!
         function renderCalendarGrid() {
             const selectedYearLabel = document.getElementById('globalYearSelect').value;
             document.getElementById('calendarMonthTitle').innerText = `พ.ศ. ${parseInt(selectedYearLabel) + 543}`;
@@ -696,7 +696,7 @@
                         let isClosed = (primaryJob.status === "Closed" || remaining === 0);
                         let type = primaryJob.status_notes || "อื่นๆ";
 
-                        // 💜 ตรวจสอบสถานะการปิดงานก่อน หากปิดงานแล้วให้เปลี่ยนเป็นสีม่วงทันที!
+                        // 💜 ตรวจสอบสถานะการปิดงาน พร้อมใส่ป้ายข้อความ "💜 ปิดงาน" เพิ่มเติม!
                         if (isClosed) {
                             dayDiv.className = "p-2 bg-purple-950/60 text-purple-300 font-bold rounded-lg relative cursor-pointer border border-purple-500/40 shadow-md h-16 flex flex-col justify-between items-start";
                         } else if (type.includes("รับปริญญา")) {
@@ -712,22 +712,39 @@
                         dayDiv.setAttribute('onclick', `handleCalendarDayClick('${dayStr}')`);
                         
                         let dotContainer = document.createElement('div');
-                        dotContainer.className = "flex flex-wrap gap-1 mt-1 w-full";
+                        dotContainer.className = "flex flex-col gap-0.5 mt-0.5 w-full";
+                        
+                        let dotsRow = document.createElement('div');
+                        dotsRow.className = "flex flex-wrap gap-1 w-full";
+
+                        let hasClosedJob = false;
                         dayJobs.forEach(job => {
                             let jobRemaining = Number(job.total || 0) - Number(job.paid || 0);
                             let jobIsClosed = (job.status === "Closed" || jobRemaining === 0);
+                            if (jobIsClosed) hasClosedJob = true;
+
                             let jobType = job.status_notes || "อื่นๆ";
                             let dot = document.createElement('span'); dot.className = "w-2 h-2 rounded-full block";
                             
-                            // 💜 กำหนดจุดสีม่วงสว่างให้งานที่ปิดแล้ว
                             if (jobIsClosed) dot.classList.add('bg-purple-400');
                             else if (jobType.includes("รับปริญญา")) dot.classList.add('bg-sky-400');
                             else if (jobType === "งานแต่งงาน") dot.classList.add('bg-pink-400');
                             else if (jobType === "งานบวช") dot.classList.add('bg-amber-500');
                             else dot.classList.add('bg-emerald-400');
                             
-                            dotContainer.appendChild(dot);
+                            dotsRow.appendChild(dot);
                         });
+
+                        dotContainer.appendChild(dotsRow);
+
+                        // 💡 หากมีงานที่ปิดแล้ว ให้แสดงข้อความคำว่า "💜 ปิดงาน" ด้านล่างวันที่
+                        if (hasClosedJob) {
+                            let labelText = document.createElement('span');
+                            labelText.className = "text-[9px] font-black text-purple-300 leading-none tracking-tighter truncate block mt-0.5";
+                            labelText.innerText = "💜 ปิดงาน";
+                            dotContainer.appendChild(labelText);
+                        }
+
                         dayDiv.appendChild(dotContainer);
                     }
                 }
@@ -735,7 +752,6 @@
             }
         }
 
-        // 💜 ปรับเพิ่มแท็กสัญลักษณ์สีม่วงด้านบนปฏิทิน
         function renderCalendarBadges() {
             const container = document.getElementById('calendarBadgesContainer'); if(!container) return;
             if (currentSystemView === 'public') {
@@ -766,7 +782,7 @@
 
             filteredJobs.forEach((job) => {
                 let remaining = Number(job.total || 0) - Number(job.paid || 0); let jobType = job.status_notes || "อื่นๆ";
-                let actionBtnHTML = remaining > 0 ? `<button onclick="quickFinishJob(${job.id}, ${job.total})" class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded hover:bg-emerald-500 hover:text-slate-950 transition-all cursor-pointer">เสร็จงาน</button>` : `<span class="text-xs text-slate-500"><i class="fa-solid fa-check text-emerald-400 mr-1"></i> จ่ายครบ</span>`;
+                let actionBtnHTML = remaining > 0 ? `<button onclick="quickFinishJob(${job.id}, ${job.total})" class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded hover:bg-emerald-500 hover:text-slate-950 transition-all cursor-pointer">เสร็จงาน</button>` : `<span class="text-xs text-purple-300 font-bold"><i class="fa-solid fa-check text-purple-400 mr-1"></i> จ่ายครบ (ปิดงาน)</span>`;
                 let driveBtnHTML = (job.staff && job.staff.trim().startsWith('http')) ? `<a href="${job.staff.trim()}" target="_blank" class="text-xs bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-bold px-3 py-1 rounded-xl shadow-md"><i class="fa-solid fa-images"></i> รูปภาพ</a>` : `<span class="text-xs text-slate-600 select-none">ยังไม่ส่งงาน</span>`;
                 
                 let lineMsg = `📸 I'M OIL PHOTO - สรุปคิวงานออกกอง\n━━━━━━━━━━━━━━━\n🎓 งาน: งาน${jobType}\n👤 ลูกค้า: ${job.title}\n📅 วันที่: ${job.date}\n💰 ยอดเต็ม: ฿${Number(job.total).toLocaleString()}\n💵 มัดจำแล้ว: ฿${Number(job.paid).toLocaleString()}\n🚨 ค้างจ่ายหน้างาน: ฿${remaining.toLocaleString()} บาท`;

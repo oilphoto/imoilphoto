@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v14.0.0</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v15.0.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Font Awesome Icon -->
@@ -589,14 +589,24 @@
         async function loadJobsFromCloud() {
             if (!supabaseClient) return;
             let { data, error } = await supabaseClient.from('jobs').select('*').order('date', { ascending: true });
-            if (!error) { allJobs = data || []; filterJobsByMonth(); }
+            if (!error) { 
+                allJobs = data || []; 
+                filterJobsByMonth(); 
+            }
         }
 
-        // 🛠️ แก้ไขซ่อมจุดเปลี่ยนเดือน: สั่งกรองข้อมูลและวาดตารางการเงินใหม่ตามเดือนที่เลือกชัวร์ 100%
+        // 🎯 🛠️ ฟังก์ชันกรองเฉพาะคิวงานประจำเดือนที่เลือก ตัวการหลักซ่อมตารางการเงิน!
         function filterJobsByMonth() {
             const selectedYear = document.getElementById('globalYearSelect').value;
             const selectedMonth = document.getElementById('globalMonthSelect').value; 
-            filteredJobs = allJobs.filter(job => job.date && job.date.split('-')[0] === selectedYear && job.date.split('-')[1] === selectedMonth);
+            
+            // กรองเอาเฉพาะคิวงานที่ตรงกับ ปี-เดือน ที่เลือกใน Select box
+            filteredJobs = allJobs.filter(job => {
+                if (!job.date || !job.date.includes('-')) return false;
+                const parts = job.date.split('-');
+                return parts[0] === selectedYear && parts[1] === selectedMonth;
+            });
+
             if (selectedActiveJobId) {
                 const updatedJob = allJobs.find(j => j.id === selectedActiveJobId);
                 if (updatedJob) openQuickViewModal(selectedActiveJobId);
@@ -606,7 +616,6 @@
 
         function changeSystemMonth() { filterJobsByMonth(); }
         
-        // 💡 ฟังก์ชันรีเฟรชหน้าจอ สั่งวาดทั้งปฏิทิน และตารางการเงินใหม่ทุกครั้ง
         function refreshUI() { 
             renderCalendarGrid(); 
             renderTodayJobs(); 
@@ -719,31 +728,33 @@
             });
         }
 
-        // 🛠️ วาดตารางการเงินที่กรองตามรายการ `filteredJobs` ประจำเดือนนั้น ๆ เป๊ะ ๆ 
+        // 🎯 🛠️ ฟังก์ชันวาดตารางการเงินที่ใช้รายการ `filteredJobs` ประจำเดือนนั้น ๆ แบบเป๊ะ ๆ 100%
         function renderFinanceTable() {
             const tbody = document.getElementById('financeTableBody'); if(!tbody) return; tbody.innerHTML = '';
+            
             if (filteredJobs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500 text-xs">ไม่มีคิวงานในเดือนนี้</td></tr>`;
                 return;
             }
+
             filteredJobs.forEach((job) => {
                 let remaining = Number(job.total || 0) - Number(job.paid || 0); let jobType = job.status_notes || "อื่นๆ";
-                let actionBtnHTML = remaining > 0 ? `<button onclick="quickFinishJob(${job.id}, ${job.total})" class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded hover:bg-emerald-500 hover:text-slate-950 transition-all cursor-pointer">เสร็จงาน</button>` : `<span class="text-xs text-slate-500">✅ จ่ายครบ</span>`;
+                let actionBtnHTML = remaining > 0 ? `<button onclick="quickFinishJob(${job.id}, ${job.total})" class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded hover:bg-emerald-500 hover:text-slate-950 transition-all cursor-pointer">เสร็จงาน</button>` : `<span class="text-xs text-slate-500"><i class="fa-solid fa-check text-emerald-400 mr-1"></i> จ่ายครบ</span>`;
                 let driveBtnHTML = (job.staff && job.staff.trim().startsWith('http')) ? `<a href="${job.staff.trim()}" target="_blank" class="text-xs bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-bold px-3 py-1 rounded-xl shadow-md"><i class="fa-solid fa-images"></i> รูปภาพ</a>` : `<span class="text-xs text-slate-600 select-none">ยังไม่ส่งงาน</span>`;
                 
                 let lineMsg = `📸 I'M OIL PHOTO - สรุปคิวงานออกกอง\n━━━━━━━━━━━━━━━\n🎓 งาน: งาน${jobType}\n👤 ลูกค้า: ${job.title}\n📅 วันที่: ${job.date}\n💰 ยอดเต็ม: ฿${Number(job.total).toLocaleString()}\n💵 มัดจำแล้ว: ฿${Number(job.paid).toLocaleString()}\n🚨 ค้างจ่ายหน้างาน: ฿${remaining.toLocaleString()} บาท`;
                 let lineUrl = `https://line.me/R/share?text=${encodeURIComponent(lineMsg)}`;
 
-                let tr = document.createElement('tr'); tr.className = "text-xs";
+                let tr = document.createElement('tr'); tr.className = "text-xs hover:bg-slate-900/50 transition-all";
                 tr.innerHTML = `
                     <td class="p-4"><div class="font-semibold text-slate-200">${job.title}</div><div class="text-[10px] text-slate-500">งาน${jobType}</div></td>
                     <td class="p-4 text-slate-400 truncate max-w-[120px]">${job.location || '-'}</td>
-                    <td class="p-4">฿${job.total.toLocaleString()}</td>
-                    <td class="p-4 text-emerald-400">฿${job.paid.toLocaleString()}</td>
-                    <td class="p-4 text-rose-400">฿${remaining.toLocaleString()}</td>
-                    <td class="p-4"><span class="bg-slate-800 px-2.5 py-1 rounded text-xs font-mono">${job.status || 'No Code'}</span></td>
+                    <td class="p-4 font-mono">฿${Number(job.total || 0).toLocaleString()}</td>
+                    <td class="p-4 font-mono text-emerald-400">฿${Number(job.paid || 0).toLocaleString()}</td>
+                    <td class="p-4 font-mono text-rose-400">฿${remaining.toLocaleString()}</td>
+                    <td class="p-4"><span class="bg-slate-800 px-2.5 py-1 rounded text-xs font-mono">${job.status || 'Active'}</span></td>
                     <td class="p-4 text-center space-x-1 flex justify-center items-center h-[52px]">
-                        <button onclick="openQuickViewModal(${job.id})" class="text-xs bg-slate-800 text-slate-300 border border-slate-700 px-2 py-1 rounded cursor-pointer"><i class="fa-solid fa-eye"></i> ดูงาน</button>
+                        <button onclick="openQuickViewModal(${job.id})" class="text-xs bg-slate-800 text-slate-300 border border-slate-700 px-2 py-1 rounded cursor-pointer hover:bg-slate-700"><i class="fa-solid fa-eye"></i> ดูงาน</button>
                         ${actionBtnHTML} ${driveBtnHTML} <a href="${lineUrl}" target="_blank" class="bg-[#06C755] text-white px-2 py-1 rounded text-[11px] hover:bg-[#05b34c]"><i class="fa-brands fa-line"></i> LINE</a>
                         <button onclick="openJobModal('edit', ${job.id})" class="text-slate-500 hover:text-amber-400 cursor-pointer pl-1"><i class="fa-solid fa-gear"></i></button>
                         <button onclick="deleteJobFromCloud(${job.id})" class="text-rose-500/30 hover:text-rose-400 cursor-pointer"><i class="fa-solid fa-trash"></i></button>

@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v21.0.0 Pro</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v24.0.0 All-in-One</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Font Awesome Icon -->
+    <!-- Font Awesome Icon (ใช้เฉพาะ UI หน้าเว็บ ส่วนในใบเสร็จใช้ Inline SVG เพื่อโหลด PNG ไม่เพี้ยน 100%) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 📸 modern-screenshot Library -->
+    <script src="https://cdn.jsdelivr.net/npm/modern-screenshot@4.6.0/dist/index.js"></script>
     
     <!-- 📅 Flatpickr Library -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -18,7 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Anuphan:wght=300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Anuphan', sans-serif; }
         
         @media print {
@@ -45,9 +47,6 @@
         .flatpickr-day.selected, .flatpickr-day.selected:hover {
             background: #f59e0b !important; border-color: #f59e0b !important; color: #020617 !important; font-weight: bold !important;
         }
-        .flatpickr-time input { color: #f59e0b !important; font-weight: 700 !important; font-size: 18px !important; background: transparent !important; border: none !important; text-align: center !important; }
-        .flatpickr-time .numInputWrapper span { display: none !important; }
-        .flatpickr-time .flatpickr-time-separator { color: #f3f4f6 !important; font-weight: bold !important; font-size: 18px !important; display: inline-block !important; padding: 0 6px !important; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row">
@@ -62,19 +61,19 @@
                 <div class="bg-amber-500 text-slate-950 p-2 rounded-lg font-bold text-xl shadow-lg shadow-amber-500/20"><i class="fa-solid fa-camera"></i></div>
                 <div>
                     <span class="text-xl font-semibold tracking-wider bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent block leading-none">I'M OIL PHOTO</span>
-                    <span class="text-[10px] text-slate-500 font-mono">Queue & Cloud System v21</span>
+                    <span class="text-[10px] text-slate-500 font-mono">All-in-One System v24.0</span>
                 </div>
             </div>
 
-            <!-- สวิตช์สลับโหมด หน้าบ้าน / หลังบ้าน (ซ่อนอัตโนมัติถ้าแนบ ?view=public) -->
+            <!-- สวิตช์สลับโหมด หน้าบ้าน / หลังบ้าน -->
             <div id="modeSwitcherBox" class="bg-slate-950 p-1 rounded-xl border border-slate-800 flex gap-1 mb-6 text-xs font-bold">
-                <button onclick="toggleViewMode('public')" id="btnViewPublic" class="flex-1 bg-amber-500 text-slate-950 py-2 rounded-lg transition-all cursor-pointer text-center">🌐 หน้าบ้าน</button>
-                <button onclick="requestAdminAccess()" id="btnViewAdmin" class="flex-1 text-slate-400 py-2 rounded-lg transition-all cursor-pointer text-center">🔒 หลังบ้าน</button>
+                <button onclick="toggleViewMode('public')" id="btnViewPublic" class="flex-1 text-slate-400 py-2 rounded-lg transition-all cursor-pointer text-center">🌐 หน้าบ้าน</button>
+                <button onclick="toggleViewMode('admin')" id="btnViewAdmin" class="flex-1 bg-amber-500 text-slate-950 py-2 rounded-lg transition-all cursor-pointer text-center">⚡ หลังบ้าน</button>
             </div>
 
             <nav id="sidebarNavLinks" class="space-y-2">
                 <a href="#dashboard" class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-amber-400 rounded-xl transition-all"><i class="fa-solid fa-chart-pie w-5"></i> แดชบอร์ด</a>
-                <a href="#quotation" class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-amber-400 rounded-xl transition-all"><i class="fa-solid fa-calendar-check w-5"></i> ออกใบจองคิว / PDF</a>
+                <a href="#quotation" class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-amber-400 rounded-xl transition-all"><i class="fa-solid fa-file-circle-plus w-5"></i> ลงคิวงาน & ออกใบจอง</a>
                 <a href="#calendar" id="menuCalendar" class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-amber-400 rounded-xl transition-all"><i class="fa-solid fa-calendar-days w-5"></i> คิวงาน & ปฏิทิน</a>
                 <a href="#finance" id="menuFinance" class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-amber-400 rounded-xl transition-all"><i class="fa-solid fa-wallet w-5"></i> มัดจำ & เก็บเงิน</a>
                 <a href="#customers" id="menuCustomers" class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-amber-400 rounded-xl transition-all"><i class="fa-solid fa-users w-5"></i> ฐานข้อมูลลูกค้า</a>
@@ -87,6 +86,7 @@
                     <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 
                     <span id="syncStatusText">เชื่อมต่อ Cloud Realtime</span>
                 </div>
+                <button onclick="loadJobsFromCloud()" class="text-slate-400 hover:text-amber-400 cursor-pointer" title="รีเฟรชข้อมูล"><i class="fa-solid fa-rotate"></i></button>
             </div>
         </div>
     </aside>
@@ -98,15 +98,17 @@
         <section id="dashboard" class="space-y-6 no-print">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 id="mainDashboardTitle" class="text-2xl md:text-3xl font-bold">ตารางเช็ค "วันว่างจองคิว" ช่างภาพ</h1>
+                    <h1 id="mainDashboardTitle" class="text-2xl md:text-3xl font-bold">ภาพรวมธุรกิจหลังบ้านช่างภาพ</h1>
                     <p class="text-sm text-slate-400">สรุปยอดจองและตารางคิวงานบนระบบคลาวด์แยกตามรายเดือน</p>
                 </div>
-                <button id="btnSharePublicLink" onclick="copyPublicCustomerLink()" class="hidden bg-slate-900 hover:bg-slate-800 text-amber-400 border border-amber-500/30 text-xs font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2">
-                    <i class="fa-solid fa-share-nodes"></i> คัดลอกลิงก์หน้าบ้านให้ลูกค้าเช็คคิว
-                </button>
+                <div class="flex flex-wrap gap-2">
+                    <button id="btnSharePublicLink" onclick="copyPublicCustomerLink()" class="bg-slate-900 hover:bg-slate-800 text-amber-400 border border-amber-500/30 text-xs font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2">
+                        <i class="fa-solid fa-share-nodes"></i> คัดลอกลิงก์หน้าบ้านให้ลูกค้าเช็คคิว
+                    </button>
+                </div>
             </div>
 
-            <div id="adminGoalSection" class="hidden bg-gradient-to-r from-slate-900 to-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-3">
+            <div id="adminGoalSection" class="bg-gradient-to-r from-slate-900 to-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-3">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div class="space-y-0.5">
                         <div class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-bullseye"></i> เป้าหมายรายได้และคิวงานประจำเดือน</div>
@@ -130,62 +132,137 @@
             </div>
             
             <div id="adminStatsCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl"><div class="text-slate-400 text-sm">รายรับมัดจำ/เก็บแล้ว (เดือนนี้)</div><div id="dashTotalRevenue" class="text-2xl font-bold mt-2 text-emerald-400">฿0</div></div>
-                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl"><div class="text-slate-400 text-sm">ยอดค้างชำระหน้างาน</div><div id="dashTotalPending" class="text-2xl font-bold mt-2 text-rose-400">฿0</div></div>
-                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl"><div class="text-slate-400 text-sm">คิวงานเดือนนี้</div><div id="dashTotalJobs" class="text-2xl font-bold mt-2 text-amber-400">0 คิว</div></div>
-                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl"><div class="text-slate-400 text-sm">มูลค่างานรวมประจำเดือน</div><div id="dashTotalMonthlyIncome" class="text-2xl font-bold mt-2 text-amber-500">฿0</div></div>
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+                    <div class="text-slate-400 text-xs flex justify-between items-center"><span>รายรับมัดจำ/เก็บแล้ว (เดือนนี้)</span><i class="fa-solid fa-circle-dollar-to-slot text-emerald-500/40 text-lg"></i></div>
+                    <div id="dashTotalRevenue" class="text-2xl font-bold mt-2 text-emerald-400 font-mono">฿0</div>
+                </div>
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+                    <div class="text-slate-400 text-xs flex justify-between items-center"><span>ยอดค้างชำระหน้างาน</span><i class="fa-solid fa-hand-holding-dollar text-rose-500/40 text-lg"></i></div>
+                    <div id="dashTotalPending" class="text-2xl font-bold mt-2 text-rose-400 font-mono">฿0</div>
+                </div>
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+                    <div class="text-slate-400 text-xs flex justify-between items-center"><span>คิวงานเดือนนี้</span><i class="fa-solid fa-calendar-check text-amber-500/40 text-lg"></i></div>
+                    <div id="dashTotalJobs" class="text-2xl font-bold mt-2 text-amber-400">0 คิว</div>
+                </div>
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+                    <div class="text-slate-400 text-xs flex justify-between items-center"><span>มูลค่างานรวมประจำเดือน</span><i class="fa-solid fa-sack-dollar text-amber-500/40 text-lg"></i></div>
+                    <div id="dashTotalMonthlyIncome" class="text-2xl font-bold mt-2 text-amber-500 font-mono">฿0</div>
+                </div>
             </div>
         </section>
 
-        <!-- BOOKING GENERATOR SECTION -->
+        <!-- 🎯 ALL-IN-ONE: ลงคิวงาน Cloud + ออกใบจองคิว & ใบเสร็จรับเงินมัดจำ (ที่เดียวจบ) -->
         <section id="quotation" class="space-y-6">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div><h2 class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-calendar-check mr-2"></i>ระบบออกเอกสารจองคิว & ใบเสร็จรับเงินมัดจำ</h2></div>
-                <div class="flex gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
-                    <button onclick="switchTemplateMode('booking')" id="btnModeBooking" class="bg-amber-500 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition-all cursor-pointer">🎫 ใบยืนยันการจอง</button>
-                    <button onclick="switchTemplateMode('receipt')" id="btnModeReceipt" class="text-slate-400 font-medium text-xs px-4 py-2 rounded-lg transition-all cursor-pointer">🖨️ ใบเสร็จมัดจำ + QR โอนเงิน</button>
+                <div>
+                    <div class="flex items-center gap-2.5">
+                        <h2 class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-calendar-check mr-1"></i>ระบบลงคิวงาน Cloud & ออกใบจอง / ใบเสร็จ</h2>
+                        <span id="formEditStatusBadge" class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold px-2.5 py-0.5 rounded-full">✨ โหมดสร้างคิวงานใหม่</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-0.5">กรอกข้อมูลหรือใช้ AI สแกนแชท เพื่อออกรูปใบจองและบันทึกเข้าปฏิทิน Cloud ในที่เดียว</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="resetUnifiedForm()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate-left text-amber-400"></i> เคลียร์ฟอร์ม (เริ่มคิวใหม่)
+                    </button>
+                    <div class="flex gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+                        <button onclick="switchTemplateMode('booking')" id="btnModeBooking" class="bg-amber-500 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition-all cursor-pointer">🎫 ใบยืนยันการจอง</button>
+                        <button onclick="switchTemplateMode('receipt')" id="btnModeReceipt" class="text-slate-400 font-medium text-xs px-4 py-2 rounded-lg transition-all cursor-pointer">🖨️ ใบเสร็จมัดจำ + QR</button>
+                    </div>
                 </div>
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                <div class="lg:col-span-5 space-y-4 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl no-print">
-                    <div class="bg-slate-950 p-4 rounded-xl border border-dashed border-amber-500/30 space-y-2">
-                        <span class="text-xs font-bold text-amber-400 block"><i class="fa-solid fa-wallet"></i> บัญชีพร้อมเพย์รับเงินของคุณสุพจน์ (สร้าง QR อัตโนมัติ)</span>
-                        <input type="text" id="ppAccountInput" value="064-550-3701" placeholder="กรอกเบอร์พร้อมเพย์ที่นี่" oninput="syncInputToPreview()" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500 font-mono">
+                <!-- ฟอร์มกรอกข้อมูลรวมศูนย์ (ซ้าย) -->
+                <div class="lg:col-span-5 space-y-4 bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl no-print">
+                    <input type="hidden" id="editingJobId" value="">
+
+                    <!-- 🤖 AI เลขาอัจฉริยะ สแกนแชทลงฟอร์มทันที -->
+                    <div class="bg-slate-950 p-3.5 rounded-xl border border-amber-500/30 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-robot mr-1"></i>⚡ AI เลขาสแกนแชทลงฟอร์มอัตโนมัติ</span>
+                            <button type="button" onclick="openFacebookPageInbox()" class="bg-blue-600/20 text-blue-400 border border-blue-500/30 text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer hover:bg-blue-600/30"><i class="fa-brands fa-facebook-messenger"></i> เปิดแชทเพจ</button>
+                        </div>
+                        <textarea id="aiRawText" rows="2" placeholder="วางข้อความแชทลูกค้า เช่น: ชื่อฟ้า 089-123-4567 งานรับปริญญา ม.รังสิต วันที่ 15 ธ.ค. 69 ครึ่งวันเช้า ราคา 4,500 มัดจำ 1,000..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-300 focus:outline-none focus:border-amber-500"></textarea>
+                        <button type="button" onclick="runAiExtractionUnified()" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 font-bold text-xs py-1.5 rounded-lg cursor-pointer transition-all"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> สั่ง AI สแกนคัดแยกข้อมูลลงฟอร์มด่วน</button>
                     </div>
-                    <div><label class="block text-sm text-slate-400 mb-2">ประเภทแพ็กเกจคิวงาน</label>
-                        <select id="custPackageSelect" onchange="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 focus:outline-none focus:border-amber-500 cursor-pointer">
-                            <option value="รับปริญญา/นอกรอบ" selected>🎓 รับปริญญา/นอกรอบ</option>
-                            <option value="งานแต่งงาน">👰 งานแต่งงาน</option>
-                            <option value="งานบวช">🙏 งานบวช</option>
-                            <option value="อื่นๆ">📸 อื่นๆ / ทั่วไป</option>
-                        </select>
-                    </div>
-                    <div><label class="block text-sm text-slate-400 mb-2">ชื่อลูกค้า / คู่บ่าวสาว</label><input type="text" id="custName" value="คุณ Wilawan" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200"></div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-sm text-slate-400 mb-2">เบอร์โทรศัพท์ลูกค้า</label><input type="text" id="custPhone" value="0924012063" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200"></div>
-                        <div><label class="block text-sm text-slate-400 mb-2">วันที่จัดงาน</label><input type="text" id="custDate" value="30 ตุลาคม 2569" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200"></div>
-                    </div>
-                    <div><label class="block text-sm text-slate-400 mb-2">สถานที่</label><input type="text" id="custLocation" value="มหาวิทยาลัยราชภัฏอุดรธานี สามพร้าว" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200"></div>
-                    <div><label class="block text-sm text-slate-400 mb-2">เวลาทำงาน</label><input type="text" id="custTime" value="ช่วงเช้า" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200"></div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-sm text-slate-400 mb-2">ยอดเงินประเมินรวม (บาท)</label><input type="number" id="packPrice" value="4000" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200"></div>
-                        <div><label class="block text-sm text-slate-400 mb-2">ชำระเงินมัดจำแล้ว (บาท)</label><input type="number" id="paidDeposit" value="1000" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-200"></div>
-                    </div>
-                    
-                    <div class="space-y-2 pt-2">
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="copyBriefToClipboard()" class="bg-[#00c755]/10 hover:bg-[#00c755]/20 text-[#00c755] border border-[#00c755]/30 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs"><i class="fa-solid fa-copy"></i> 💬 คัดลอกสรุปส่งแชท</button>
-                            <button type="button" onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs"><i class="fa-solid fa-print"></i> พิมพ์ / PDF / รูปภาพ</button>
+
+                    <!-- ⚡ ปุ่มลัดเลือกแพ็กเกจ (Quick Package Presets) -->
+                    <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                        <span class="text-[11px] font-bold text-amber-400 block"><i class="fa-solid fa-bolt"></i> ปุ่มลัดเลือกแพ็กเกจราคาด่วน</span>
+                        <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+                            <button type="button" onclick="applyPackagePreset('รับปริญญา/นอกรอบ', 'ครึ่งวัน (เช้า/บ่าย)', 3500, 1000)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer">🎓 ปริญญา ครึ่งวัน (3,500)</button>
+                            <button type="button" onclick="applyPackagePreset('รับปริญญา/นอกรอบ', 'เต็มวัน (08:00-17:00)', 4500, 1000)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer">🎓 ปริญญา เต็มวัน (4,500)</button>
+                            <button type="button" onclick="applyPackagePreset('งานแต่งงาน', 'ครึ่งวัน (เช้า หรือ เย็น)', 5500, 1500)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-pink-300 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer">👰 งานแต่ง ครึ่งวัน (5,500)</button>
+                            <button type="button" onclick="applyPackagePreset('งานแต่งงาน', 'เต็มวัน (เช้า + เลี้ยงฉลอง)', 8500, 2000)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-pink-300 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer">👰 งานแต่ง เต็มวัน (8,500)</button>
                         </div>
                     </div>
 
-                    <div class="pt-2 border-t border-slate-800/80">
-                        <button type="button" onclick="sendFlexMessageToLineDirectly()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white font-black py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer text-sm active:scale-[0.98]"><i class="fa-brands fa-line text-lg"></i> 🚀 ส่งสรุปบิลเข้า LINE ด่วน</button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">ประเภทแพ็กเกจคิวงาน</label>
+                            <select id="custPackageSelect" onchange="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-amber-500 cursor-pointer">
+                                <option value="รับปริญญา/นอกรอบ" selected>🎓 รับปริญญา/นอกรอบ</option>
+                                <option value="งานแต่งงาน">👰 งานแต่งงาน</option>
+                                <option value="งานบวช">🙏 งานบวช</option>
+                                <option value="อื่นๆ">📸 อื่นๆ / ทั่วไป</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">ชื่อลูกค้า / คู่บ่าวสาว <span class="text-rose-400">*</span></label>
+                            <input type="text" id="custName" value="คุณ Wilawan" placeholder="กรอกชื่อลูกค้า" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="block text-xs text-slate-400 mb-1">เบอร์โทรศัพท์ลูกค้า</label><input type="text" id="custPhone" value="0924012063" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200"></div>
+                        <div><label class="block text-xs text-slate-400 mb-1">วันที่จัดงาน <span class="text-rose-400">*</span></label><input type="text" id="custDate" value="2026-10-30" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="block text-xs text-slate-400 mb-1">สถานที่นัดหมาย</label><input type="text" id="custLocation" value="ม.ราชภัฏอุดรธานี สามพร้าว" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200"></div>
+                        <div><label class="block text-xs text-slate-400 mb-1">ช่วงเวลาทำงาน</label><input type="text" id="custTime" value="ช่วงเช้า" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="block text-xs text-slate-400 mb-1">ยอดเงินประเมินรวม (บาท)</label><input type="number" id="packPrice" value="4000" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200"></div>
+                        <div><label class="block text-xs text-slate-400 mb-1">ชำระเงินมัดจำแล้ว (บาท)</label><input type="number" id="paidDeposit" value="1000" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200"></div>
+                    </div>
+
+                    <!-- ช่องเก็บลิงก์แชทและลิงก์ส่งงาน Google Drive (สำหรับฐานข้อมูล Cloud) -->
+                    <div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-800/70">
+                        <div><label class="block text-[11px] text-slate-400 mb-1"><i class="fa-brands fa-facebook-messenger text-sky-400 mr-1"></i>ลิงก์แชท FB / LINE ลูกค้า</label><input type="text" id="custFbLink" placeholder="วางลิงก์แชท..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200"></div>
+                        <div><label class="block text-[11px] text-slate-400 mb-1"><i class="fa-brands fa-google-drive text-amber-400 mr-1"></i>ลิงก์ส่งงานรูปภาพ (Drive)</label><input type="text" id="custDriveLink" placeholder="https://drive.google.com/..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200"></div>
+                    </div>
+
+                    <!-- พร้อมเพย์ QR Setting -->
+                    <div class="bg-slate-950 p-3 rounded-xl border border-dashed border-amber-500/30 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 flex-1">
+                            <span class="text-[11px] font-bold text-amber-400 shrink-0"><i class="fa-solid fa-qrcode mr-1"></i>พร้อมเพย์:</span>
+                            <input type="text" id="ppAccountInput" value="064-550-3701" oninput="syncInputToPreview()" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-100 font-mono">
+                        </div>
+                        <select id="qrAmountLockMode" onchange="syncInputToPreview()" class="bg-slate-900 border border-slate-800 text-[10px] text-slate-300 rounded-lg px-2 py-1 focus:outline-none cursor-pointer">
+                            <option value="none">QR ไม่ระบุยอด</option>
+                            <option value="deposit" selected>QR ยอดมัดจำ</option>
+                            <option value="pending">QR ยอดคงเหลือ</option>
+                        </select>
+                    </div>
+                    
+                    <!-- ปุ่มบันทึก Cloud หลัก (ปรับสีและข้อความตามโหมด Add / Edit อัตโนมัติ) -->
+                    <div class="pt-1">
+                        <button type="button" id="btnSaveCloudMain" onclick="saveOrUpdateJobToCloud()" class="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-black py-3 px-4 rounded-xl shadow-lg shadow-sky-500/15 transition-all flex items-center justify-center gap-2 cursor-pointer text-sm active:scale-[0.99]">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> ☁️ บันทึกคิวงานใหม่เข้าปฏิทิน Cloud
+                        </button>
+                    </div>
+
+                    <!-- แถวปุ่มส่งออกเอกสาร -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                        <button type="button" onclick="copyBriefToClipboard()" class="bg-[#00c755]/10 hover:bg-[#00c755]/20 text-[#00c755] border border-[#00c755]/30 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer text-[11px]"><i class="fa-solid fa-copy"></i> คัดลอกแชท</button>
+                        <button type="button" id="btnDownloadPng" onclick="downloadInvoiceAsImage()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer text-[11px] shadow-lg shadow-amber-500/10"><i class="fa-solid fa-download"></i> โหลด PNG</button>
+                        <button type="button" onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer text-[11px] text-slate-200"><i class="fa-solid fa-print"></i> พิมพ์ PDF</button>
+                        <button type="button" onclick="sendFlexMessageToLineDirectly()" class="bg-[#06C755] hover:bg-[#05b34c] text-white font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer text-[11px]"><i class="fa-brands fa-line"></i> ส่ง LINE</button>
                     </div>
                 </div>
 
-                <!-- ใบพรีวิวเอกสาร PDF -->
+                <!-- ใบพรีวิวเอกสาร PDF / PNG (ใช้ Inline SVG ล้วน 100% เพื่อไม่ให้ไอคอนกลายเป็นสี่เหลี่ยมเวลาโหลด PNG) -->
                 <div class="lg:col-span-7 w-full flex justify-center">
                     <div id="pdfCaptureArea" class="w-full max-w-[620px] bg-white p-6 rounded-2xl border border-slate-200 shadow-2xl space-y-5 text-slate-800 box-border">
                         <div class="flex justify-between items-center border-b-2 border-[#0a192f] pb-3">
@@ -204,19 +281,67 @@
                                 <span id="bannerSub" class="text-[10px] font-bold text-sky-400 uppercase tracking-widest block">Booking Confirmation</span>
                                 <h3 id="bannerMain" class="text-base font-bold text-white mt-0.5">ใบยืนยันการจองคิวงานถ่ายภาพ</h3>
                             </div>
-                            <span id="badgeStatus" class="bg-emerald-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-lg shadow-md"><i class="fa-solid fa-circle-check mr-1"></i> คอนเฟิร์มคิวแล้ว</span>
+                            <span id="badgeStatus" class="bg-emerald-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-lg shadow-md inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/></svg>
+                                <span>คอนเฟิร์มคิวแล้ว</span>
+                            </span>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start pt-1">
                             <div class="md:col-span-7 space-y-3">
-                                <div class="text-[11px] font-bold text-[#0a192f] tracking-wide border-b border-slate-200 pb-1 uppercase print-text-navy"><i class="fa-solid fa-camera mr-1.5 text-slate-400"></i>รายละเอียดการนัดหมาย</div>
+                                <div class="text-[11px] font-bold text-[#0a192f] tracking-wide border-b border-slate-200 pb-1 uppercase print-text-navy flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-slate-400 fill-current shrink-0" viewBox="0 0 512 512"><path d="M149.1 64.8L138.7 96H64C28.7 96 0 124.7 0 160V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H373.3L362.9 64.8C356.4 45.2 338.1 32 317.4 32H194.6c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"/></svg>
+                                    <span>รายละเอียดการนัดหมาย</span>
+                                </div>
                                 <div class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
-                                    <div class="grid grid-cols-12 py-2 items-center"><i class="fa-solid fa-user col-span-1 text-slate-400"></i><span class="col-span-4 text-slate-400 pl-1">ชื่อผู้จอง</span><span id="prevName" class="col-span-7 text-slate-900 font-bold">คุณ Wilawan</span></div>
-                                    <div class="grid grid-cols-12 py-2 items-center"><i class="fa-solid fa-phone col-span-1 text-slate-400"></i><span class="col-span-4 text-slate-400 pl-1">เบอร์ติดต่อ</span><span id="prevPhone" class="col-span-7 text-slate-900 font-mono">0924012063</span></div>
-                                    <div class="grid grid-cols-12 py-2 items-center"><i class="fa-solid fa-graduation-cap col-span-1 text-slate-400"></i><span class="col-span-4 text-slate-400 pl-1">ประเภทงาน</span><span id="prevPackage" class="col-span-7 text-slate-800">รับปริญญา/นอกรอบ</span></div>
-                                    <div class="grid grid-cols-12 py-2 items-center"><i class="fa-solid fa-calendar-day col-span-1 text-slate-400"></i><span class="col-span-4 text-slate-400 pl-1">วันที่ถ่ายงาน</span><span id="prevDate" class="col-span-7 text-slate-900 font-bold">30 ตุลาคม 2569</span></div>
-                                    <div class="grid grid-cols-12 py-2 items-center"><i class="fa-solid fa-clock col-span-1 text-slate-400"></i><span class="col-span-4 text-slate-400 pl-1">ช่วงเวลา</span><span id="prevTime" class="col-span-7 text-slate-900 font-bold">ช่วงเช้า</span></div>
-                                    <div class="grid grid-cols-12 py-2 items-start"><i class="fa-solid fa-location-dot col-span-1 text-rose-500 mt-0.5"></i><span class="col-span-4 text-slate-400 pl-1">สถานที่นัด</span><span id="prevLocation" class="col-span-7 text-slate-800 leading-tight">มหาวิทยาลัยราชภัฏอุดรธานี สามพร้าว</span></div>
+                                    <!-- ชื่อผู้จอง -->
+                                    <div class="grid grid-cols-12 py-2 items-center">
+                                        <span class="col-span-1 flex items-center text-slate-400">
+                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg>
+                                        </span>
+                                        <span class="col-span-4 text-slate-400 pl-1">ชื่อผู้จอง</span>
+                                        <span id="prevName" class="col-span-7 text-slate-900 font-bold">คุณ Wilawan</span>
+                                    </div>
+                                    <!-- เบอร์ติดต่อ -->
+                                    <div class="grid grid-cols-12 py-2 items-center">
+                                        <span class="col-span-1 flex items-center text-slate-400">
+                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 512 512"><path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z"/></svg>
+                                        </span>
+                                        <span class="col-span-4 text-slate-400 pl-1">เบอร์ติดต่อ</span>
+                                        <span id="prevPhone" class="col-span-7 text-slate-900 font-mono">0924012063</span>
+                                    </div>
+                                    <!-- ประเภทงาน -->
+                                    <div class="grid grid-cols-12 py-2 items-center">
+                                        <span class="col-span-1 flex items-center text-slate-400">
+                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 640 512"><path d="M320 32c-8.1 0-16.1 1.4-23.7 4.1L15.8 137.4C6.3 140.9 0 149.9 0 160s6.3 19.1 15.8 22.6l57.9 20.9C57.3 229.3 48 259.8 48 291.9v28.1c0 28.4-10.8 57.7-22.3 80.8c-6.5 13-13.9 25.8-22.5 37.6C0 442.7-.9 448.3 .9 453.4s6 8.9 11.2 10.2l64 16c4.2 1.1 8.7 .3 12.4-2s6.3-6.1 7.1-10.4c8.6-42.8 4.3-81.2-2.1-108.7C90.3 344.3 86 329.8 80 316.5V291.9c0-30.2 10.2-58.7 27.9-81.5c12.9-15.5 29.6-28 49.2-35.7l157-61.7c8.2-3.2 17.5 .8 20.7 9s-.8 17.5-9 20.7l-157 61.7c-12.4 4.9-23.3 12.4-32.2 21.6l159.6 57.6c7.6 2.7 15.6 4.1 23.7 4.1s16.1-1.4 23.7-4.1L624.2 182.6c9.5-3.4 15.8-12.5 15.8-22.6s-6.3-19.1-15.8-22.6L343.7 36.1C336.1 33.4 328.1 32 320 32zM128 408c0 35.3 86 72 192 72s192-36.7 192-72L496.7 262.6 354.5 314c-11.1 4-22.8 6-34.5 6s-23.5-2-34.5-6L143.3 262.6 128 408z"/></svg>
+                                        </span>
+                                        <span class="col-span-4 text-slate-400 pl-1">ประเภทงาน</span>
+                                        <span id="prevPackage" class="col-span-7 text-slate-800">รับปริญญา/นอกรอบ</span>
+                                    </div>
+                                    <!-- วันที่ถ่ายงาน -->
+                                    <div class="grid grid-cols-12 py-2 items-center">
+                                        <span class="col-span-1 flex items-center text-slate-400">
+                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 448 512"><path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zm64 80v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16z"/></svg>
+                                        </span>
+                                        <span class="col-span-4 text-slate-400 pl-1">วันที่ถ่ายงาน</span>
+                                        <span id="prevDate" class="col-span-7 text-slate-900 font-bold">30 ตุลาคม 2569</span>
+                                    </div>
+                                    <!-- ช่วงเวลา -->
+                                    <div class="grid grid-cols-12 py-2 items-center">
+                                        <span class="col-span-1 flex items-center text-slate-400">
+                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 512 512"><path d="M256 0a256 256 0 1 1 0 512A256 256 0 1 1 256 0zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/></svg>
+                                        </span>
+                                        <span class="col-span-4 text-slate-400 pl-1">ช่วงเวลา</span>
+                                        <span id="prevTime" class="col-span-7 text-slate-900 font-bold">ช่วงเช้า</span>
+                                    </div>
+                                    <!-- สถานที่นัด -->
+                                    <div class="grid grid-cols-12 py-2 items-start">
+                                        <span class="col-span-1 flex items-center text-rose-500 mt-0.5">
+                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 384 512"><path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg>
+                                        </span>
+                                        <span class="col-span-4 text-slate-400 pl-1">สถานที่นัด</span>
+                                        <span id="prevLocation" class="col-span-7 text-slate-800 leading-tight">มหาวิทยาลัยราชภัฏอุดรธานี สามพร้าว</span>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -241,18 +366,21 @@
                         <!-- กล่องพร้อมเพย์ + QR Code อัตโนมัติ -->
                         <div id="receiptQrContainer" class="hidden bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center justify-between gap-4 text-xs print-box">
                             <div class="space-y-1">
-                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded inline-block">ช่องทางชำระเงิน / โอนมัดจำ</span>
+                                <span id="qrAmountTag" class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded inline-block">ช่องทางชำระเงิน / โอนมัดจำ</span>
                                 <div class="text-sm font-bold text-slate-900">พร้อมเพย์: <span id="ppAccountLabelText" class="text-emerald-700 font-mono text-base">064-550-3701</span></div>
                                 <div class="text-[11px] text-slate-600 font-medium">ชื่อบัญชี: สุพจน์ สำอางค์ญาติ (I'M OIL PHOTO)</div>
-                                <div class="text-[10px] text-slate-400">สแกน QR Code เพื่อโอนยอดมัดจำหรือยอดคงเหลือได้ทันที</div>
+                                <div class="text-[10px] text-slate-400">สแกน QR Code เพื่อโอนยอดตามระบุได้ทันที</div>
                             </div>
                             <div class="bg-white p-1.5 rounded-lg border border-slate-200 shadow-sm shrink-0">
-                                <img id="ppQrImage" src="" alt="PromptPay QR" class="w-20 h-20 object-contain" onerror="this.style.display='none'">
+                                <img id="ppQrImage" crossOrigin="anonymous" src="" alt="PromptPay QR" class="w-20 h-20 object-contain" onerror="this.style.display='none'">
                             </div>
                         </div>
 
                         <div class="text-center text-xs font-semibold text-slate-600 tracking-wide border-t border-slate-100 pt-4 pb-1">
-                            <p class="leading-relaxed text-slate-500"><i class="fa-solid fa-heart text-rose-500 mr-1.5"></i> ขอขอบพระคุณที่ไว้วางใจให้ <span class="font-bold text-[#0a192f] print-text-navy">I'M OIL PHOTO</span> ได้บันทึกภาพความทรงจำและอยู่เคียงข้างในวันสำคัญของคุณครับ 📸✨</p>
+                            <p class="leading-relaxed text-slate-500 flex items-center justify-center gap-1.5 flex-wrap">
+                                <svg class="w-3.5 h-3.5 text-rose-500 fill-current inline-block shrink-0" viewBox="0 0 512 512"><path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/></svg>
+                                <span>ขอขอบพระคุณที่ไว้วางใจให้ <strong class="font-bold text-[#0a192f] print-text-navy">I'M OIL PHOTO</strong> ได้บันทึกภาพความทรงจำในวันสำคัญของคุณครับ</span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -265,9 +393,9 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 id="calendarSectionTitle" class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-calendar-days mr-2"></i>คิวงาน & ปฏิทินรายเดือน (แยกสีงาน)</h2>
-                    <p id="calendarSectionDesc" class="text-sm text-slate-400">💡 คลิกจิ้มที่ช่องวันที่มีแถบสีบนปฏิทินเพื่อเด้งดูข้อมูลลูกค้าและรายละเอียดด่วนได้ทันทีครับ</p>
+                    <p id="calendarSectionDesc" class="text-sm text-slate-400">💡 คลิกที่วันที่มีแถบสีเพื่อดูรายละเอียด หรือคลิกช่องวันว่างเพื่อตั้งวันที่ลงคิวงานใหม่ด้านบนได้ทันที</p>
                 </div>
-                <button onclick="openJobModal('add')" id="btnAddNewJobAdmin" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-lg shadow-amber-500/10"><i class="fa-solid fa-plus mr-2"></i>เพิ่มคิวงานใหม่เข้าระบบ Cloud</button>
+                <button onclick="jumpToNewJobForm()" id="btnAddNewJobAdmin" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-lg shadow-amber-500/10"><i class="fa-solid fa-arrow-up mr-1.5"></i>ไปที่ฟอร์มลงคิวงานใหม่ด้านบน</button>
             </div>
             <!-- แถบสัญลักษณ์สีปฏิทิน -->
             <div id="calendarBadgesContainer" class="flex flex-wrap gap-4 bg-slate-900 p-3.5 rounded-xl border border-slate-800 text-xs"></div>
@@ -308,9 +436,20 @@
         <!-- FINANCE MANAGEMENT -->
         <hr class="border-slate-800 no-print" id="lineFinance">
         <section id="finance" class="space-y-4 no-print">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                 <h2 class="text-xl font-bold text-amber-400"><i class="fa-solid fa-wallet mr-2"></i>จัดการมัดจำ เก็บเงิน และส่งลิงก์รูปภาพ</h2>
-                <input type="text" id="searchFinanceInput" oninput="renderFinanceTable()" placeholder="🔍 ค้นหาชื่อลูกค้า หรือ สถานที่..." class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 w-full sm:w-64">
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <select id="filterFinanceStatus" onchange="renderFinanceTable()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 cursor-pointer">
+                        <option value="all">📋 สถานะทั้งหมด</option>
+                        <option value="active">⏳ รอถ่าย / ค้างชำระ</option>
+                        <option value="pending_delivery">📸 รอส่งลิงก์รูปภาพ</option>
+                        <option value="closed">🔴 ปิดงานแล้ว</option>
+                    </select>
+                    <input type="text" id="searchFinanceInput" oninput="renderFinanceTable()" placeholder="🔍 ค้นหาชื่อลูกค้า / สถานที่..." class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 flex-1 sm:w-56">
+                    <button onclick="exportFinanceToCSV()" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5" title="ดาวน์โหลดไฟล์ CSV เปิดใน Excel">
+                        <i class="fa-solid fa-file-csv"></i> Export CSV
+                    </button>
+                </div>
             </div>
             <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
                 <div class="overflow-x-auto">
@@ -341,6 +480,9 @@
                 <button onclick="closeMultipleJobsModal()" class="text-slate-400 hover:text-slate-200 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div id="multipleJobsListButtonsContainer" class="p-5 space-y-2 max-h-[60vh] overflow-y-auto"></div>
+            <div class="px-5 py-3 bg-slate-950 border-t border-slate-800">
+                <button id="btnAddMoreJobOnSameDay" class="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold py-2 rounded-xl cursor-pointer transition-all">+ ลงคิวงานซ้อนในวันนี้อีกคิว</button>
+            </div>
         </div>
     </div>
 
@@ -360,7 +502,7 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="editJobFromQuickView()" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5"><i class="fa-solid fa-pen"></i> แก้ไขงาน</button>
+                    <button onclick="pullToInvoiceForm()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5"><i class="fa-solid fa-pen"></i> แก้ไขงาน / ออกใบเสร็จ</button>
                     <button onclick="closeQuickViewModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 p-2 rounded-xl text-lg transition-all focus:outline-none cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
@@ -419,7 +561,7 @@
                             <div class="space-y-0.5 text-right"><span class="text-slate-500 block text-[10px]">คงเหลือ</span><span id="qvPendingAmountText" class="font-bold text-amber-500 text-sm">฿0</span></div>
                         </div>
                         
-                        <button onclick="pullToInvoiceForm()" class="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"><i class="fa-solid fa-file-invoice"></i> ดึงข้อมูลไปออกใบจอง / ใบเสร็จ PDF</button>
+                        <button onclick="pullToInvoiceForm()" class="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"><i class="fa-solid fa-file-invoice"></i> ดึงข้อมูลไปแก้ไข / ออกใบเสร็จ PNG</button>
                         
                         <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/50">
                             <a id="qvChatWithCustomerBtn" href="#" target="_blank" class="bg-[#00c755]/10 hover:bg-[#00c755]/20 text-[#00c755] border border-[#00c755]/20 font-bold py-2 rounded-xl text-[11px] transition-all flex items-center justify-center gap-1.5">
@@ -438,7 +580,6 @@
                         </button>
                     </div>
 
-                    <!-- แก้บั๊กค่า Value ของ Select ให้ตรงกับฟังก์ชัน JS -->
                     <div class="bg-[#1a1d26] border border-slate-800/80 rounded-2xl p-4 space-y-2">
                         <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block flex items-center gap-1.5"><i class="fa-solid fa-circle-notch text-slate-400"></i> เปลี่ยน Status คิวงาน</span>
                         <select id="qvStatusSelector" onchange="changeJobStatusDirectly()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-200 focus:outline-none cursor-pointer">
@@ -458,73 +599,20 @@
         </div>
     </div>
 
-    <!-- JOB EDIT/ADD MODAL -->
-    <div id="jobModal" onclick="if(event.target === this) closeJobModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print p-4">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
-            <div class="bg-slate-950 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
-                <h3 id="modalTitle" class="text-lg font-bold text-amber-400">เพิ่มคิวงานใหม่เข้าระบบ Cloud</h3>
-                <button onclick="closeJobModal()" class="text-slate-400 hover:text-slate-200 cursor-pointer text-xl"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-                <input type="hidden" id="modalJobId">
-                <div id="aiSection" class="bg-slate-950 p-4 rounded-xl border border-amber-500/30 space-y-2">
-                    <div class="flex justify-between items-center">
-                        <label class="block text-xs font-bold text-amber-400"><i class="fa-solid fa-robot"></i> ⚡ AI เลขาอัจฉริยะ v3.0 (รองรับวันที่ไทย & ลูกน้ำ)</label>
-                        <button type="button" onclick="openFacebookPageInbox()" class="bg-blue-600/20 text-blue-400 border border-blue-500/30 text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer hover:bg-blue-600/30"><i class="fa-brands fa-facebook-messenger"></i> เปิดแชทเพจด่วน</button>
-                    </div>
-                    <textarea id="aiRawText" rows="3" placeholder="วางข้อความแชทลูกค้า เช่น: ชื่อภูมิ 089-123-4567 งานรับปริญญา ม.รังสิต วันที่ 15 ธ.ค. 69 ครึ่งวันเช้า ราคา 4,500 มัดจำ 1,000..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-300 focus:outline-none focus:border-amber-500"></textarea>
-                    <button type="button" onclick="runAiExtractionV3()" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 font-bold text-xs py-2 rounded-lg cursor-pointer transition-all"><i class="fa-solid fa-wand-magic-sparkles"></i> สั่ง AI สแกนคัดแยกข้อมูลลงฟอร์มด่วน</button>
-                </div>
-                <div><label class="block text-xs text-slate-400 mb-1.5">ประเภทคิวงาน</label>
-                    <select id="mJobType" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200">
-                        <option value="รับปริญญา/นอกรอบ">🎓 รับปริญญา/นอกรอบ</option>
-                        <option value="งานแต่งงาน">👰 งานแต่งงาน</option>
-                        <option value="งานบวช">🙏 งานบวช</option>
-                        <option value="อื่นๆ">📸 อื่นๆ / ทั่วไป</option>
-                    </select>
-                </div>
-                <div><label class="block text-xs text-slate-400 mb-1.5">ชื่อลูกค้า / หัวข้องาน <span class="text-rose-400">*</span></label><input type="text" id="mTitle" placeholder="เช่น คุณฟ้า (ครึ่งวันเช้า)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200"></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-xs text-slate-400 mb-1.5">เบอร์โทรศัพท์ลูกค้า</label><input type="text" id="mPhone" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200"></div>
-                    <div><label class="block text-xs text-slate-400 mb-1.5">ลิงก์แชท FB/Line</label><input type="text" id="mFb" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200"></div>
-                </div>
-                <div><label class="block text-xs text-slate-400 mb-1.5">สถานที่จัดงาน</label><input type="text" id="mLocation" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200"></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-xs text-slate-400 mb-1.5">วันที่จัดงาน <span class="text-rose-400">*</span></label><input type="text" id="mDate" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200"></div>
-                    <div><label class="block text-xs text-slate-400 mb-1.5">เวลาเริ่มทำงาน</label><input type="text" id="mTime" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200"></div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-xs text-slate-400 mb-1.5">ราคาเต็ม (บาท)</label><input type="number" id="mTotal" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200"></div>
-                    <div><label class="block text-xs text-slate-400 mb-1.5">ยอดมัดจำแล้ว (บาท)</label><input type="number" id="mPaid" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200"></div>
-                </div>
-                <div><label class="block text-xs text-slate-400 mb-1.5">ลิงก์ส่งงาน (Google Drive / ลิงก์รูปภาพ)</label><input type="text" id="mDriveLink" placeholder="https://drive.google.com/..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200"></div>
-            </div>
-            <div class="bg-slate-950 px-6 py-4 border-t border-slate-800 flex justify-end gap-3">
-                <button onclick="closeJobModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-4 py-2 rounded-xl cursor-pointer">ยกเลิก</button>
-                <button id="btnSubmitJobModal" onclick="submitJobModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-sm font-bold px-5 py-2 rounded-xl cursor-pointer">💾 บันทึกข้อมูล</button>
-            </div>
-        </div>
-    </div>
-
     <!-- SCRIPTS CORE LOGIC -->
     <script>
         const SUPABASE_URL = 'https://ihvtdaehpjmqwazpaghp.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_Eeu7tjWSA8qMcaBOVpCX2A_dAn3yNGL';
-        const ADMIN_PIN = '2540'; // 🔐 รหัสผ่านเข้าโหมดหลังบ้าน (เปลี่ยนตัวเลขตรงนี้ได้เลยครับ)
         
         let supabaseClient = null;
         let allJobs = [];
         let filteredJobs = [];
-        let currentModalMode = 'add';
         let activeTemplateMode = 'booking';
-        let currentSystemView = 'public';
-        let isAdminAuthenticated = false;
-        let datePickerInstance = null;
-        let timePickerInstance = null;
+        let currentSystemView = 'admin';
+        let invoiceDatePicker = null;
         let selectedActiveJobId = null;
         let currentInvoiceDocId = '0001';
 
-        // 🛡️ ป้องกัน XSS เวลาแสดงผลข้อมูลจากฐานข้อมูล
         function escapeHtml(str) {
             if (!str) return '';
             return String(str).replace(/[&<>"']/g, function(m) {
@@ -532,7 +620,6 @@
             });
         }
 
-        // 🔔 ฟังก์ชันแจ้งเตือน Toast มุมขวาล่างแทน alert()
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -561,17 +648,68 @@
             return `${y}-${m}-${d}`;
         }
 
+        function formatThaiDatePretty(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            const thMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            const y = parseInt(parts[0]) + 543;
+            const m = thMonths[parseInt(parts[1]) - 1] || parts[1];
+            const d = parseInt(parts[2]);
+            return `${d} ${m} ${y}`;
+        }
+
+        function generatePromptPayPayload(target, amount) {
+            const cleanTarget = target.replace(/[^0-9]/g, '');
+            let targetTag = '';
+            if (cleanTarget.length >= 13) {
+                targetTag = '0213' + cleanTarget.substring(0, 13);
+            } else {
+                const formattedPhone = '0066' + cleanTarget.replace(/^0/, '');
+                targetTag = '0113' + formattedPhone;
+            }
+            const merchantInfoVal = '0016A000000677010111' + targetTag;
+            const merchantInfo = '29' + String(merchantInfoVal.length).padStart(2, '0') + merchantInfoVal;
+
+            let payload = '000201' + (amount && amount > 0 ? '010212' : '010211') + merchantInfo + '5802TH5303764';
+            if (amount && amount > 0) {
+                const amtStr = Number(amount).toFixed(2);
+                payload += '54' + String(amtStr.length).padStart(2, '0') + amtStr;
+            }
+            payload += '6304';
+
+            let crc = 0xFFFF;
+            for (let i = 0; i < payload.length; i++) {
+                crc ^= payload.charCodeAt(i) << 8;
+                for (let j = 0; j < 8; j++) {
+                    if ((crc & 0x8000) !== 0) crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+                    else crc = (crc << 1) & 0xFFFF;
+                }
+            }
+            return payload + crc.toString(16).toUpperCase().padStart(4, '0');
+        }
+
+        function getDaysCountdownBadge(dateStr, isClosed) {
+            if (isClosed) return `<span class="text-[10px] bg-red-500/15 text-red-400 px-2 py-0.5 rounded font-bold">ปิดงานแล้ว</span>`;
+            if (!dateStr || !dateStr.includes('-')) return '';
+            const today = new Date(getTodayFormatted());
+            const target = new Date(dateStr);
+            const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+            if (diffDays === 0) return `<span class="text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded font-bold animate-pulse">🔥 วันนี้!</span>`;
+            if (diffDays > 0 && diffDays <= 7) return `<span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-bold">⏳ อีก ${diffDays} วัน</span>`;
+            if (diffDays > 7) return `<span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded">อีก ${diffDays} วัน</span>`;
+            return `<span class="text-[10px] bg-slate-900 text-slate-500 px-2 py-0.5 rounded">ผ่านมาแล้ว</span>`;
+        }
+
         async function initSystem() {
             try {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 
-                // โหลดเป้าหมายรายเดือนที่เคยตั้งไว้จาก LocalStorage
                 const savedGoal = localStorage.getItem('oilphoto_monthly_goal');
                 if (savedGoal) document.getElementById('monthlyGoalInput').value = savedGoal;
 
                 const todayStr = getTodayFormatted();
-                datePickerInstance = flatpickr("#mDate", { locale: "th", dateFormat: "Y-m-d", defaultDate: todayStr, disableMobile: "true" });
-                timePickerInstance = flatpickr("#mTime", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "06:30", disableMobile: "true" });
+                invoiceDatePicker = flatpickr("#custDate", { locale: "th", dateFormat: "Y-m-d", defaultDate: todayStr, disableMobile: "true", onChange: () => syncInputToPreview() });
 
                 const timeData = new Date();
                 const currentYear = timeData.getFullYear().toString();
@@ -584,22 +722,22 @@
                 document.getElementById('globalMonthSelect').value = currentMonth;
                 document.getElementById('currentInvoiceDate').innerText = `${timeData.getDate().toString().padStart(2, '0')}/${currentMonth}/${parseInt(currentYear) + 543}`;
 
-                // เช็ค URL Parameter ว่าส่งลิงก์ให้ลูกค้าดูหน้าบ้านอย่างเดียวหรือไม่ (?view=public)
+                await loadJobsFromCloud();
+                setupRealtimeSubscription();
+
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.get('view') === 'public') {
                     document.getElementById('modeSwitcherBox').classList.add('hidden');
+                    toggleViewMode('public');
+                } else {
+                    toggleViewMode('admin');
                 }
-
-                await loadJobsFromCloud();
-                setupRealtimeSubscription();
-                toggleViewMode('public'); 
             } catch (err) {
                 console.error(err);
                 showToast("เชื่อมต่อฐานข้อมูลขัดข้อง", "error");
             }
         }
 
-        // ☁️ เชื่อมต่อ Supabase Realtime อัปเดตข้อมูลทันทีที่มีการเปลี่ยนแปลง
         function setupRealtimeSubscription() {
             if (!supabaseClient) return;
             supabaseClient
@@ -614,28 +752,182 @@
 
         function openFacebookPageInbox() { window.open('https://business.facebook.com/latest/inbox/all', '_blank'); }
 
-        // 🔐 ระบบป้องกันก่อนเข้าโหมดหลังบ้าน
-        function requestAdminAccess() {
-            if (isAdminAuthenticated) {
-                toggleViewMode('admin');
-                return;
-            }
-            const pin = prompt("🔒 กรุณากรอกรหัส PIN ช่างภาพเพื่อเข้าสู่ระบบหลังบ้าน:");
-            if (pin === ADMIN_PIN) {
-                isAdminAuthenticated = true;
-                toggleViewMode('admin');
-                showToast("ปลดล็อคระบบหลังบ้านสำเร็จ!");
-            } else if (pin !== null) {
-                showToast("รหัส PIN ไม่ถูกต้อง!", "error");
-            }
-        }
-
         function copyPublicCustomerLink() {
             const url = new URL(window.location.href);
             url.searchParams.set('view', 'public');
             navigator.clipboard.writeText(url.toString()).then(() => {
                 showToast("คัดลอกลิงก์หน้าบ้านสำหรับส่งให้ลูกค้าแล้ว!");
             });
+        }
+
+        function applyPackagePreset(pkgType, workTime, totalPrice, depositPrice) {
+            document.getElementById('custPackageSelect').value = pkgType;
+            document.getElementById('custTime').value = workTime;
+            document.getElementById('packPrice').value = totalPrice;
+            document.getElementById('paidDeposit').value = depositPrice;
+            syncInputToPreview();
+            showToast(`เลือกแพ็กเกจ ${pkgType} (฿${totalPrice.toLocaleString()}) แล้ว`);
+        }
+
+        // 🔄 เคลียร์ฟอร์มรวมศูนย์เพื่อเริ่มลงคิวงานใหม่
+        function resetUnifiedForm(presetDate = null) {
+            document.getElementById('editingJobId').value = '';
+            document.getElementById('custName').value = '';
+            document.getElementById('custPhone').value = '';
+            document.getElementById('custLocation').value = '';
+            document.getElementById('custTime').value = 'ช่วงเช้า';
+            document.getElementById('packPrice').value = 4000;
+            document.getElementById('paidDeposit').value = 1000;
+            document.getElementById('custFbLink').value = '';
+            document.getElementById('custDriveLink').value = '';
+            document.getElementById('aiRawText').value = '';
+            currentInvoiceDocId = String(allJobs.length + 1).padStart(4, '0');
+
+            const targetDate = presetDate || getTodayFormatted();
+            if (invoiceDatePicker) invoiceDatePicker.setDate(targetDate);
+            else document.getElementById('custDate').value = targetDate;
+
+            const badge = document.getElementById('formEditStatusBadge');
+            badge.className = "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold px-2.5 py-0.5 rounded-full";
+            badge.innerText = presetDate ? `✨ สร้างคิวใหม่ (${presetDate})` : "✨ โหมดสร้างคิวงานใหม่";
+
+            const btnSave = document.getElementById('btnSaveCloudMain');
+            btnSave.className = "w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-black py-3 px-4 rounded-xl shadow-lg shadow-sky-500/15 transition-all flex items-center justify-center gap-2 cursor-pointer text-sm active:scale-[0.99]";
+            btnSave.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> ☁️ บันทึกคิวงานใหม่เข้าปฏิทิน Cloud`;
+
+            syncInputToPreview();
+        }
+
+        function jumpToNewJobForm(presetDate = null) {
+            resetUnifiedForm(presetDate);
+            window.scrollTo({ top: document.getElementById('quotation').offsetTop - 20, behavior: 'smooth' });
+            setTimeout(() => document.getElementById('custName').focus(), 400);
+        }
+
+        // ☁️ บันทึกงานใหม่ หรือ อัปเดตงานเดิม ในปุ่มเดียว
+        async function saveOrUpdateJobToCloud() {
+            if (!supabaseClient) return;
+            const editId = document.getElementById('editingJobId').value.trim();
+            const name = document.getElementById('custName').value.trim();
+            const dateVal = document.getElementById('custDate').value.trim();
+
+            if (!name || !dateVal) {
+                showToast("กรุณากรอกชื่อลูกค้าและวันที่จัดงานก่อนบันทึกครับ", "error");
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveCloudMain');
+            btn.disabled = true;
+            btn.innerText = "⏳ กำลังบันทึกข้อมูลลง Cloud...";
+
+            const payload = {
+                title: name,
+                phone: document.getElementById('custPhone').value.trim(),
+                facebook: document.getElementById('custFbLink').value.trim(),
+                location: document.getElementById('custLocation').value.trim(),
+                date: dateVal,
+                time: document.getElementById('custTime').value.trim(),
+                total: Number(document.getElementById('packPrice').value || 0),
+                paid: Number(document.getElementById('paidDeposit').value || 0),
+                staff: document.getElementById('custDriveLink').value.trim(),
+                status_notes: document.getElementById('custPackageSelect').value
+            };
+
+            let res;
+            if (!editId) {
+                payload.status = "Active";
+                res = await supabaseClient.from('jobs').insert([payload]);
+            } else {
+                res = await supabaseClient.from('jobs').update(payload).eq('id', editId);
+            }
+
+            btn.disabled = false;
+            if (!res.error) {
+                showToast(editId ? `อัปเดตข้อมูล "${name}" เรียบร้อย!` : `เพิ่มคิวงาน "${name}" เข้าปฏิทิน Cloud สำเร็จ!`);
+                // ซิงค์เดือนในปฏิทินให้ตรงกับวันที่งานที่เพิ่งบันทึก
+                const parts = dateVal.split('-');
+                if (parts.length >= 2) {
+                    document.getElementById('globalYearSelect').value = parts[0];
+                    document.getElementById('globalMonthSelect').value = parts[1];
+                }
+                await loadJobsFromCloud();
+                if (!editId) {
+                    // อัปเดตสถานะปุ่มหลังเพิ่มเสร็จ
+                    btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> ☁️ บันทึกคิวงานใหม่เข้าปฏิทิน Cloud`;
+                } else {
+                    btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> 💾 บันทึกแก้ไขคิวงานเดิม (#${editId})`;
+                }
+            } else {
+                showToast("เกิดข้อผิดพลาดในการบันทึก", "error");
+                btn.innerHTML = editId ? `<i class="fa-solid fa-floppy-disk"></i> 💾 บันทึกแก้ไขคิวงานเดิม (#${editId})` : `<i class="fa-solid fa-cloud-arrow-up"></i> ☁️ บันทึกคิวงานใหม่เข้าปฏิทิน Cloud`;
+            }
+        }
+
+        // 🤖 AI สแกนแชทลงฟอร์มรวมศูนย์ทันทีพร้อมอัปเดตใบจองพรีวิว
+        function runAiExtractionUnified() {
+            const raw = document.getElementById('aiRawText').value;
+            if (!raw) {
+                showToast("กรุณาวางข้อความแชทก่อนครับ", "error");
+                return;
+            }
+
+            if (raw.includes("ปริญญา") || raw.includes("นอกรอบ") || raw.includes("บัณฑิต")) {
+                document.getElementById('custPackageSelect').value = "รับปริญญา/นอกรอบ";
+            } else if (raw.includes("แต่งงาน") || raw.includes("บ่าวสาว") || raw.includes("พรีเวดดิ้ง")) {
+                document.getElementById('custPackageSelect').value = "งานแต่งงาน";
+            } else if (raw.includes("บวช") || raw.includes("นาค")) {
+                document.getElementById('custPackageSelect').value = "งานบวช";
+            }
+
+            const phoneMatch = raw.match(/(0\d{2}[-\s]?\d{3}[-\s]?\d{4})/);
+            if (phoneMatch) document.getElementById('custPhone').value = phoneMatch[1].replace(/[- ]/g, "");
+
+            const priceMatch = raw.match(/(?:ราคา|ยอดเต็ม|รวม|แพ็กเกจ)\s*([\d,]+)/) || raw.match(/([\d,]{4,})\s*บาท/);
+            if (priceMatch) document.getElementById('packPrice').value = priceMatch[1].replace(/,/g, "");
+
+            const depMatch = raw.match(/(?:มัดจำ|โอนแล้ว|มัดจำแล้ว)\s*([\d,]+)/);
+            if (depMatch) document.getElementById('paidDeposit').value = depMatch[1].replace(/,/g, "");
+
+            const nameMatch = raw.match(/(?:ชื่อ|คุณ|ลูกค้า)\s*([ก-๙a-zA-Z0-9_]+)/);
+            if (nameMatch) {
+                document.getElementById('custName').value = "คุณ" + nameMatch[1].replace(/^คุณ/, '');
+            }
+
+            const locMatch = raw.match(/(?:สถานที่|ที่|ม\.|มหาวิทยาลัย|วัด|โรงแรม)\s*([^\n,]+)/);
+            if (locMatch) {
+                document.getElementById('custLocation').value = locMatch[0].trim();
+            }
+
+            if (raw.includes("เต็มวัน")) document.getElementById('custTime').value = "เต็มวัน (08:00-17:00)";
+            else if (raw.includes("ครึ่งวันบ่าย") || raw.includes("ช่วงบ่าย")) document.getElementById('custTime').value = "ครึ่งวันบ่าย";
+            else if (raw.includes("ครึ่งวันเช้า") || raw.includes("ช่วงเช้า")) document.getElementById('custTime').value = "ครึ่งวันเช้า";
+
+            const isoDateMatch = raw.match(/(\d{4}-\d{2}-\d{2})/);
+            if (isoDateMatch) {
+                invoiceDatePicker.setDate(isoDateMatch[1]);
+            } else {
+                const thMonths = {
+                    'ม.ค.': '01', 'มกรา': '01', 'ก.พ.': '02', 'กุมภา': '02', 'มี.ค.': '03', 'มีนา': '03',
+                    'เม.ย.': '04', 'เมษา': '04', 'พ.ค.': '05', 'พฤษภา': '05', 'มิ.ย.': '06', 'มิถุนา': '06',
+                    'ก.ค.': '07', 'กรกฎา': '07', 'ส.ค.': '08', 'สิงหา': '08', 'ก.ย.': '09', 'กันยา': '09',
+                    'ต.ค.': '10', 'ตุลา': '10', 'พ.ย.': '11', 'พฤศจิกา': '11', 'ธ.ค.': '12', 'ธันวา': '12'
+                };
+                for (const [mKey, mVal] of Object.entries(thMonths)) {
+                    const regex = new RegExp(`(\\d{1,2})\\s*${mKey}[ก-๙]*\\s*(\\d{2,4})`);
+                    const m = raw.match(regex);
+                    if (m) {
+                        const d = m[1].padStart(2, '0');
+                        let y = parseInt(m[2]);
+                        if (y < 100) y += 2500; 
+                        if (y > 2400) y -= 543; 
+                        invoiceDatePicker.setDate(`${y}-${mVal}-${d}`);
+                        break;
+                    }
+                }
+            }
+
+            syncInputToPreview();
+            showToast("⚡ AI สกัดข้อมูลลงฟอร์มและอัปเดตใบพรีวิวเรียบร้อย!");
         }
 
         function toggleViewMode(mode) {
@@ -680,7 +972,7 @@
                 btnAdm.className = "flex-1 bg-amber-500 text-slate-950 py-2 rounded-lg text-center cursor-pointer font-bold";
                 btnPub.className = "flex-1 text-slate-400 py-2 rounded-lg transition-all text-center cursor-pointer";
                 document.getElementById('mainDashboardTitle').innerText = 'ภาพรวมธุรกิจหลังบ้านช่างภาพ';
-                document.getElementById('calendarSectionDesc').innerText = '💡 คลิกจิ้มที่ช่องวันที่มีแถบสีบนปฏิทินเพื่อเด้งดูข้อมูลลูกค้าและรายละเอียดด่วนได้ทันทีครับ';
+                document.getElementById('calendarSectionDesc').innerText = '💡 คลิกที่วันที่มีแถบสีเพื่อดูรายละเอียด หรือคลิกช่องวันว่างเพื่อตั้งวันที่ลงคิวงานใหม่ด้านบนได้ทันที';
                 stats.classList.remove('hidden'); 
                 btnAdd.classList.remove('hidden');
                 btnShare.classList.remove('hidden');
@@ -699,7 +991,6 @@
             refreshUI();
         }
 
-        // ปุ่มเลื่อนเดือนซ้าย-ขวาบนปฏิทิน
         function navigateMonth(direction) {
             const yearSel = document.getElementById('globalYearSelect');
             const monthSel = document.getElementById('globalMonthSelect');
@@ -751,7 +1042,6 @@
             document.getElementById('goalTargetText').innerText = '฿' + targetGoal.toLocaleString();
         }
 
-        // แก้บั๊กปุ่มสลับโหมด ใบจอง vs ใบเสร็จ
         function switchTemplateMode(mode) {
             activeTemplateMode = mode;
             const btnBooking = document.getElementById('btnModeBooking');
@@ -772,10 +1062,11 @@
         }
 
         function syncInputToPreview() {
+            const rawDate = document.getElementById('custDate').value || '-';
             document.getElementById('prevName').innerText = document.getElementById('custName').value || '-';
             document.getElementById('prevPhone').innerText = document.getElementById('custPhone').value || '-';
             document.getElementById('prevLocation').innerText = document.getElementById('custLocation').value || '-';
-            document.getElementById('prevDate').innerText = document.getElementById('custDate').value || '-';
+            document.getElementById('prevDate').innerText = formatThaiDatePretty(rawDate);
             document.getElementById('prevTime').innerText = document.getElementById('custTime').value || '-';
             document.getElementById('prevPackage').innerText = document.getElementById('custPackageSelect').value || 'งานถ่ายภาพ';
             
@@ -791,6 +1082,7 @@
             const qrBox = document.getElementById('receiptQrContainer');
             const ppRaw = document.getElementById('ppAccountInput').value || '064-550-3701';
             const cleanPp = ppRaw.replace(/[^0-9]/g, '');
+            const qrLockMode = document.getElementById('qrAmountLockMode')?.value || 'deposit';
 
             if (activeTemplateMode === 'booking') {
                 document.getElementById('docTypeNumber').innerText = `เลขที่เอกสาร: INV-${yearNow}-${currentInvoiceDocId}`;
@@ -800,13 +1092,70 @@
                 qrBox.classList.remove('hidden');
                 document.getElementById('ppAccountLabelText').innerText = ppRaw;
                 
-                // สร้าง QR พร้อมเพย์จากเบอร์โทร
                 const qrImg = document.getElementById('ppQrImage');
+                const qrTag = document.getElementById('qrAmountTag');
                 if (cleanPp.length >= 10) {
                     qrImg.style.display = 'block';
-                    qrImg.src = `https://promptpay.io/${cleanPp}.png`;
+                    let targetAmount = 0;
+                    if (qrLockMode === 'deposit' && deposit > 0) {
+                        targetAmount = deposit;
+                        qrTag.innerText = `สแกนโอนยอดมัดจำ (฿${deposit.toLocaleString()})`;
+                    } else if (qrLockMode === 'pending' && pending > 0) {
+                        targetAmount = pending;
+                        qrTag.innerText = `สแกนโอนยอดคงเหลือ (฿${pending.toLocaleString()})`;
+                    } else {
+                        qrTag.innerText = `ช่องทางชำระเงิน / โอนมัดจำ`;
+                    }
+                    const payload = generatePromptPayPayload(cleanPp, targetAmount);
+                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=4&data=${encodeURIComponent(payload)}`;
                 } else {
                     qrImg.style.display = 'none';
+                }
+            }
+        }
+
+        // 📸 ฟังก์ชันดาวน์โหลด #pdfCaptureArea เป็นรูปภาพ PNG (รอฟอนต์และใช้ Inline SVG ไอคอนไม่หาย 100%)
+        async function downloadInvoiceAsImage() {
+            const captureArea = document.getElementById('pdfCaptureArea');
+            const btn = document.getElementById('btnDownloadPng');
+            if (!captureArea) return;
+
+            try {
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> สร้างรูป...`;
+                }
+                showToast("กำลังสร้างไฟล์รูปภาพ PNG...");
+
+                if (document.fonts && document.fonts.ready) {
+                    await document.fonts.ready;
+                }
+
+                const dataUrl = await window.modernScreenshot.domToPng(captureArea, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    fetch: {
+                        requestInit: { mode: 'cors' }
+                    }
+                });
+
+                const link = document.createElement('a');
+                const customerName = (document.getElementById('custName').value.trim() || 'IM_OIL_PHOTO').replace(/[\\/:*?"<>|]/g, '_');
+                const docType = activeTemplateMode === 'booking' ? 'Booking' : 'Receipt';
+                link.download = `${docType}_${customerName}.png`;
+                link.href = dataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showToast("ดาวน์โหลดรูปภาพใบจองสำเร็จ! 📥");
+            } catch (err) {
+                console.error("PNG Capture Error:", err);
+                showToast("ไม่สามารถสร้างรูปภาพได้ กรุณาลองใหม่", "error");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-download"></i> โหลด PNG`;
                 }
             }
         }
@@ -815,7 +1164,7 @@
             const name = document.getElementById('custName').value || '-';
             const phone = document.getElementById('custPhone').value || '-';
             const pack = document.getElementById('custPackageSelect').value || 'งานถ่ายภาพ';
-            const date = document.getElementById('custDate').value || '-';
+            const date = formatThaiDatePretty(document.getElementById('custDate').value || '-');
             const time = document.getElementById('custTime').value || '-';
             const loc = document.getElementById('custLocation').value || '-';
             const total = Number(document.getElementById('packPrice').value || 0);
@@ -875,10 +1224,16 @@
             updateDashboard(); 
         }
 
+        // คลิกวันว่างบนปฏิทิน ➔ เด้งขึ้นไปตั้งวันที่ในฟอร์มออกใบจอง/ลงคิวด้านบนทันที
         function handleCalendarDayClick(dayStr) {
             let dayJobs = filteredJobs.filter(j => j.date === dayStr);
-            if (dayJobs.length === 0) return;
-            
+            if (dayJobs.length === 0) {
+                if (currentSystemView === 'admin') {
+                    jumpToNewJobForm(dayStr);
+                    showToast(`เลือกวันที่ ${dayStr} ในฟอร์มลงคิวงานแล้ว!`);
+                }
+                return;
+            }
             if (dayJobs.length === 1) {
                 openQuickViewModal(dayJobs[0].id);
             } else {
@@ -899,13 +1254,18 @@
                 btn.onclick = function() { closeMultipleJobsModal(); openQuickViewModal(job.id); };
                 container.appendChild(btn);
             });
+
+            document.getElementById('btnAddMoreJobOnSameDay').onclick = function() {
+                closeMultipleJobsModal();
+                jumpToNewJobForm(dayStr);
+                showToast(`ตั้งวันที่ ${dayStr} สำหรับลงคิวซ้อนแล้ว`);
+            };
             
             document.getElementById('multipleJobsResolverModal').classList.remove('hidden');
         }
 
         function closeMultipleJobsModal() { document.getElementById('multipleJobsResolverModal').classList.add('hidden'); }
 
-        // วาดปฏิทิน
         function renderCalendarGrid() {
             const selectedYear = document.getElementById('globalYearSelect').value;
             const selectedMonth = document.getElementById('globalMonthSelect').value;
@@ -940,8 +1300,9 @@
                         dayDiv.innerHTML = `<span>${day}</span><span class="text-[9px] font-medium tracking-tighter opacity-80 mt-0.5">✅ ว่างจอง</span>`;
                     }
                 } else {
-                    dayDiv.className = `p-2 bg-slate-950 hover:bg-slate-900 rounded-lg text-slate-400 relative transition-all cursor-pointer h-16 flex flex-col justify-between items-start ${todayRingClass}`; 
-                    dayDiv.innerHTML = `<span class="text-xs">${day}</span>`;
+                    dayDiv.className = `p-2 bg-slate-950 hover:bg-slate-900 rounded-lg text-slate-400 relative transition-all cursor-pointer h-16 flex flex-col justify-between items-start group ${todayRingClass}`; 
+                    dayDiv.innerHTML = `<div class="flex justify-between w-full items-center"><span class="text-xs">${day}</span><i class="fa-solid fa-plus text-[9px] opacity-0 group-hover:opacity-60 text-amber-400 transition-opacity"></i></div>`;
+                    dayDiv.onclick = () => handleCalendarDayClick(dayStr);
                     
                     if (dayJobs.length > 0) {
                         let primaryJob = dayJobs[0];
@@ -960,8 +1321,7 @@
                         } else {
                             dayDiv.className = `p-2 bg-emerald-950/50 text-emerald-400 font-bold rounded-lg relative cursor-pointer border border-emerald-500/40 shadow-md h-16 flex flex-col justify-between items-start ${todayRingClass}`;
                         }
-
-                        dayDiv.onclick = () => handleCalendarDayClick(dayStr);
+                        dayDiv.innerHTML = `<span class="text-xs">${day}</span>`;
                         
                         let dotContainer = document.createElement('div');
                         dotContainer.className = "flex flex-col gap-0.5 mt-0.5 w-full";
@@ -1028,14 +1388,16 @@
                 card.className = "bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 relative hover:border-amber-500/40 transition-all cursor-pointer";
                 if (currentSystemView === 'admin') card.onclick = () => openQuickViewModal(job.id); 
                 
+                const remaining = Math.max(0, Number(job.total || 0) - Number(job.paid || 0));
+                const isClosed = (job.status === 'Closed' || (Number(job.total) > 0 && remaining === 0));
                 const titleDisplay = currentSystemView === 'public' ? '❌ คิวงานจองแล้ว' : escapeHtml(job.title);
                 const locDisplay = currentSystemView === 'public' ? 'สงวนข้อมูลสถานที่' : escapeHtml(job.location || '-');
-                const badgeType = escapeHtml(job.status_notes || 'ทั่วไป');
+                const countdownHTML = currentSystemView === 'admin' ? getDaysCountdownBadge(job.date, isClosed) : '';
 
                 card.innerHTML = `
                     <div class="text-xs text-slate-400 flex justify-between items-center">
                         <span class="font-mono text-amber-400 font-bold">📅 ${escapeHtml(job.date)}</span>
-                        <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded border border-slate-800">${badgeType}</span>
+                        ${countdownHTML}
                     </div>
                     <div class="text-sm font-semibold mt-1.5 text-slate-100">${titleDisplay}</div>
                     <div class="text-xs text-slate-400 mt-1 flex justify-between">
@@ -1049,14 +1411,23 @@
         function renderFinanceTable() {
             const tbody = document.getElementById('financeTableBody'); if(!tbody) return; tbody.innerHTML = '';
             const keyword = (document.getElementById('searchFinanceInput')?.value || '').toLowerCase().trim();
+            const statusFilter = document.getElementById('filterFinanceStatus')?.value || 'all';
 
             const list = filteredJobs.filter(job => {
-                if (!keyword) return true;
-                return (job.title || '').toLowerCase().includes(keyword) || (job.location || '').toLowerCase().includes(keyword);
+                const matchKeyword = !keyword || (job.title || '').toLowerCase().includes(keyword) || (job.location || '').toLowerCase().includes(keyword);
+                if (!matchKeyword) return false;
+
+                const remaining = Math.max(0, Number(job.total || 0) - Number(job.paid || 0));
+                const isClosed = (job.status === 'Closed' || (Number(job.total) > 0 && remaining === 0));
+
+                if (statusFilter === 'closed') return isClosed;
+                if (statusFilter === 'pending_delivery') return job.status === 'Pending_Delivery' && !isClosed;
+                if (statusFilter === 'active') return !isClosed && job.status !== 'Pending_Delivery';
+                return true;
             });
             
             if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500 text-xs">ไม่พบรายการคิวงาน</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500 text-xs">ไม่พบรายการคิวงานตามเงื่อนไขที่เลือก</td></tr>`;
                 return;
             }
 
@@ -1090,15 +1461,49 @@
                     <td class="p-4">${statusBadge}</td>
                     <td class="p-4 text-center space-x-1.5 flex justify-center items-center">
                         <button onclick="openQuickViewModal(${job.id})" class="text-xs bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-lg cursor-pointer hover:bg-slate-700" title="ดูรายละเอียด"><i class="fa-solid fa-eye"></i></button>
-                        <button onclick="loadJobToInvoiceEditor(${job.id})" class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-lg cursor-pointer hover:bg-amber-500/20" title="ออกใบจอง/ใบเสร็จ PDF"><i class="fa-solid fa-file-pdf"></i> บิล</button>
+                        <button onclick="loadJobToInvoiceEditor(${job.id})" class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-lg cursor-pointer hover:bg-amber-500/20 font-bold" title="แก้ไขข้อมูล / ออกใบเสร็จ"><i class="fa-solid fa-pen-to-square"></i> แก้ไข/บิล</button>
                         ${actionBtnHTML} ${driveBtnHTML}
                         <a href="${lineUrl}" target="_blank" class="bg-[#06C755] text-white px-2 py-1 rounded-lg text-[11px] hover:bg-[#05b34c] font-bold"><i class="fa-brands fa-line"></i></a>
-                        <button onclick="openJobModal('edit', ${job.id})" class="text-slate-400 hover:text-amber-400 cursor-pointer px-1"><i class="fa-solid fa-pen-to-square"></i></button>
                         <button onclick="deleteJobFromCloud(${job.id})" class="text-rose-500/50 hover:text-rose-400 cursor-pointer px-1"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        function exportFinanceToCSV() {
+            if (filteredJobs.length === 0) {
+                showToast("ไม่มีข้อมูลคิวงานในเดือนนี้ให้ส่งออก", "error");
+                return;
+            }
+            const headers = ["วันที่", "เวลา", "ชื่อลูกค้า", "ประเภทงาน", "สถานที่", "เบอร์โทรศัพท์", "ราคาเต็ม", "มัดจำ/จ่ายแล้ว", "คงเหลือ", "สถานะ"];
+            const rows = filteredJobs.map(j => {
+                const total = Number(j.total || 0);
+                const paid = Number(j.paid || 0);
+                const rem = Math.max(0, total - paid);
+                return [
+                    j.date || '',
+                    j.time || '',
+                    `"${(j.title || '').replace(/"/g, '""')}"`,
+                    `"${(j.status_notes || '').replace(/"/g, '""')}"`,
+                    `"${(j.location || '').replace(/"/g, '""')}"`,
+                    `"${(j.phone || '')}"`,
+                    total,
+                    paid,
+                    rem,
+                    j.status || 'Active'
+                ].join(',');
+            });
+
+            const csvContent = "\uFEFF" + [headers.join(','), ...rows].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const y = document.getElementById('globalYearSelect').value;
+            const m = document.getElementById('globalMonthSelect').value;
+            link.href = URL.createObjectURL(blob);
+            link.download = `IMOILPHOTO_Finance_${y}_${m}.csv`;
+            link.click();
+            showToast("ดาวน์โหลดไฟล์บัญชี CSV เรียบร้อย! 📊");
         }
 
         function renderCustomers() {
@@ -1137,16 +1542,22 @@
             });
         }
 
+        // ดึงข้อมูลคิวงานขึ้นมาแก้ไข + ออกใบเสร็จในฟอร์มหลักที่เดียว
         function loadJobToInvoiceEditor(jobId) {
             const job = allJobs.find(j => j.id === jobId); if (!job) return;
+            document.getElementById('editingJobId').value = job.id;
             currentInvoiceDocId = String(job.id).padStart(4, '0');
+
             document.getElementById('custName').value = job.title || '';
             document.getElementById('custPhone').value = job.phone || '';
             document.getElementById('custLocation').value = job.location || '';
-            document.getElementById('custDate').value = job.date || '';
+            if (invoiceDatePicker && job.date) invoiceDatePicker.setDate(job.date);
+            else document.getElementById('custDate').value = job.date || '';
             document.getElementById('custTime').value = job.time || '';
             document.getElementById('packPrice').value = job.total || 0;
             document.getElementById('paidDeposit').value = job.paid || 0;
+            document.getElementById('custFbLink').value = job.facebook || '';
+            document.getElementById('custDriveLink').value = job.staff || '';
             
             let pkgSelect = document.getElementById('custPackageSelect');
             let matchedType = "อื่นๆ";
@@ -1155,8 +1566,17 @@
             else if (job.status_notes === "งานบวช") matchedType = "งานบวช";
             pkgSelect.value = matchedType;
 
+            // เปลี่ยนป้ายสถานะและปุ่มเป็นโหมดแก้ไขคิวเดิม
+            const badge = document.getElementById('formEditStatusBadge');
+            badge.className = "bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-bold px-2.5 py-0.5 rounded-full";
+            badge.innerText = `✏️ กำลังแก้ไขคิวงาน: ${job.title}`;
+
+            const btnSave = document.getElementById('btnSaveCloudMain');
+            btnSave.className = "w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black py-3 px-4 rounded-xl shadow-lg shadow-amber-500/15 transition-all flex items-center justify-center gap-2 cursor-pointer text-sm active:scale-[0.99]";
+            btnSave.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> 💾 บันทึกแก้ไขคิวงานเดิม (#${job.id})`;
+
             syncInputToPreview();
-            showToast(`ดึงข้อมูล "${job.title}" ลงใบพรีวิวแล้ว!`);
+            showToast(`ดึงข้อมูล "${job.title}" มาที่ฟอร์มแก้ไขและใบพรีวิวแล้ว!`);
             window.scrollTo({ top: document.getElementById('quotation').offsetTop - 20, behavior: 'smooth' });
         }
 
@@ -1176,160 +1596,13 @@
             if (confirm("⚠️ คุณต้องการลบคิวงานนี้ออกจากฐานข้อมูล Cloud ถาวรใช่หรือไม่?")) {
                 let { error } = await supabaseClient.from('jobs').delete().eq('id', jobId);
                 if (!error) {
+                    if (document.getElementById('editingJobId').value == jobId) {
+                        resetUnifiedForm();
+                    }
                     showToast("🗑️ ลบคิวงานออกจากระบบเรียบร้อย");
                     loadJobsFromCloud();
                 }
             }
-        }
-
-        function openJobModal(mode, jobId = null) {
-            currentModalMode = mode;
-            document.getElementById('jobModal').classList.remove('hidden');
-            if (mode === 'add') {
-                document.getElementById('modalTitle').innerText = "เพิ่มคิวงานใหม่เข้าระบบ Cloud";
-                document.getElementById('modalJobId').value = "";
-                document.getElementById('mTitle').value = "";
-                document.getElementById('mPhone').value = "";
-                document.getElementById('mFb').value = "";
-                document.getElementById('mLocation').value = "";
-                document.getElementById('mTotal').value = "";
-                document.getElementById('mPaid').value = "";
-                document.getElementById('mDriveLink').value = "";
-                document.getElementById('aiRawText').value = "";
-                datePickerInstance.setDate(getTodayFormatted());
-                timePickerInstance.setDate("06:30");
-            } else if (mode === 'edit' && jobId) {
-                document.getElementById('modalTitle').innerText = "⚙️ ตั้งค่าและแก้ไขข้อมูลคิวงาน";
-                const job = allJobs.find(j => j.id === jobId);
-                if (job) {
-                    document.getElementById('modalJobId').value = job.id;
-                    document.getElementById('mJobType').value = job.status_notes || "อื่นๆ";
-                    document.getElementById('mTitle').value = job.title || "";
-                    document.getElementById('mPhone').value = job.phone || "";
-                    document.getElementById('mFb').value = job.facebook || "";
-                    document.getElementById('mLocation').value = job.location || "";
-                    document.getElementById('mTotal').value = job.total || "";
-                    document.getElementById('mPaid').value = job.paid || "";
-                    document.getElementById('mDriveLink').value = job.staff || "";
-                    datePickerInstance.setDate(job.date || getTodayFormatted());
-                    timePickerInstance.setDate(job.time || "06:30");
-                }
-            }
-        }
-
-        function closeJobModal() { document.getElementById('jobModal').classList.add('hidden'); }
-
-        async function submitJobModal() {
-            if (!supabaseClient) return;
-            const id = document.getElementById('modalJobId').value;
-            const payload = {
-                title: document.getElementById('mTitle').value.trim(),
-                phone: document.getElementById('mPhone').value.trim(),
-                facebook: document.getElementById('mFb').value.trim(),
-                location: document.getElementById('mLocation').value.trim(),
-                date: document.getElementById('mDate').value,
-                time: document.getElementById('mTime').value,
-                total: Number(document.getElementById('mTotal').value || 0),
-                paid: Number(document.getElementById('mPaid').value || 0),
-                staff: document.getElementById('mDriveLink').value.trim(),
-                status_notes: document.getElementById('mJobType').value
-            };
-
-            if (!payload.title || !payload.date) {
-                showToast("กรุณากรอกชื่อลูกค้าและวันที่จัดงานครับ", "error");
-                return;
-            }
-
-            const btn = document.getElementById('btnSubmitJobModal');
-            btn.disabled = true;
-            btn.innerText = "กำลังบันทึก...";
-
-            let res;
-            if (currentModalMode === 'add') {
-                payload.status = "Active";
-                res = await supabaseClient.from('jobs').insert([payload]);
-            } else {
-                res = await supabaseClient.from('jobs').update(payload).eq('id', id);
-            }
-
-            btn.disabled = false;
-            btn.innerText = "💾 บันทึกข้อมูล";
-
-            if (!res.error) {
-                showToast("บันทึกข้อมูลคิวงานลง Cloud สำเร็จ!");
-                closeJobModal();
-                loadJobsFromCloud();
-            } else {
-                showToast("เกิดข้อผิดพลาดในการบันทึก", "error");
-            }
-        }
-
-        // 🤖 อัปเกรด AI Extraction v3.0 (รองรับตัวเลขมีลูกน้ำ + วันที่ภาษาไทย พ.ศ./ค.ศ.)
-        function runAiExtractionV3() {
-            const raw = document.getElementById('aiRawText').value;
-            if (!raw) {
-                showToast("กรุณาวางข้อความแชทก่อนครับ", "error");
-                return;
-            }
-
-            // 1. ประเภทงาน
-            if (raw.includes("ปริญญา") || raw.includes("นอกรอบ") || raw.includes("บัณฑิต")) {
-                document.getElementById('mJobType').value = "รับปริญญา/นอกรอบ";
-            } else if (raw.includes("แต่งงาน") || raw.includes("บ่าวสาว") || raw.includes("พรีเวดดิ้ง")) {
-                document.getElementById('mJobType').value = "งานแต่งงาน";
-            } else if (raw.includes("บวช") || raw.includes("นาค")) {
-                document.getElementById('mJobType').value = "งานบวช";
-            }
-
-            // 2. เบอร์โทรศัพท์
-            const phoneMatch = raw.match(/(0\d{2}[-\s]?\d{3}[-\s]?\d{4})/);
-            if (phoneMatch) document.getElementById('mPhone').value = phoneMatch[1].replace(/[- ]/g, "");
-
-            // 3. ยอดราคาเต็ม & มัดจำ (รองรับลูกน้ำ เช่น 4,500 หรือ 8,500)
-            const priceMatch = raw.match(/(?:ราคา|ยอดเต็ม|รวม|แพ็กเกจ)\s*([\d,]+)/) || raw.match(/([\d,]{4,})\s*บาท/);
-            if (priceMatch) document.getElementById('mTotal').value = priceMatch[1].replace(/,/g, "");
-
-            const depMatch = raw.match(/(?:มัดจำ|โอนแล้ว|มัดจำแล้ว)\s*([\d,]+)/);
-            if (depMatch) document.getElementById('mPaid').value = depMatch[1].replace(/,/g, "");
-
-            // 4. ชื่อลูกค้า
-            const nameMatch = raw.match(/(?:ชื่อ|คุณ|ลูกค้า)\s*([ก-๙a-zA-Z0-9_]+)/);
-            if (nameMatch && !document.getElementById('mTitle').value) {
-                document.getElementById('mTitle').value = "คุณ" + nameMatch[1].replace(/^คุณ/, '');
-            }
-
-            // 5. สถานที่
-            const locMatch = raw.match(/(?:สถานที่|ที่|ม\.|มหาวิทยาลัย|วัด|โรงแรม)\s*([^\n,]+)/);
-            if (locMatch && !document.getElementById('mLocation').value) {
-                document.getElementById('mLocation').value = locMatch[0].trim();
-            }
-
-            // 6. วันที่ (รองรับทั้ง YYYY-MM-DD และ วันที่ไทย เช่น 15 ธ.ค. 69)
-            const isoDateMatch = raw.match(/(\d{4}-\d{2}-\d{2})/);
-            if (isoDateMatch) {
-                datePickerInstance.setDate(isoDateMatch[1]);
-            } else {
-                const thMonths = {
-                    'ม.ค.': '01', 'มกรา': '01', 'ก.พ.': '02', 'กุมภา': '02', 'มี.ค.': '03', 'มีนา': '03',
-                    'เม.ย.': '04', 'เมษา': '04', 'พ.ค.': '05', 'พฤษภา': '05', 'มิ.ย.': '06', 'มิถุนา': '06',
-                    'ก.ค.': '07', 'กรกฎา': '07', 'ส.ค.': '08', 'สิงหา': '08', 'ก.ย.': '09', 'กันยา': '09',
-                    'ต.ค.': '10', 'ตุลา': '10', 'พ.ย.': '11', 'พฤศจิกา': '11', 'ธ.ค.': '12', 'ธันวา': '12'
-                };
-                for (const [mKey, mVal] of Object.entries(thMonths)) {
-                    const regex = new RegExp(`(\\d{1,2})\\s*${mKey}[ก-๙]*\\s*(\\d{2,4})`);
-                    const m = raw.match(regex);
-                    if (m) {
-                        const d = m[1].padStart(2, '0');
-                        let y = parseInt(m[2]);
-                        if (y < 100) y += 2500; // เช่น 69 -> 2569
-                        if (y > 2400) y -= 543; // แปลง พ.ศ. เป็น ค.ศ.
-                        datePickerInstance.setDate(`${y}-${mVal}-${d}`);
-                        break;
-                    }
-                }
-            }
-
-            showToast("⚡ AI สกัดข้อมูลลงฟอร์มเรียบร้อย!");
         }
 
         function openQuickViewModal(jobId) {
@@ -1343,7 +1616,7 @@
 
             document.getElementById('qvCustomerName').innerText = job.title || 'ไม่ระบุชื่อ';
             document.getElementById('qvJobCode').innerText = `JOB-${String(job.id).padStart(4, '0')}`;
-            document.getElementById('qvJobDateBadge').innerText = job.date || '--';
+            document.getElementById('qvJobDateBadge').innerText = formatThaiDatePretty(job.date);
             document.getElementById('qvJobType').innerText = job.status_notes || 'ถ่ายภาพทั่วไป';
             document.getElementById('qvLocationText').innerText = job.location || 'ไม่ได้ระบุสถานที่';
 
@@ -1437,7 +1710,6 @@
         }
 
         function closeQuickViewModal() { document.getElementById('quickViewModal').classList.add('hidden'); selectedActiveJobId = null; }
-        function editJobFromQuickView() { const targetId = selectedActiveJobId; closeQuickViewModal(); openJobModal('edit', targetId); }
         function pullToInvoiceForm() { const targetId = selectedActiveJobId; closeQuickViewModal(); loadJobToInvoiceEditor(targetId); }
 
         async function changeJobStatusDirectly() {
@@ -1466,7 +1738,7 @@
             const name = document.getElementById('custName').value || 'ไม่ระบุชื่อ';
             const phone = document.getElementById('custPhone').value || 'ไม่ระบุเบอร์';
             const packageType = document.getElementById('custPackageSelect').value || 'งานถ่ายภาพ';
-            const date = document.getElementById('custDate').value || 'ไม่ระบุวัน';
+            const date = formatThaiDatePretty(document.getElementById('custDate').value || 'ไม่ระบุวัน');
             const time = document.getElementById('custTime').value || 'ช่วงเช้า';
             const location = document.getElementById('custLocation').value || 'ไม่ระบุสถานที่';
             const total = Number(document.getElementById('packPrice').value || 0);

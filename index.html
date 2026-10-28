@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v24.0.0 All-in-One</title>
+    <title>I'M OIL PHOTO - ระบบจัดการคิวงานและใบเสร็จมัดจำ v25.3.0</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Font Awesome Icon (ใช้เฉพาะ UI หน้าเว็บ ส่วนในใบเสร็จใช้ Inline SVG เพื่อโหลด PNG ไม่เพี้ยน 100%) -->
+    <!-- Font Awesome Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- 📸 modern-screenshot Library -->
     <script src="https://cdn.jsdelivr.net/npm/modern-screenshot@4.6.0/dist/index.js"></script>
+    <!-- 📲 QRCode Generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     
     <!-- 📅 Flatpickr Library -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -20,16 +22,24 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Anuphan:wght=300;400;500;600;700&family=Caveat:wght@700&display=swap');
         body { font-family: 'Anuphan', sans-serif; }
         
+        .tab-animate {
+            animation: fadeInTab 0.2s ease-out;
+        }
+        @keyframes fadeInTab {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @media print {
             body * { visibility: hidden; }
             #pdfCaptureArea, #pdfCaptureArea * { visibility: visible; }
             #pdfCaptureArea { 
                 position: absolute; left: 50% !important; top: 0 !important; transform: translateX(-50%) !important;
-                width: 175mm !important; max-height: 297mm !important; padding: 12mm !important;
-                background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; border-radius: 16px !important; box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+                width: 180mm !important; max-height: 297mm !important;
+                background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; border-radius: 20px !important; box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
                 box-shadow: none !important;
             }
             .print-box { background-color: #f8fafc !important; border: 1px solid #e2e8f0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -49,38 +59,60 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row pb-20 md:pb-0">
 
     <!-- 🔔 TOAST NOTIFICATION CONTAINER -->
-    <div id="toastContainer" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 no-print pointer-events-none"></div>
+    <div id="toastContainer" class="fixed bottom-20 md:bottom-5 right-5 z-[100] flex flex-col gap-2 no-print pointer-events-none"></div>
 
-    <!-- Sidebar (no-print) -->
-    <aside class="w-full md:w-64 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 p-6 flex flex-col justify-between no-print shrink-0">
+    <!-- 🖥️ SIDEBAR NAVIGATION (ซ้ายมือสำหรับ PC / ด้านบนสำหรับมือถือ) -->
+    <aside class="w-full md:w-64 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 p-5 md:p-6 flex flex-col justify-between no-print shrink-0 md:h-screen md:sticky md:top-0">
         <div>
-            <div class="flex items-center gap-3 mb-8">
-                <div class="bg-amber-500 text-slate-950 p-2 rounded-lg font-bold text-xl shadow-lg shadow-amber-500/20"><i class="fa-solid fa-camera"></i></div>
-                <div>
-                    <span class="text-xl font-semibold tracking-wider bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent block leading-none">I'M OIL PHOTO</span>
-                    <span class="text-[10px] text-slate-500 font-mono">All-in-One System v24.0</span>
+            <!-- โลโก้แบรนด์บนแถบเมนูซ้าย -->
+            <div class="flex items-center justify-between md:justify-start gap-3 mb-4 md:mb-6">
+                <div class="bg-white px-3 py-2 rounded-xl shadow-md flex items-center justify-center w-full md:w-auto">
+                    <img id="sidebarBrandLogoImg" src="logo.png" alt="I'M OIL PHOTO" class="h-10 w-auto object-contain hidden" onload="this.classList.remove('hidden'); document.getElementById('sidebarBrandLogoSvg').classList.add('hidden');" onerror="this.classList.add('hidden'); document.getElementById('sidebarBrandLogoSvg').classList.remove('hidden');">
+                    <!-- Vector โลโก้ I'M OIL PHOTO ฝังในตัว -->
+                    <svg id="sidebarBrandLogoSvg" class="h-10 w-auto" viewBox="0 0 520 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="22" y="34" width="24" height="9" rx="4" fill="#111111"/>
+                        <path d="M52 38L63 14H103L116 44C106 37 94 34 81 34C69 34 59 36 52 38Z" fill="#111111"/>
+                        <path d="M51 134H22C11 134 4 126 4 115V56C4 45 11 38 22 38H52C34 49 23 68 23 90C23 109 34 125 51 134Z" fill="#111111"/>
+                        <circle cx="83" cy="88" r="52" stroke="#111111" stroke-width="4.5" fill="white"/>
+                        <circle cx="83" cy="88" r="42" stroke="#111111" stroke-width="2.5" fill="white"/>
+                        <path d="M52 66C60 54 74 48 89 50" stroke="#111111" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M62 121C82 128 106 118 114 97" stroke="#111111" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M150 12Q153 78 150 144Q147 78 150 12Z" fill="#111111"/>
+                        <text x="165" y="96" font-family="'Caveat', 'Brush Script MT', cursive" font-size="76" font-weight="700" fill="#111111">Photography</text>
+                        <text x="172" y="133" font-family="'Anuphan', sans-serif" font-size="21" font-weight="700" letter-spacing="8.5" fill="#111111">I'MOILPHOTO</text>
+                    </svg>
                 </div>
+                <button onclick="loadJobsFromCloud()" class="md:hidden bg-slate-800 text-slate-300 px-3 py-2 rounded-lg text-xs shrink-0"><i class="fa-solid fa-rotate"></i></button>
             </div>
 
             <!-- สวิตช์สลับโหมด หน้าบ้าน / หลังบ้าน -->
-            <div id="modeSwitcherBox" class="bg-slate-950 p-1 rounded-xl border border-slate-800 flex gap-1 mb-6 text-xs font-bold">
+            <div id="modeSwitcherBox" class="bg-slate-950 p-1 rounded-xl border border-slate-800 flex gap-1 mb-2 md:mb-6 text-xs font-bold">
                 <button onclick="toggleViewMode('public')" id="btnViewPublic" class="flex-1 text-slate-400 py-2 rounded-lg transition-all cursor-pointer text-center">🌐 หน้าบ้าน</button>
                 <button onclick="toggleViewMode('admin')" id="btnViewAdmin" class="flex-1 bg-amber-500 text-slate-950 py-2 rounded-lg transition-all cursor-pointer text-center">⚡ หลังบ้าน</button>
             </div>
 
-            <nav id="sidebarNavLinks" class="space-y-2">
-                <a href="#dashboard" class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-amber-400 rounded-xl transition-all"><i class="fa-solid fa-chart-pie w-5"></i> แดชบอร์ด</a>
-                <a href="#quotation" class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-amber-400 rounded-xl transition-all"><i class="fa-solid fa-file-circle-plus w-5"></i> ลงคิวงาน & ออกใบจอง</a>
-                <a href="#calendar" id="menuCalendar" class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-amber-400 rounded-xl transition-all"><i class="fa-solid fa-calendar-days w-5"></i> คิวงาน & ปฏิทิน</a>
-                <a href="#finance" id="menuFinance" class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-amber-400 rounded-xl transition-all"><i class="fa-solid fa-wallet w-5"></i> มัดจำ & เก็บเงิน</a>
-                <a href="#customers" id="menuCustomers" class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-amber-400 rounded-xl transition-all"><i class="fa-solid fa-users w-5"></i> ฐานข้อมูลลูกค้า</a>
+            <!-- เมนูสลับแท็บ (แสดงบนจอคอม) -->
+            <nav id="sidebarNavLinks" class="hidden md:block space-y-2">
+                <button type="button" onclick="switchAppTab('dashboard')" id="navBtn-dashboard" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all cursor-pointer bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/10">
+                    <span class="flex items-center gap-3"><i class="fa-solid fa-calendar-days w-5 text-center"></i> ปฏิทิน & แดชบอร์ด</span>
+                </button>
+                <button type="button" onclick="switchAppTab('quotation')" id="navBtn-quotation" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all cursor-pointer text-slate-300 hover:bg-slate-800 hover:text-amber-400">
+                    <span class="flex items-center gap-3"><i class="fa-solid fa-file-circle-plus w-5 text-center"></i> ลงคิวงาน & ออกบิล</span>
+                </button>
+                <button type="button" onclick="switchAppTab('finance')" id="navBtn-finance" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all cursor-pointer text-slate-300 hover:bg-slate-800 hover:text-amber-400">
+                    <span class="flex items-center gap-3"><i class="fa-solid fa-wallet w-5 text-center"></i> มัดจำ & เก็บเงิน</span>
+                    <span id="navBadgeJobsCount" class="text-[10px] bg-slate-800 text-amber-400 px-2 py-0.5 rounded-full font-mono">0</span>
+                </button>
+                <button type="button" onclick="switchAppTab('customers')" id="navBtn-customers" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all cursor-pointer text-slate-300 hover:bg-slate-800 hover:text-amber-400">
+                    <span class="flex items-center gap-3"><i class="fa-solid fa-users w-5 text-center"></i> ฐานข้อมูลลูกค้า</span>
+                </button>
             </nav>
         </div>
         
-        <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 no-print">
+        <div class="hidden md:block mt-4 pt-4 border-t border-slate-800 space-y-2 no-print">
             <div class="text-slate-500 text-[10px] flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 
@@ -91,83 +123,154 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 p-4 md:p-8 space-y-12 overflow-y-auto max-w-7xl mx-auto w-full">
+    <!-- 📱 MOBILE BOTTOM NAVIGATION BAR -->
+    <nav id="mobileBottomNav" class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-40 grid grid-cols-4 gap-1 p-2 no-print shadow-2xl">
+        <button type="button" onclick="switchAppTab('dashboard')" id="mobNavBtn-dashboard" class="flex flex-col items-center justify-center py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-[10px] gap-1">
+            <i class="fa-solid fa-calendar-days text-sm"></i>
+            <span>ปฏิทิน/ยอด</span>
+        </button>
+        <button type="button" onclick="switchAppTab('quotation')" id="mobNavBtn-quotation" class="flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 font-medium text-[10px] gap-1">
+            <i class="fa-solid fa-file-circle-plus text-sm"></i>
+            <span>ลงคิว/ออกบิล</span>
+        </button>
+        <button type="button" onclick="switchAppTab('finance')" id="mobNavBtn-finance" class="flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 font-medium text-[10px] gap-1">
+            <i class="fa-solid fa-wallet text-sm"></i>
+            <span>การเงิน/ส่งรูป</span>
+        </button>
+        <button type="button" onclick="switchAppTab('customers')" id="mobNavBtn-customers" class="flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 font-medium text-[10px] gap-1">
+            <i class="fa-solid fa-users text-sm"></i>
+            <span>ลูกค้า</span>
+        </button>
+    </nav>
 
-        <!-- DASHBOARD -->
-        <section id="dashboard" class="space-y-6 no-print">
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+
+        <!-- ========================================================================= -->
+        <!-- TAB 1: DASHBOARD & CALENDAR -->
+        <!-- ========================================================================= -->
+        <div id="tabView-dashboard" class="space-y-6 tab-animate no-print">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 id="mainDashboardTitle" class="text-2xl md:text-3xl font-bold">ภาพรวมธุรกิจหลังบ้านช่างภาพ</h1>
+                    <h1 id="mainDashboardTitle" class="text-2xl md:text-3xl font-bold">ภาพรวมธุรกิจ & ปฏิทินคิวงาน</h1>
                     <p class="text-sm text-slate-400">สรุปยอดจองและตารางคิวงานบนระบบคลาวด์แยกตามรายเดือน</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
                     <button id="btnSharePublicLink" onclick="copyPublicCustomerLink()" class="bg-slate-900 hover:bg-slate-800 text-amber-400 border border-amber-500/30 text-xs font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2">
-                        <i class="fa-solid fa-share-nodes"></i> คัดลอกลิงก์หน้าบ้านให้ลูกค้าเช็คคิว
+                        <i class="fa-solid fa-share-nodes"></i> คัดลอกลิงก์หน้าบ้านให้ลูกค้า
+                    </button>
+                    <button id="btnAddNewJobAdmin" onclick="jumpToNewJobForm()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-lg shadow-amber-500/10 flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> ลงคิวงานใหม่ / ออกใบจอง
                     </button>
                 </div>
             </div>
 
-            <div id="adminGoalSection" class="bg-gradient-to-r from-slate-900 to-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-3">
+            <!-- Stats Cards -->
+            <div id="adminStatsCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                    <div class="text-slate-400 text-xs flex justify-between items-center"><span>รายรับมัดจำ/เก็บแล้ว (เดือนนี้)</span><i class="fa-solid fa-circle-dollar-to-slot text-emerald-500/40 text-lg"></i></div>
+                    <div id="dashTotalRevenue" class="text-2xl font-bold mt-1.5 text-emerald-400 font-mono">฿0</div>
+                </div>
+                <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                    <div class="text-slate-400 text-xs flex justify-between items-center"><span>ยอดค้างชำระหน้างาน</span><i class="fa-solid fa-hand-holding-dollar text-rose-500/40 text-lg"></i></div>
+                    <div id="dashTotalPending" class="text-2xl font-bold mt-1.5 text-rose-400 font-mono">฿0</div>
+                </div>
+                <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                    <div class="text-slate-400 text-xs flex justify-between items-center"><span>คิวงานเดือนนี้</span><i class="fa-solid fa-calendar-check text-amber-500/40 text-lg"></i></div>
+                    <div id="dashTotalJobs" class="text-2xl font-bold mt-1.5 text-amber-400">0 คิว</div>
+                </div>
+                <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                    <div class="text-slate-400 text-xs flex justify-between items-center"><span>มูลค่างานรวมประจำเดือน</span><i class="fa-solid fa-sack-dollar text-amber-500/40 text-lg"></i></div>
+                    <div id="dashTotalMonthlyIncome" class="text-2xl font-bold mt-1.5 text-amber-500 font-mono">฿0</div>
+                </div>
+            </div>
+
+            <!-- Goal Progress Bar -->
+            <div id="adminGoalSection" class="bg-gradient-to-r from-slate-900 to-slate-950 p-4 rounded-2xl border border-slate-800 shadow-xl space-y-2.5">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <div class="space-y-0.5">
-                        <div class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-bullseye"></i> เป้าหมายรายได้และคิวงานประจำเดือน</div>
-                        <p class="text-[11px] text-slate-400">คำนวณสัดส่วนจากมูลค่างานรวมทั้งหมดที่จองเข้ามาเทียบกับเป้าหมายช่างภาพ</p>
-                    </div>
-                    <div class="flex items-center gap-2 text-xs bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
-                        <span class="text-slate-400">ตั้งเป้าหมายเดือนนี้:</span>
-                        <input type="number" id="monthlyGoalInput" value="50000" oninput="saveAndRefreshGoal()" class="w-24 bg-transparent text-amber-400 font-bold focus:outline-none text-right font-mono">
+                    <div class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-bullseye mr-1"></i> เป้าหมายรายได้ประจำเดือน</div>
+                    <div class="flex items-center gap-2 text-xs bg-slate-950 px-3 py-1 rounded-xl border border-slate-800">
+                        <span class="text-slate-400">ตั้งเป้าหมาย:</span>
+                        <input type="number" id="monthlyGoalInput" value="50000" oninput="saveAndRefreshGoal()" class="w-20 bg-transparent text-amber-400 font-bold focus:outline-none text-right font-mono">
                         <span class="text-slate-400">บาท</span>
                     </div>
                 </div>
-                <div class="space-y-1.5">
-                    <div class="w-full bg-slate-950 rounded-full h-3.5 p-0.5 border border-slate-900 overflow-hidden">
+                <div class="space-y-1">
+                    <div class="w-full bg-slate-950 rounded-full h-3 p-0.5 border border-slate-900 overflow-hidden">
                         <div id="goalProgressBar" class="bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-500 h-full rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
                     </div>
                     <div class="flex justify-between text-[11px] text-slate-400 font-medium font-mono">
                         <div>ความสำเร็จ: <span id="goalPercentText" class="text-emerald-400 font-bold">0%</span></div>
-                        <div>รายได้จองแล้ว: <span id="goalCurrentText" class="text-slate-200 font-bold">฿0</span> / <span id="goalTargetText" class="text-amber-400">฿50,000</span></div>
+                        <div>ยอดรวมเดือนนี้: <span id="goalCurrentText" class="text-slate-200 font-bold">฿0</span> / <span id="goalTargetText" class="text-amber-400">฿50,000</span></div>
                     </div>
                 </div>
             </div>
-            
-            <div id="adminStatsCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
-                    <div class="text-slate-400 text-xs flex justify-between items-center"><span>รายรับมัดจำ/เก็บแล้ว (เดือนนี้)</span><i class="fa-solid fa-circle-dollar-to-slot text-emerald-500/40 text-lg"></i></div>
-                    <div id="dashTotalRevenue" class="text-2xl font-bold mt-2 text-emerald-400 font-mono">฿0</div>
+
+            <!-- Calendar Section -->
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <p id="calendarSectionDesc" class="text-xs text-slate-400">💡 คลิกที่วันที่มีแถบสีเพื่อดูรายละเอียด หรือคลิกช่องวันว่างเพื่อเปิดหน้าลงคิวงานใหม่ทันที</p>
+                    <div id="calendarBadgesContainer" class="flex flex-wrap gap-3 text-[11px]"></div>
                 </div>
-                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
-                    <div class="text-slate-400 text-xs flex justify-between items-center"><span>ยอดค้างชำระหน้างาน</span><i class="fa-solid fa-hand-holding-dollar text-rose-500/40 text-lg"></i></div>
-                    <div id="dashTotalPending" class="text-2xl font-bold mt-2 text-rose-400 font-mono">฿0</div>
-                </div>
-                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
-                    <div class="text-slate-400 text-xs flex justify-between items-center"><span>คิวงานเดือนนี้</span><i class="fa-solid fa-calendar-check text-amber-500/40 text-lg"></i></div>
-                    <div id="dashTotalJobs" class="text-2xl font-bold mt-2 text-amber-400">0 คิว</div>
-                </div>
-                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
-                    <div class="text-slate-400 text-xs flex justify-between items-center"><span>มูลค่างานรวมประจำเดือน</span><i class="fa-solid fa-sack-dollar text-amber-500/40 text-lg"></i></div>
-                    <div id="dashTotalMonthlyIncome" class="text-2xl font-bold mt-2 text-amber-500 font-mono">฿0</div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                            <h3 id="calendarMonthTitle" class="font-bold text-lg text-slate-200">พ.ศ. ---</h3>
+                            <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs">
+                                <button onclick="navigateMonth(-1)" class="text-slate-400 hover:text-amber-400 px-1.5 py-1 cursor-pointer" title="เดือนก่อนหน้า"><i class="fa-solid fa-chevron-left"></i></button>
+                                <div class="flex items-center gap-1.5 border-r border-slate-800 pr-2"><i class="fa-solid fa-calendar text-amber-400 text-[10px]"></i>
+                                    <select id="globalYearSelect" onchange="changeSystemMonth()" class="bg-transparent text-slate-200 font-semibold focus:outline-none cursor-pointer">
+                                        <option value="2025">พ.ศ. 2568</option>
+                                        <option value="2026" selected>พ.ศ. 2569</option>
+                                        <option value="2027">พ.ศ. 2570</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <select id="globalMonthSelect" onchange="changeSystemMonth()" class="bg-transparent text-slate-200 font-semibold focus:outline-none cursor-pointer">
+                                        <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option><option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option><option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+                                    </select>
+                                </div>
+                                <button onclick="navigateMonth(1)" class="text-slate-400 hover:text-amber-400 px-1.5 py-1 cursor-pointer" title="เดือนถัดไป"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-2 text-center text-xs font-medium text-slate-400 mb-2"><div>อา</div><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div></div>
+                        <div id="calendarGrid" class="grid grid-cols-7 gap-2 text-center text-sm"></div>
+                    </div>
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                            <h3 id="jobListTitle" class="font-semibold text-slate-300">รายการคิวงานเดือนนี้</h3>
+                            <span id="jobListCountBadge" class="text-[11px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-md font-mono font-bold">0 คิว</span>
+                        </div>
+                        <div id="todayJobsContainer" class="space-y-3 max-h-[420px] overflow-y-auto pr-1"></div>
+                    </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- 🎯 ALL-IN-ONE: ลงคิวงาน Cloud + ออกใบจองคิว & ใบเสร็จรับเงินมัดจำ (ที่เดียวจบ) -->
-        <section id="quotation" class="space-y-6">
+        <!-- ========================================================================= -->
+        <!-- TAB 2: QUOTATION & JOB EDITOR -->
+        <!-- ========================================================================= -->
+        <div id="tabView-quotation" class="space-y-6 tab-animate hidden">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <div class="flex items-center gap-2.5">
-                        <h2 class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-calendar-check mr-1"></i>ระบบลงคิวงาน Cloud & ออกใบจอง / ใบเสร็จ</h2>
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <h2 class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-file-circle-plus mr-1"></i>ระบบลงคิวงาน Cloud & ออกใบจอง / ใบเสร็จ</h2>
                         <span id="formEditStatusBadge" class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold px-2.5 py-0.5 rounded-full">✨ โหมดสร้างคิวงานใหม่</span>
                     </div>
-                    <p class="text-xs text-slate-400 mt-0.5">กรอกข้อมูลหรือใช้ AI สแกนแชท เพื่อออกรูปใบจองและบันทึกเข้าปฏิทิน Cloud ในที่เดียว</p>
+                    <p class="text-xs text-slate-400 mt-0.5">กรอกข้อมูลหรือใช้ AI สแกนแชท เพื่อออกรูปใบจองพร้อม QR โอนมัดจำ และบันทึกเข้าปฏิทิน Cloud ในที่เดียว</p>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <label class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-bold text-xs px-3 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5" title="เลือกไฟล์รูปโลโก้จากเครื่อง (หากต้องการเปลี่ยน)">
+                        <i class="fa-solid fa-image text-amber-400"></i> เปลี่ยนไฟล์โลโก้
+                        <input type="file" accept="image/*" class="hidden" onchange="handleCustomLogoUpload(event)">
+                    </label>
                     <button type="button" onclick="resetUnifiedForm()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5">
                         <i class="fa-solid fa-rotate-left text-amber-400"></i> เคลียร์ฟอร์ม (เริ่มคิวใหม่)
                     </button>
                     <div class="flex gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
-                        <button onclick="switchTemplateMode('booking')" id="btnModeBooking" class="bg-amber-500 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition-all cursor-pointer">🎫 ใบยืนยันการจอง</button>
-                        <button onclick="switchTemplateMode('receipt')" id="btnModeReceipt" class="text-slate-400 font-medium text-xs px-4 py-2 rounded-lg transition-all cursor-pointer">🖨️ ใบเสร็จมัดจำ + QR</button>
+                        <button onclick="switchTemplateMode('booking')" id="btnModeBooking" class="bg-amber-500 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition-all cursor-pointer">🎫 ใบยืนยันการจอง + QR</button>
+                        <button onclick="switchTemplateMode('receipt')" id="btnModeReceipt" class="text-slate-400 font-medium text-xs px-4 py-2 rounded-lg transition-all cursor-pointer">🖨️ ใบเสร็จรับเงินมัดจำ</button>
                     </div>
                 </div>
             </div>
@@ -177,24 +280,25 @@
                 <div class="lg:col-span-5 space-y-4 bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl no-print">
                     <input type="hidden" id="editingJobId" value="">
 
-                    <!-- 🤖 AI เลขาอัจฉริยะ สแกนแชทลงฟอร์มทันที -->
+                    <!-- 🤖 AI เลขาอัจฉริยะ -->
                     <div class="bg-slate-950 p-3.5 rounded-xl border border-amber-500/30 space-y-2">
                         <div class="flex justify-between items-center">
                             <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-robot mr-1"></i>⚡ AI เลขาสแกนแชทลงฟอร์มอัตโนมัติ</span>
                             <button type="button" onclick="openFacebookPageInbox()" class="bg-blue-600/20 text-blue-400 border border-blue-500/30 text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer hover:bg-blue-600/30"><i class="fa-brands fa-facebook-messenger"></i> เปิดแชทเพจ</button>
                         </div>
-                        <textarea id="aiRawText" rows="2" placeholder="วางข้อความแชทลูกค้า เช่น: ชื่อฟ้า 089-123-4567 งานรับปริญญา ม.รังสิต วันที่ 15 ธ.ค. 69 ครึ่งวันเช้า ราคา 4,500 มัดจำ 1,000..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-300 focus:outline-none focus:border-amber-500"></textarea>
+                        <textarea id="aiRawText" rows="2" placeholder="วางข้อความแชทลูกค้า เช่น: ชื่อฟ้า 089-123-4567 งานรับปริญญา ม.รังสิต วันที่ 15 ธ.ค. 69 ครึ่งวันเช้า ราคา 3,000 มัดจำ 500..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-300 focus:outline-none focus:border-amber-500"></textarea>
                         <button type="button" onclick="runAiExtractionUnified()" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 font-bold text-xs py-1.5 rounded-lg cursor-pointer transition-all"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> สั่ง AI สแกนคัดแยกข้อมูลลงฟอร์มด่วน</button>
                     </div>
 
-                    <!-- ⚡ ปุ่มลัดเลือกแพ็กเกจ (Quick Package Presets) -->
+                    <!-- ⚡ ปุ่มลัดเลือกแพ็กเกจ (ตามเรทราคาที่คุณออยตั้งไว้) -->
                     <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
                         <span class="text-[11px] font-bold text-amber-400 block"><i class="fa-solid fa-bolt"></i> ปุ่มลัดเลือกแพ็กเกจราคาด่วน</span>
                         <div class="grid grid-cols-2 gap-1.5 text-[11px]">
-                            <button type="button" onclick="applyPackagePreset('รับปริญญา/นอกรอบ', 'ครึ่งวัน (เช้า/บ่าย)', 3500, 1000)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer">🎓 ปริญญา ครึ่งวัน (3,500)</button>
-                            <button type="button" onclick="applyPackagePreset('รับปริญญา/นอกรอบ', 'เต็มวัน (08:00-17:00)', 4500, 1000)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer">🎓 ปริญญา เต็มวัน (4,500)</button>
-                            <button type="button" onclick="applyPackagePreset('งานแต่งงาน', 'ครึ่งวัน (เช้า หรือ เย็น)', 5500, 1500)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-pink-300 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer">👰 งานแต่ง ครึ่งวัน (5,500)</button>
-                            <button type="button" onclick="applyPackagePreset('งานแต่งงาน', 'เต็มวัน (เช้า + เลี้ยงฉลอง)', 8500, 2000)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-pink-300 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer">👰 งานแต่ง เต็มวัน (8,500)</button>
+                            <button type="button" onclick="applyPackagePreset('รับปริญญา/นอกรอบ', 'ครึ่งวัน (เช้า/บ่าย)', 3000, 500)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer">🎓 ปริญญา ครึ่งวัน (3,000)</button>
+                            <button type="button" onclick="applyPackagePreset('รับปริญญา/นอกรอบ', 'เต็มวัน (08:00-17:00)', 4000, 500)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer">🎓 ปริญญา เต็มวัน (4,000)</button>
+                            <button type="button" onclick="applyPackagePreset('รับปริญญา/นอกรอบ', '2ชม (-)', 1500, 500)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer">🎓 ปริญญา 2ชม (1,500)</button>
+                            <button type="button" onclick="applyPackagePreset('งานแต่งงาน', 'ครึ่งวัน (เช้า หรือ เย็น)', 5500, 1000)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-pink-300 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer">👰 งานแต่ง ครึ่งวัน (5,500)</button>
+                            <button type="button" onclick="applyPackagePreset('งานแต่งงาน', 'เต็มวัน (เช้า + เลี้ยงฉลอง)', 8500, 1000)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-pink-300 py-1.5 px-2 rounded-lg text-left transition-all cursor-pointer col-span-2">👰 งานแต่ง เต็มวัน (8,500)</button>
                         </div>
                     </div>
 
@@ -227,26 +331,35 @@
                         <div><label class="block text-xs text-slate-400 mb-1">ชำระเงินมัดจำแล้ว (บาท)</label><input type="number" id="paidDeposit" value="1000" oninput="syncInputToPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200"></div>
                     </div>
 
-                    <!-- ช่องเก็บลิงก์แชทและลิงก์ส่งงาน Google Drive (สำหรับฐานข้อมูล Cloud) -->
+                    <!-- ช่องเก็บลิงก์แชทและลิงก์ส่งงาน Google Drive -->
                     <div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-800/70">
                         <div><label class="block text-[11px] text-slate-400 mb-1"><i class="fa-brands fa-facebook-messenger text-sky-400 mr-1"></i>ลิงก์แชท FB / LINE ลูกค้า</label><input type="text" id="custFbLink" placeholder="วางลิงก์แชท..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200"></div>
                         <div><label class="block text-[11px] text-slate-400 mb-1"><i class="fa-brands fa-google-drive text-amber-400 mr-1"></i>ลิงก์ส่งงานรูปภาพ (Drive)</label><input type="text" id="custDriveLink" placeholder="https://drive.google.com/..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200"></div>
                     </div>
 
-                    <!-- พร้อมเพย์ QR Setting -->
-                    <div class="bg-slate-950 p-3 rounded-xl border border-dashed border-amber-500/30 flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2 flex-1">
-                            <span class="text-[11px] font-bold text-amber-400 shrink-0"><i class="fa-solid fa-qrcode mr-1"></i>พร้อมเพย์:</span>
-                            <input type="text" id="ppAccountInput" value="064-550-3701" oninput="syncInputToPreview()" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-100 font-mono">
+                    <!-- 📲 ตั้งค่าบัญชีรับเงิน & QR MAKE by KBank -->
+                    <div class="bg-slate-950 p-3.5 rounded-xl border border-dashed border-amber-500/30 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-amber-400"><i class="fa-solid fa-qrcode mr-1"></i>ตั้งค่าบัญชี & QR รับเงินในใบจอง</span>
+                            <select id="qrAmountLockMode" onchange="syncInputToPreview()" class="bg-slate-900 border border-slate-800 text-[10px] text-amber-400 font-bold rounded-lg px-2 py-1 focus:outline-none cursor-pointer">
+                                <option value="none" selected>QR ไม่ระบุยอด (เหมือนแอป MAKE)</option>
+                                <option value="deposit">QR ล็อคยอดมัดจำอัตโนมัติ</option>
+                                <option value="pending">QR ล็อคยอดคงเหลือ</option>
+                            </select>
                         </div>
-                        <select id="qrAmountLockMode" onchange="syncInputToPreview()" class="bg-slate-900 border border-slate-800 text-[10px] text-slate-300 rounded-lg px-2 py-1 focus:outline-none cursor-pointer">
-                            <option value="none">QR ไม่ระบุยอด</option>
-                            <option value="deposit" selected>QR ยอดมัดจำ</option>
-                            <option value="pending">QR ยอดคงเหลือ</option>
-                        </select>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-0.5">เลขบัญชีธนาคาร (โชว์ในบิล)</label>
+                                <input type="text" id="bankAccountInput" value="143-8-67251-2" oninput="syncInputToPreview()" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-100 font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-0.5">รหัสอ้างอิง QR (MAKE / พร้อมเพย์)</label>
+                                <input type="text" id="ppAccountInput" value="004666005272822" oninput="syncInputToPreview()" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-emerald-400 font-mono">
+                            </div>
+                        </div>
                     </div>
                     
-                    <!-- ปุ่มบันทึก Cloud หลัก (ปรับสีและข้อความตามโหมด Add / Edit อัตโนมัติ) -->
+                    <!-- ปุ่มบันทึก Cloud หลัก -->
                     <div class="pt-1">
                         <button type="button" id="btnSaveCloudMain" onclick="saveOrUpdateJobToCloud()" class="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-black py-3 px-4 rounded-xl shadow-lg shadow-sky-500/15 transition-all flex items-center justify-center gap-2 cursor-pointer text-sm active:scale-[0.99]">
                             <i class="fa-solid fa-cloud-arrow-up"></i> ☁️ บันทึกคิวงานใหม่เข้าปฏิทิน Cloud
@@ -262,182 +375,216 @@
                     </div>
                 </div>
 
-                <!-- ใบพรีวิวเอกสาร PDF / PNG (ใช้ Inline SVG ล้วน 100% เพื่อไม่ให้ไอคอนกลายเป็นสี่เหลี่ยมเวลาโหลด PNG) -->
+                <!-- 💎 ใบพรีวิวเอกสาร PDF / PNG โฉมใหม่ พร้อมโลโก้ I'M OIL PHOTO -->
                 <div class="lg:col-span-7 w-full flex justify-center">
-                    <div id="pdfCaptureArea" class="w-full max-w-[620px] bg-white p-6 rounded-2xl border border-slate-200 shadow-2xl space-y-5 text-slate-800 box-border">
-                        <div class="flex justify-between items-center border-b-2 border-[#0a192f] pb-3">
-                            <div>
-                                <h2 class="text-2xl font-black tracking-wider text-[#0a192f] print-text-navy">I'M OIL PHOTO</h2>
-                                <p class="text-[10px] text-slate-400 tracking-widest uppercase font-bold">Professional Photography Service</p>
-                            </div>
-                            <div class="text-right">
-                                <p id="docTypeNumber" class="text-[11px] font-bold text-slate-500 font-mono">เลขที่เอกสาร: INV-2026-0001</p>
-                                <p class="text-[11px] text-slate-400">วันที่ออกใบ: <span id="currentInvoiceDate" class="font-bold">--/--/----</span></p>
-                            </div>
-                        </div>
+                    <div id="pdfCaptureArea" class="w-full max-w-[640px] bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden text-slate-800 box-border">
+                        
+                        <!-- แถบสีทอง-กรมท่าพรีเมียมด้านบนสุด -->
+                        <div class="h-2.5 bg-gradient-to-r from-[#0a192f] via-amber-500 to-[#0a192f]"></div>
 
-                        <div class="bg-[#0a192f] text-white rounded-xl p-4 flex justify-between items-center print-dark-box">
-                            <div>
-                                <span id="bannerSub" class="text-[10px] font-bold text-sky-400 uppercase tracking-widest block">Booking Confirmation</span>
-                                <h3 id="bannerMain" class="text-base font-bold text-white mt-0.5">ใบยืนยันการจองคิวงานถ่ายภาพ</h3>
+                        <div class="p-6 sm:p-8 space-y-6">
+                            <!-- 1. ส่วนหัวแบรนด์ (โลโก้ I'M OIL PHOTO) & เลขที่เอกสาร -->
+                            <div class="flex justify-between items-center border-b border-slate-200 pb-4">
+                                <div class="flex items-center">
+                                    <!-- ถ้าระบบหาไฟล์ logo.png เจอ หรืออัปโหลดโลโก้ไว้ จะโชว์รูปภาพ ถ้าไม่เจอจะโชว์ Vector โลโก้ที่เหมือนกันเป๊ะแทนทันที -->
+                                    <img id="invoiceBrandLogoImg" src="logo.png" alt="I'M OIL PHOTO" class="h-14 sm:h-16 w-auto object-contain hidden" onload="this.classList.remove('hidden'); document.getElementById('invoiceBrandLogoSvg').classList.add('hidden');" onerror="this.classList.add('hidden'); document.getElementById('invoiceBrandLogoSvg').classList.remove('hidden');">
+                                    
+                                    <svg id="invoiceBrandLogoSvg" class="h-14 sm:h-16 w-auto" viewBox="0 0 520 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <!-- ปุ่มชัตเตอร์ซ้าย -->
+                                        <rect x="22" y="34" width="24" height="9" rx="4" fill="#111111"/>
+                                        <!-- หัวกะโหลกกล้อง -->
+                                        <path d="M52 38L63 14H103L116 44C106 37 94 34 81 34C69 34 59 36 52 38Z" fill="#111111"/>
+                                        <!-- บอดี้กล้องซ้าย -->
+                                        <path d="M51 134H22C11 134 4 126 4 115V56C4 45 11 38 22 38H52C34 49 23 68 23 90C23 109 34 125 51 134Z" fill="#111111"/>
+                                        <!-- วงแหวนเลนส์ -->
+                                        <circle cx="83" cy="88" r="52" stroke="#111111" stroke-width="4.5" fill="white"/>
+                                        <circle cx="83" cy="88" r="42" stroke="#111111" stroke-width="2.5" fill="white"/>
+                                        <!-- แสงสะท้อนหน้าเลนส์ -->
+                                        <path d="M52 66C60 54 74 48 89 50" stroke="#111111" stroke-width="2.2" stroke-linecap="round"/>
+                                        <path d="M62 121C82 128 106 118 114 97" stroke="#111111" stroke-width="4.2" stroke-linecap="round"/>
+                                        <!-- เส้นคั่นกลางเรียวแหลม -->
+                                        <path d="M150 10Q153.5 78 150 146Q146.5 78 150 10Z" fill="#111111"/>
+                                        <!-- ข้อความ Photography & I'MOILPHOTO -->
+                                        <text x="165" y="96" font-family="'Caveat', 'Brush Script MT', cursive" font-size="76" font-weight="700" fill="#111111">Photography</text>
+                                        <text x="172" y="133" font-family="'Anuphan', sans-serif" font-size="21" font-weight="700" letter-spacing="8.5" fill="#111111">I'MOILPHOTO</text>
+                                    </svg>
+                                </div>
+                                <div class="text-right space-y-1 shrink-0">
+                                    <span id="docTypeNumber" class="inline-block bg-slate-100 border border-slate-200 text-[#0a192f] text-[11px] font-bold px-3 py-1 rounded-lg font-mono">เลขที่เอกสาร: INV-2026-0001</span>
+                                    <p class="text-xs text-slate-500 font-medium">วันที่ออกเอกสาร: <span id="currentInvoiceDate" class="font-bold text-slate-800">--/--/----</span></p>
+                                </div>
                             </div>
-                            <span id="badgeStatus" class="bg-emerald-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-lg shadow-md inline-flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/></svg>
-                                <span>คอนเฟิร์มคิวแล้ว</span>
-                            </span>
-                        </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start pt-1">
-                            <div class="md:col-span-7 space-y-3">
-                                <div class="text-[11px] font-bold text-[#0a192f] tracking-wide border-b border-slate-200 pb-1 uppercase print-text-navy flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5 text-slate-400 fill-current shrink-0" viewBox="0 0 512 512"><path d="M149.1 64.8L138.7 96H64C28.7 96 0 124.7 0 160V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H373.3L362.9 64.8C356.4 45.2 338.1 32 317.4 32H194.6c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"/></svg>
-                                    <span>รายละเอียดการนัดหมาย</span>
+                            <!-- 2. แบนเนอร์หัวข้อเอกสาร & ป้ายสถานะ -->
+                            <div class="bg-[#0a192f] text-white rounded-2xl p-5 flex justify-between items-center shadow-lg print-dark-box">
+                                <div class="space-y-0.5">
+                                    <span id="bannerSub" class="text-[11px] font-bold text-amber-400 uppercase tracking-widest block">Official Booking Confirmation</span>
+                                    <h3 id="bannerMain" class="text-lg sm:text-xl font-bold text-white tracking-wide">ใบยืนยันการจองคิวงานถ่ายภาพ</h3>
                                 </div>
-                                <div class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
-                                    <!-- ชื่อผู้จอง -->
-                                    <div class="grid grid-cols-12 py-2 items-center">
-                                        <span class="col-span-1 flex items-center text-slate-400">
-                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg>
-                                        </span>
-                                        <span class="col-span-4 text-slate-400 pl-1">ชื่อผู้จอง</span>
-                                        <span id="prevName" class="col-span-7 text-slate-900 font-bold">คุณ Wilawan</span>
-                                    </div>
-                                    <!-- เบอร์ติดต่อ -->
-                                    <div class="grid grid-cols-12 py-2 items-center">
-                                        <span class="col-span-1 flex items-center text-slate-400">
-                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 512 512"><path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z"/></svg>
-                                        </span>
-                                        <span class="col-span-4 text-slate-400 pl-1">เบอร์ติดต่อ</span>
-                                        <span id="prevPhone" class="col-span-7 text-slate-900 font-mono">0924012063</span>
-                                    </div>
-                                    <!-- ประเภทงาน -->
-                                    <div class="grid grid-cols-12 py-2 items-center">
-                                        <span class="col-span-1 flex items-center text-slate-400">
-                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 640 512"><path d="M320 32c-8.1 0-16.1 1.4-23.7 4.1L15.8 137.4C6.3 140.9 0 149.9 0 160s6.3 19.1 15.8 22.6l57.9 20.9C57.3 229.3 48 259.8 48 291.9v28.1c0 28.4-10.8 57.7-22.3 80.8c-6.5 13-13.9 25.8-22.5 37.6C0 442.7-.9 448.3 .9 453.4s6 8.9 11.2 10.2l64 16c4.2 1.1 8.7 .3 12.4-2s6.3-6.1 7.1-10.4c8.6-42.8 4.3-81.2-2.1-108.7C90.3 344.3 86 329.8 80 316.5V291.9c0-30.2 10.2-58.7 27.9-81.5c12.9-15.5 29.6-28 49.2-35.7l157-61.7c8.2-3.2 17.5 .8 20.7 9s-.8 17.5-9 20.7l-157 61.7c-12.4 4.9-23.3 12.4-32.2 21.6l159.6 57.6c7.6 2.7 15.6 4.1 23.7 4.1s16.1-1.4 23.7-4.1L624.2 182.6c9.5-3.4 15.8-12.5 15.8-22.6s-6.3-19.1-15.8-22.6L343.7 36.1C336.1 33.4 328.1 32 320 32zM128 408c0 35.3 86 72 192 72s192-36.7 192-72L496.7 262.6 354.5 314c-11.1 4-22.8 6-34.5 6s-23.5-2-34.5-6L143.3 262.6 128 408z"/></svg>
-                                        </span>
-                                        <span class="col-span-4 text-slate-400 pl-1">ประเภทงาน</span>
-                                        <span id="prevPackage" class="col-span-7 text-slate-800">รับปริญญา/นอกรอบ</span>
-                                    </div>
-                                    <!-- วันที่ถ่ายงาน -->
-                                    <div class="grid grid-cols-12 py-2 items-center">
-                                        <span class="col-span-1 flex items-center text-slate-400">
-                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 448 512"><path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zm64 80v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16z"/></svg>
-                                        </span>
-                                        <span class="col-span-4 text-slate-400 pl-1">วันที่ถ่ายงาน</span>
-                                        <span id="prevDate" class="col-span-7 text-slate-900 font-bold">30 ตุลาคม 2569</span>
-                                    </div>
-                                    <!-- ช่วงเวลา -->
-                                    <div class="grid grid-cols-12 py-2 items-center">
-                                        <span class="col-span-1 flex items-center text-slate-400">
-                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 512 512"><path d="M256 0a256 256 0 1 1 0 512A256 256 0 1 1 256 0zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/></svg>
-                                        </span>
-                                        <span class="col-span-4 text-slate-400 pl-1">ช่วงเวลา</span>
-                                        <span id="prevTime" class="col-span-7 text-slate-900 font-bold">ช่วงเช้า</span>
-                                    </div>
-                                    <!-- สถานที่นัด -->
-                                    <div class="grid grid-cols-12 py-2 items-start">
-                                        <span class="col-span-1 flex items-center text-rose-500 mt-0.5">
-                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 384 512"><path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg>
-                                        </span>
-                                        <span class="col-span-4 text-slate-400 pl-1">สถานที่นัด</span>
-                                        <span id="prevLocation" class="col-span-7 text-slate-800 leading-tight">มหาวิทยาลัยราชภัฏอุดรธานี สามพร้าว</span>
-                                    </div>
-                                </div>
+                                <span id="badgeStatus" class="bg-emerald-400 text-slate-950 font-black text-xs px-3.5 py-2 rounded-xl shadow-md inline-flex items-center gap-1.5 shrink-0">
+                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/></svg>
+                                    <span>คอนเฟิร์มคิวแล้ว</span>
+                                </span>
                             </div>
-                            
-                            <div class="md:col-span-5 bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-4 print-box">
-                                <div class="text-[10px] font-bold text-slate-400 tracking-wider uppercase border-b border-slate-200 pb-1">บัญชีและค่าบริการ</div>
-                                <div class="space-y-1">
-                                    <span class="text-[11px] text-slate-400 block font-medium">ราคาเต็มแพ็กเกจ:</span>
-                                    <div class="flex justify-between items-baseline"><span id="prevTotal" class="text-2xl font-black text-[#0a192f] font-mono">฿4,000</span><span class="text-[10px] font-bold text-slate-400">Total</span></div>
-                                </div>
-                                <div class="space-y-1 border-t border-slate-200 pt-2">
-                                    <span class="text-[11px] text-slate-400 block font-medium">มัดจำล็อคคิวแล้ว:</span>
-                                    <div class="flex justify-between items-baseline"><span id="prevDeposit" class="text-xl font-bold text-emerald-700 font-mono print-text-emerald">- ฿1,000</span><span class="text-[10px] font-bold text-slate-400">บาท</span></div>
-                                </div>
-                                <div class="bg-slate-100 rounded-xl p-3 border border-slate-200/50 space-y-1 text-xs">
-                                    <span class="text-[11px] text-slate-500 block font-bold">ยอดคงเหลือจ่ายหน้างาน:</span>
-                                    <div class="flex justify-between items-baseline"><span id="prevPending" class="text-xl font-black text-rose-600 font-mono print-text-rose">฿3,000</span><span class="text-[10px] font-bold text-slate-500">บาท</span></div>
-                                </div>
-                                <div class="bg-[#0a192f] text-white font-bold text-[10px] py-2 px-1 rounded-lg text-center shadow-sm print-dark-box">ชำระยอดคงเหลือหลังจบกองถ่ายงานทันที</div>
-                            </div>
-                        </div>
 
-                        <!-- กล่องพร้อมเพย์ + QR Code อัตโนมัติ -->
-                        <div id="receiptQrContainer" class="hidden bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center justify-between gap-4 text-xs print-box">
-                            <div class="space-y-1">
-                                <span id="qrAmountTag" class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded inline-block">ช่องทางชำระเงิน / โอนมัดจำ</span>
-                                <div class="text-sm font-bold text-slate-900">พร้อมเพย์: <span id="ppAccountLabelText" class="text-emerald-700 font-mono text-base">064-550-3701</span></div>
-                                <div class="text-[11px] text-slate-600 font-medium">ชื่อบัญชี: สุพจน์ สำอางค์ญาติ (I'M OIL PHOTO)</div>
-                                <div class="text-[10px] text-slate-400">สแกน QR Code เพื่อโอนยอดตามระบุได้ทันที</div>
-                            </div>
-                            <div class="bg-white p-1.5 rounded-lg border border-slate-200 shadow-sm shrink-0">
-                                <img id="ppQrImage" crossOrigin="anonymous" src="" alt="PromptPay QR" class="w-20 h-20 object-contain" onerror="this.style.display='none'">
-                            </div>
-                        </div>
+                            <!-- 3. ข้อมูลนัดหมาย (ซ้าย) & สรุปยอดเงิน (ขวา) -->
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+                                
+                                <!-- คอลัมน์ซ้าย: รายละเอียดการนัดหมาย -->
+                                <div class="md:col-span-7 bg-slate-50/70 border border-slate-200/90 rounded-2xl p-5 flex flex-col justify-between print-box">
+                                    <div class="text-xs font-extrabold text-[#0a192f] tracking-wider uppercase border-b border-slate-200 pb-2.5 mb-3 flex items-center gap-2 print-text-navy">
+                                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                        <span>ข้อมูลผู้จองและกำหนดการนัดหมาย</span>
+                                    </div>
 
-                        <div class="text-center text-xs font-semibold text-slate-600 tracking-wide border-t border-slate-100 pt-4 pb-1">
-                            <p class="leading-relaxed text-slate-500 flex items-center justify-center gap-1.5 flex-wrap">
-                                <svg class="w-3.5 h-3.5 text-rose-500 fill-current inline-block shrink-0" viewBox="0 0 512 512"><path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/></svg>
-                                <span>ขอขอบพระคุณที่ไว้วางใจให้ <strong class="font-bold text-[#0a192f] print-text-navy">I'M OIL PHOTO</strong> ได้บันทึกภาพความทรงจำในวันสำคัญของคุณครับ</span>
-                            </p>
+                                    <div class="space-y-3 text-sm">
+                                        <!-- ชื่อผู้จอง -->
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#0a192f] shrink-0 shadow-2xs">
+                                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg>
+                                            </div>
+                                            <div class="flex-1">
+                                                <span class="text-[11px] text-slate-400 font-bold block leading-none">ชื่อลูกค้า / ผู้จองคิว</span>
+                                                <span id="prevName" class="text-base font-extrabold text-slate-900 mt-0.5 block">คุณ Wilawan</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- เบอร์ติดต่อ & ประเภทงาน -->
+                                        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200/60">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 shrink-0">
+                                                    <svg class="w-3 h-3 fill-current" viewBox="0 0 512 512"><path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z"/></svg>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] text-slate-400 font-bold block leading-none">เบอร์โทรศัพท์</span>
+                                                    <span id="prevPhone" class="text-xs font-bold text-slate-800 font-mono mt-0.5 block">0924012063</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 shrink-0">
+                                                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 640 512"><path d="M320 32c-8.1 0-16.1 1.4-23.7 4.1L15.8 137.4C6.3 140.9 0 149.9 0 160s6.3 19.1 15.8 22.6l57.9 20.9C57.3 229.3 48 259.8 48 291.9v28.1c0 28.4-10.8 57.7-22.3 80.8c-6.5 13-13.9 25.8-22.5 37.6C0 442.7-.9 448.3 .9 453.4s6 8.9 11.2 10.2l64 16c4.2 1.1 8.7 .3 12.4-2s6.3-6.1 7.1-10.4c8.6-42.8 4.3-81.2-2.1-108.7C90.3 344.3 86 329.8 80 316.5V291.9c0-30.2 10.2-58.7 27.9-81.5c12.9-15.5 29.6-28 49.2-35.7l157-61.7c8.2-3.2 17.5 .8 20.7 9s-.8 17.5-9 20.7l-157 61.7c-12.4 4.9-23.3 12.4-32.2 21.6l159.6 57.6c7.6 2.7 15.6 4.1 23.7 4.1s16.1-1.4 23.7-4.1L624.2 182.6c9.5-3.4 15.8-12.5 15.8-22.6s-6.3-19.1-15.8-22.6L343.7 36.1C336.1 33.4 328.1 32 320 32zM128 408c0 35.3 86 72 192 72s192-36.7 192-72L496.7 262.6 354.5 314c-11.1 4-22.8 6-34.5 6s-23.5-2-34.5-6L143.3 262.6 128 408z"/></svg>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] text-slate-400 font-bold block leading-none">ประเภทงาน</span>
+                                                    <span id="prevPackage" class="text-xs font-bold text-slate-800 mt-0.5 block">รับปริญญา/นอกรอบ</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- วันที่ถ่ายงาน & ช่วงเวลา -->
+                                        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200/60">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
+                                                    <svg class="w-3 h-3 fill-current" viewBox="0 0 448 512"><path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zm64 80v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16z"/></svg>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] text-slate-400 font-bold block leading-none">วันที่นัดถ่ายงาน</span>
+                                                    <span id="prevDate" class="text-xs font-extrabold text-[#0a192f] mt-0.5 block">30 ตุลาคม 2569</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 shrink-0">
+                                                    <svg class="w-3 h-3 fill-current" viewBox="0 0 512 512"><path d="M256 0a256 256 0 1 1 0 512A256 256 0 1 1 256 0zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/></svg>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] text-slate-400 font-bold block leading-none">ช่วงเวลานัดหมาย</span>
+                                                    <span id="prevTime" class="text-xs font-bold text-slate-800 mt-0.5 block">ช่วงเช้า</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- สถานที่นัดหมาย -->
+                                        <div class="flex items-start gap-3 pt-2 border-t border-slate-200/60">
+                                            <div class="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 shrink-0 mt-0.5">
+                                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 384 512"><path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg>
+                                            </div>
+                                            <div class="flex-1">
+                                                <span class="text-[11px] text-slate-400 font-bold block leading-none">สถานที่นัดหมาย</span>
+                                                <span id="prevLocation" class="text-xs font-bold text-slate-800 leading-snug mt-1 block">มหาวิทยาลัยราชภัฏอุดรธานี สามพร้าว</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- คอลัมน์ขวา: สรุปค่าบริการและการเงิน -->
+                                <div class="md:col-span-5 bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col justify-between space-y-4 print-box">
+                                    <div>
+                                        <div class="text-xs font-extrabold text-[#0a192f] tracking-wider uppercase border-b border-slate-200 pb-2.5 mb-3 flex items-center justify-between print-text-navy">
+                                            <span>สรุปยอดค่าบริการ</span>
+                                            <span class="text-[10px] text-slate-400 font-mono">THB (฿)</span>
+                                        </div>
+
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between items-baseline">
+                                                <span class="text-xs text-slate-500 font-semibold">ราคาแพ็กเกจรวม</span>
+                                                <span id="prevTotal" class="text-xl font-black text-[#0a192f] font-mono">฿4,000</span>
+                                            </div>
+
+                                            <div class="flex justify-between items-baseline border-t border-dashed border-slate-200 pt-2.5">
+                                                <span class="text-xs text-emerald-700 font-bold">มัดจำล็อคคิวแล้ว</span>
+                                                <span id="prevDeposit" class="text-lg font-extrabold text-emerald-600 font-mono print-text-emerald">- ฿1,000</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-2.5">
+                                        <div class="bg-rose-50/80 border border-rose-200 rounded-xl p-3.5 space-y-1">
+                                            <span class="text-[11px] text-rose-700 block font-extrabold uppercase tracking-wide">ยอดคงเหลือชำระหน้างาน</span>
+                                            <div class="flex justify-between items-baseline">
+                                                <span id="prevPending" class="text-2xl font-black text-rose-600 font-mono print-text-rose">฿3,000</span>
+                                                <span class="text-xs font-bold text-rose-500">บาทถ้วน</span>
+                                            </div>
+                                        </div>
+                                        <div class="bg-[#0a192f] text-amber-400 font-bold text-[10px] py-2 px-2 rounded-xl text-center shadow-xs print-dark-box">
+                                            ชำระยอดคงเหลือหลังจบการถ่ายภาพทันที
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. กล่อง QR Code MAKE by KBank & เลขบัญชี -->
+                            <div id="receiptQrContainer" class="bg-gradient-to-r from-slate-50 via-white to-slate-50 border-2 border-slate-200 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 print-box">
+                                <div class="space-y-1.5 text-center sm:text-left">
+                                    <div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                                        <span class="bg-[#0a192f] text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md tracking-wider print-dark-box">THAI QR PAYMENT</span>
+                                        <span id="qrAmountTag" class="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-md inline-block">สแกน QR โอนได้ทุกธนาคาร</span>
+                                    </div>
+                                    <div class="pt-1">
+                                        <span class="text-[11px] text-slate-400 font-bold block">ธนาคารกสิกรไทย (MAKE by KBank)</span>
+                                        <span id="bankAccountLabelText" class="text-lg font-black text-emerald-700 font-mono tracking-wide block">143-8-67251-2</span>
+                                    </div>
+                                    <div class="text-xs text-slate-800 font-extrabold">ชื่อบัญชี: นาย สุพจน์ สำอางค์ญาติ (I'M OIL PHOTO)</div>
+                                    <div class="text-[10px] text-slate-400 font-mono">PromptPay / เลขที่อ้างอิง: <span id="ppAccountLabelText">004666005272822</span></div>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-2xl border-2 border-[#0a192f]/15 shadow-md shrink-0 flex flex-col items-center">
+                                    <img id="ppQrImage" src="" alt="PromptPay QR" class="w-24 h-24 object-contain">
+                                    <span class="text-[9px] font-extrabold text-[#0a192f] mt-1 tracking-widest uppercase">SCAN TO PAY</span>
+                                </div>
+                            </div>
+
+                            <!-- 5. ฟุตเตอร์คำขอบคุณและเงื่อนไขการส่งงาน -->
+                            <div class="border-t border-slate-200 pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 font-medium">
+                                <div class="flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-rose-500 fill-current shrink-0" viewBox="0 0 512 512"><path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/></svg>
+                                    <span>ขอบพระคุณที่ไว้วางใจให้ <strong class="font-bold text-[#0a192f] print-text-navy">I'M OIL PHOTO</strong> ดูแลความทรงจำในวันสำคัญครับ</span>
+                                </div>
+                                <span class="text-[10px] text-slate-400 font-bold bg-slate-100 px-2.5 py-1 rounded-md">ส่งรูป Demo ใน 2 วัน • ส่งงานเต็มใน 7 วัน</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- CALENDAR SECTION -->
-        <hr class="border-slate-800 no-print" id="lineCalendar">
-        <section id="calendar" class="space-y-6 no-print">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h2 id="calendarSectionTitle" class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-calendar-days mr-2"></i>คิวงาน & ปฏิทินรายเดือน (แยกสีงาน)</h2>
-                    <p id="calendarSectionDesc" class="text-sm text-slate-400">💡 คลิกที่วันที่มีแถบสีเพื่อดูรายละเอียด หรือคลิกช่องวันว่างเพื่อตั้งวันที่ลงคิวงานใหม่ด้านบนได้ทันที</p>
-                </div>
-                <button onclick="jumpToNewJobForm()" id="btnAddNewJobAdmin" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-lg shadow-amber-500/10"><i class="fa-solid fa-arrow-up mr-1.5"></i>ไปที่ฟอร์มลงคิวงานใหม่ด้านบน</button>
-            </div>
-            <!-- แถบสัญลักษณ์สีปฏิทิน -->
-            <div id="calendarBadgesContainer" class="flex flex-wrap gap-4 bg-slate-900 p-3.5 rounded-xl border border-slate-800 text-xs"></div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                        <h3 id="calendarMonthTitle" class="font-bold text-lg text-slate-200">พ.ศ. ---</h3>
-                        <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs">
-                            <button onclick="navigateMonth(-1)" class="text-slate-400 hover:text-amber-400 px-1.5 py-1 cursor-pointer" title="เดือนก่อนหน้า"><i class="fa-solid fa-chevron-left"></i></button>
-                            <div class="flex items-center gap-1.5 border-r border-slate-800 pr-2"><i class="fa-solid fa-calendar text-amber-400 text-[10px]"></i>
-                                <select id="globalYearSelect" onchange="changeSystemMonth()" class="bg-transparent text-slate-200 font-semibold focus:outline-none cursor-pointer">
-                                    <option value="2025">พ.ศ. 2568</option>
-                                    <option value="2026" selected>พ.ศ. 2569</option>
-                                    <option value="2027">พ.ศ. 2570</option>
-                                </select>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <select id="globalMonthSelect" onchange="changeSystemMonth()" class="bg-transparent text-slate-200 font-semibold focus:outline-none cursor-pointer">
-                                    <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option><option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option><option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
-                                </select>
-                            </div>
-                            <button onclick="navigateMonth(1)" class="text-slate-400 hover:text-amber-400 px-1.5 py-1 cursor-pointer" title="เดือนถัดไป"><i class="fa-solid fa-chevron-right"></i></button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-7 gap-2 text-center text-xs font-medium text-slate-400 mb-2"><div>อา</div><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div></div>
-                    <div id="calendarGrid" class="grid grid-cols-7 gap-2 text-center text-sm"></div>
-                </div>
-                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                        <h3 id="jobListTitle" class="font-semibold text-slate-300">ตารางคิวงานประจำเดือน</h3>
-                        <span id="jobListCountBadge" class="text-[11px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-md font-mono font-bold">0 คิว</span>
-                    </div>
-                    <div id="todayJobsContainer" class="space-y-3 max-h-96 overflow-y-auto pr-1"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- FINANCE MANAGEMENT -->
-        <hr class="border-slate-800 no-print" id="lineFinance">
-        <section id="finance" class="space-y-4 no-print">
+        <!-- ========================================================================= -->
+        <!-- TAB 3: FINANCE MANAGEMENT -->
+        <!-- ========================================================================= -->
+        <div id="tabView-finance" class="space-y-5 tab-animate hidden no-print">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                <h2 class="text-xl font-bold text-amber-400"><i class="fa-solid fa-wallet mr-2"></i>จัดการมัดจำ เก็บเงิน และส่งลิงก์รูปภาพ</h2>
+                <div>
+                    <h2 class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-wallet mr-2"></i>จัดการมัดจำ เก็บเงิน และส่งลิงก์รูปภาพ</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">ตรวจสอบยอดค้างชำระ กดปิดงานเมื่อรับเงินครบ และส่งออกรายงานบัญชี CSV</p>
+                </div>
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
                     <select id="filterFinanceStatus" onchange="renderFinanceTable()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 cursor-pointer">
                         <option value="all">📋 สถานะทั้งหมด</option>
@@ -461,14 +608,23 @@
                     </table>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- CUSTOMERS -->
-        <hr class="border-slate-800 no-print" id="lineCustomers">
-        <section id="customers" class="space-y-4 no-print">
-            <h2 class="text-xl font-bold text-amber-400"><i class="fa-solid fa-users mr-2"></i>สมุดรายชื่อลูกค้าประจำเดือน</h2>
+        <!-- ========================================================================= -->
+        <!-- TAB 4: CUSTOMERS -->
+        <!-- ========================================================================= -->
+        <div id="tabView-customers" class="space-y-5 tab-animate hidden no-print">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                    <h2 class="text-2xl font-bold text-amber-400"><i class="fa-solid fa-users mr-2"></i>สมุดรายชื่อลูกค้าประจำเดือน</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">ข้อมูลติดต่อ เบอร์โทรศัพท์ และลิงก์แชทของลูกค้าในเดือนที่เลือก</p>
+                </div>
+                <button onclick="jumpToNewJobForm()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-plus"></i> เพิ่มคิวลูกค้าใหม่
+                </button>
+            </div>
             <div id="customerGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-        </section>
+        </div>
 
     </main>
 
@@ -609,6 +765,7 @@
         let filteredJobs = [];
         let activeTemplateMode = 'booking';
         let currentSystemView = 'admin';
+        let currentActiveTab = 'dashboard';
         let invoiceDatePicker = null;
         let selectedActiveJobId = null;
         let currentInvoiceDocId = '0001';
@@ -640,6 +797,71 @@
             }, 3200);
         }
 
+        // 🖼️ รองรับการเลือกไฟล์โลโก้จากเครื่องและจำไว้ใน LocalStorage
+        function handleCustomLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                try { localStorage.setItem('oilphoto_custom_logo', dataUrl); } catch (err) {}
+                applyCustomLogoDataUrl(dataUrl);
+                showToast("อัปเดตโลโก้แบรนด์เรียบร้อย!");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function applyCustomLogoDataUrl(dataUrl) {
+            if (!dataUrl) return;
+            const invImg = document.getElementById('invoiceBrandLogoImg');
+            const invSvg = document.getElementById('invoiceBrandLogoSvg');
+            const sideImg = document.getElementById('sidebarBrandLogoImg');
+            const sideSvg = document.getElementById('sidebarBrandLogoSvg');
+            if (invImg && invSvg) {
+                invImg.src = dataUrl;
+                invImg.classList.remove('hidden');
+                invSvg.classList.add('hidden');
+            }
+            if (sideImg && sideSvg) {
+                sideImg.src = dataUrl;
+                sideImg.classList.remove('hidden');
+                sideSvg.classList.add('hidden');
+            }
+        }
+
+        function switchAppTab(tabName) {
+            if (currentSystemView === 'public') tabName = 'dashboard';
+            currentActiveTab = tabName;
+
+            const tabs = ['dashboard', 'quotation', 'finance', 'customers'];
+
+            tabs.forEach(t => {
+                const viewEl = document.getElementById(`tabView-${t}`);
+                const deskBtn = document.getElementById(`navBtn-${t}`);
+                const mobBtn = document.getElementById(`mobNavBtn-${t}`);
+
+                if (t === tabName) {
+                    if (viewEl) viewEl.classList.remove('hidden');
+                    if (deskBtn) {
+                        deskBtn.className = "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all cursor-pointer bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/10";
+                    }
+                    if (mobBtn) {
+                        mobBtn.className = "flex flex-col items-center justify-center py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-[10px] gap-1 transition-all";
+                    }
+                } else {
+                    if (viewEl) viewEl.classList.add('hidden');
+                    if (deskBtn) {
+                        deskBtn.className = "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all cursor-pointer text-slate-300 hover:bg-slate-800 hover:text-amber-400";
+                    }
+                    if (mobBtn) {
+                        mobBtn.className = "flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 font-medium text-[10px] gap-1 transition-all";
+                    }
+                }
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function getTodayFormatted() {
             const now = new Date();
             const y = now.getFullYear();
@@ -662,8 +884,10 @@
         function generatePromptPayPayload(target, amount) {
             const cleanTarget = target.replace(/[^0-9]/g, '');
             let targetTag = '';
-            if (cleanTarget.length >= 13) {
-                targetTag = '0213' + cleanTarget.substring(0, 13);
+            if (cleanTarget.length === 15) {
+                targetTag = '0315' + cleanTarget;
+            } else if (cleanTarget.length === 13) {
+                targetTag = '0213' + cleanTarget;
             } else {
                 const formattedPhone = '0066' + cleanTarget.replace(/^0/, '');
                 targetTag = '0113' + formattedPhone;
@@ -689,6 +913,14 @@
             return payload + crc.toString(16).toUpperCase().padStart(4, '0');
         }
 
+        function createLocalQrDataUrl(payloadText) {
+            if (typeof qrcode === 'undefined') return '';
+            const qr = qrcode(0, 'M');
+            qr.addData(payloadText);
+            qr.make();
+            return qr.createDataURL(6, 2);
+        }
+
         function getDaysCountdownBadge(dateStr, isClosed) {
             if (isClosed) return `<span class="text-[10px] bg-red-500/15 text-red-400 px-2 py-0.5 rounded font-bold">ปิดงานแล้ว</span>`;
             if (!dateStr || !dateStr.includes('-')) return '';
@@ -707,6 +939,9 @@
                 
                 const savedGoal = localStorage.getItem('oilphoto_monthly_goal');
                 if (savedGoal) document.getElementById('monthlyGoalInput').value = savedGoal;
+
+                const savedLogo = localStorage.getItem('oilphoto_custom_logo');
+                if (savedLogo) applyCustomLogoDataUrl(savedLogo);
 
                 const todayStr = getTodayFormatted();
                 invoiceDatePicker = flatpickr("#custDate", { locale: "th", dateFormat: "Y-m-d", defaultDate: todayStr, disableMobile: "true", onChange: () => syncInputToPreview() });
@@ -769,7 +1004,6 @@
             showToast(`เลือกแพ็กเกจ ${pkgType} (฿${totalPrice.toLocaleString()}) แล้ว`);
         }
 
-        // 🔄 เคลียร์ฟอร์มรวมศูนย์เพื่อเริ่มลงคิวงานใหม่
         function resetUnifiedForm(presetDate = null) {
             document.getElementById('editingJobId').value = '';
             document.getElementById('custName').value = '';
@@ -800,11 +1034,10 @@
 
         function jumpToNewJobForm(presetDate = null) {
             resetUnifiedForm(presetDate);
-            window.scrollTo({ top: document.getElementById('quotation').offsetTop - 20, behavior: 'smooth' });
-            setTimeout(() => document.getElementById('custName').focus(), 400);
+            switchAppTab('quotation');
+            setTimeout(() => document.getElementById('custName').focus(), 200);
         }
 
-        // ☁️ บันทึกงานใหม่ หรือ อัปเดตงานเดิม ในปุ่มเดียว
         async function saveOrUpdateJobToCloud() {
             if (!supabaseClient) return;
             const editId = document.getElementById('editingJobId').value.trim();
@@ -844,26 +1077,23 @@
             btn.disabled = false;
             if (!res.error) {
                 showToast(editId ? `อัปเดตข้อมูล "${name}" เรียบร้อย!` : `เพิ่มคิวงาน "${name}" เข้าปฏิทิน Cloud สำเร็จ!`);
-                // ซิงค์เดือนในปฏิทินให้ตรงกับวันที่งานที่เพิ่งบันทึก
                 const parts = dateVal.split('-');
                 if (parts.length >= 2) {
                     document.getElementById('globalYearSelect').value = parts[0];
                     document.getElementById('globalMonthSelect').value = parts[1];
                 }
                 await loadJobsFromCloud();
-                if (!editId) {
-                    // อัปเดตสถานะปุ่มหลังเพิ่มเสร็จ
-                    btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> ☁️ บันทึกคิวงานใหม่เข้าปฏิทิน Cloud`;
-                } else {
-                    btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> 💾 บันทึกแก้ไขคิวงานเดิม (#${editId})`;
-                }
+                btn.innerHTML = editId
+                    ? `<i class="fa-solid fa-floppy-disk"></i> 💾 บันทึกแก้ไขคิวงานเดิม (#${editId})`
+                    : `<i class="fa-solid fa-cloud-arrow-up"></i> ☁️ บันทึกคิวงานใหม่เข้าปฏิทิน Cloud`;
             } else {
                 showToast("เกิดข้อผิดพลาดในการบันทึก", "error");
-                btn.innerHTML = editId ? `<i class="fa-solid fa-floppy-disk"></i> 💾 บันทึกแก้ไขคิวงานเดิม (#${editId})` : `<i class="fa-solid fa-cloud-arrow-up"></i> ☁️ บันทึกคิวงานใหม่เข้าปฏิทิน Cloud`;
+                btn.innerHTML = editId
+                    ? `<i class="fa-solid fa-floppy-disk"></i> 💾 บันทึกแก้ไขคิวงานเดิม (#${editId})`
+                    : `<i class="fa-solid fa-cloud-arrow-up"></i> ☁️ บันทึกคิวงานใหม่เข้าปฏิทิน Cloud`;
             }
         }
 
-        // 🤖 AI สแกนแชทลงฟอร์มรวมศูนย์ทันทีพร้อมอัปเดตใบจองพรีวิว
         function runAiExtractionUnified() {
             const raw = document.getElementById('aiRawText').value;
             if (!raw) {
@@ -936,17 +1166,9 @@
             const stats = document.getElementById('adminStatsCards');
             const btnAdd = document.getElementById('btnAddNewJobAdmin');
             const btnShare = document.getElementById('btnSharePublicLink');
-            const menuCal = document.getElementById('menuCalendar');
-            const menuFin = document.getElementById('menuFinance');
-            const menuCust = document.getElementById('menuCustomers');
-            const secFin = document.getElementById('finance');
-            const secCust = document.getElementById('customers');
             const goalSec = document.getElementById('adminGoalSection');
             const sideNav = document.getElementById('sidebarNavLinks');
-            const quotSec = document.getElementById('quotation');
-            const lineCal = document.getElementById('lineCalendar');
-            const lineFin = document.getElementById('lineFinance');
-            const lineCust = document.getElementById('lineCustomers');
+            const mobNav = document.getElementById('mobileBottomNav');
 
             currentSystemView = mode;
             if (mode === 'public') {
@@ -958,35 +1180,21 @@
                 btnAdd.classList.add('hidden');
                 btnShare.classList.add('hidden');
                 goalSec.classList.add('hidden');
-                quotSec.classList.add('hidden');
                 sideNav.classList.add('hidden');
-                menuCal.classList.add('hidden');
-                menuFin.classList.add('hidden');
-                menuCust.classList.add('hidden');
-                secFin.classList.add('hidden');
-                secCust.classList.add('hidden');
-                lineCal.classList.add('hidden');
-                lineFin.classList.add('hidden');
-                lineCust.classList.add('hidden');
+                sideNav.classList.remove('md:block');
+                mobNav.classList.add('hidden');
+                switchAppTab('dashboard');
             } else {
                 btnAdm.className = "flex-1 bg-amber-500 text-slate-950 py-2 rounded-lg text-center cursor-pointer font-bold";
                 btnPub.className = "flex-1 text-slate-400 py-2 rounded-lg transition-all text-center cursor-pointer";
-                document.getElementById('mainDashboardTitle').innerText = 'ภาพรวมธุรกิจหลังบ้านช่างภาพ';
-                document.getElementById('calendarSectionDesc').innerText = '💡 คลิกที่วันที่มีแถบสีเพื่อดูรายละเอียด หรือคลิกช่องวันว่างเพื่อตั้งวันที่ลงคิวงานใหม่ด้านบนได้ทันที';
+                document.getElementById('mainDashboardTitle').innerText = 'ภาพรวมธุรกิจ & ปฏิทินคิวงาน';
+                document.getElementById('calendarSectionDesc').innerText = '💡 คลิกที่วันที่มีแถบสีเพื่อดูรายละเอียด หรือคลิกช่องวันว่างเพื่อเปิดหน้าลงคิวงานใหม่ทันที';
                 stats.classList.remove('hidden'); 
                 btnAdd.classList.remove('hidden');
                 btnShare.classList.remove('hidden');
                 goalSec.classList.remove('hidden');
-                quotSec.classList.remove('hidden');
-                sideNav.classList.remove('hidden');
-                menuCal.classList.remove('hidden');
-                menuFin.classList.remove('hidden');
-                menuCust.classList.remove('hidden');
-                secFin.classList.remove('hidden');
-                secCust.classList.remove('hidden');
-                lineCal.classList.remove('hidden');
-                lineFin.classList.remove('hidden');
-                lineCust.classList.remove('hidden');
+                sideNav.classList.add('md:block');
+                mobNav.classList.remove('hidden');
             }
             refreshUI();
         }
@@ -1028,6 +1236,8 @@
             document.getElementById('dashTotalJobs').innerText = totalJobs + ' คิว';
             document.getElementById('dashTotalMonthlyIncome').innerText = '฿' + totalAmount.toLocaleString();
             document.getElementById('jobListCountBadge').innerText = totalJobs + ' คิว';
+            const navBadge = document.getElementById('navBadgeJobsCount');
+            if (navBadge) navBadge.innerText = totalJobs;
         }
 
         function updateGoalProgressBar() {
@@ -1050,12 +1260,12 @@
             if (mode === 'booking') {
                 btnBooking.className = "bg-amber-500 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition-all cursor-pointer";
                 btnReceipt.className = "text-slate-400 hover:text-slate-200 font-medium text-xs px-4 py-2 rounded-lg transition-all cursor-pointer";
-                document.getElementById('bannerSub').innerText = "Booking Confirmation";
+                document.getElementById('bannerSub').innerText = "Official Booking Confirmation";
                 document.getElementById('bannerMain').innerText = "ใบยืนยันการจองคิวงานถ่ายภาพ";
             } else {
                 btnReceipt.className = "bg-amber-500 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition-all cursor-pointer";
                 btnBooking.className = "text-slate-400 hover:text-slate-200 font-medium text-xs px-4 py-2 rounded-lg transition-all cursor-pointer";
-                document.getElementById('bannerSub').innerText = "Deposit Receipt & Payment";
+                document.getElementById('bannerSub').innerText = "Official Deposit Receipt";
                 document.getElementById('bannerMain').innerText = "ใบเสร็จรับเงินมัดจำ / รายละเอียดการโอน";
             }
             syncInputToPreview();
@@ -1079,42 +1289,41 @@
             document.getElementById('prevPending').innerText = '฿' + pending.toLocaleString();
 
             const yearNow = new Date().getFullYear();
-            const qrBox = document.getElementById('receiptQrContainer');
-            const ppRaw = document.getElementById('ppAccountInput').value || '064-550-3701';
+            const bankAcc = document.getElementById('bankAccountInput')?.value || '143-8-67251-2';
+            const ppRaw = document.getElementById('ppAccountInput')?.value || '004666005272822';
             const cleanPp = ppRaw.replace(/[^0-9]/g, '');
-            const qrLockMode = document.getElementById('qrAmountLockMode')?.value || 'deposit';
+            const qrLockMode = document.getElementById('qrAmountLockMode')?.value || 'none';
 
             if (activeTemplateMode === 'booking') {
                 document.getElementById('docTypeNumber').innerText = `เลขที่เอกสาร: INV-${yearNow}-${currentInvoiceDocId}`;
-                qrBox.classList.add('hidden');
             } else {
                 document.getElementById('docTypeNumber').innerText = `เลขที่ใบเสร็จ: REC-${yearNow}-${currentInvoiceDocId}`;
-                qrBox.classList.remove('hidden');
-                document.getElementById('ppAccountLabelText').innerText = ppRaw;
-                
-                const qrImg = document.getElementById('ppQrImage');
-                const qrTag = document.getElementById('qrAmountTag');
-                if (cleanPp.length >= 10) {
-                    qrImg.style.display = 'block';
-                    let targetAmount = 0;
-                    if (qrLockMode === 'deposit' && deposit > 0) {
-                        targetAmount = deposit;
-                        qrTag.innerText = `สแกนโอนยอดมัดจำ (฿${deposit.toLocaleString()})`;
-                    } else if (qrLockMode === 'pending' && pending > 0) {
-                        targetAmount = pending;
-                        qrTag.innerText = `สแกนโอนยอดคงเหลือ (฿${pending.toLocaleString()})`;
-                    } else {
-                        qrTag.innerText = `ช่องทางชำระเงิน / โอนมัดจำ`;
-                    }
-                    const payload = generatePromptPayPayload(cleanPp, targetAmount);
-                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=4&data=${encodeURIComponent(payload)}`;
+            }
+
+            document.getElementById('bankAccountLabelText').innerText = bankAcc;
+            document.getElementById('ppAccountLabelText').innerText = ppRaw;
+            
+            const qrImg = document.getElementById('ppQrImage');
+            const qrTag = document.getElementById('qrAmountTag');
+            if (cleanPp.length >= 10) {
+                qrImg.style.display = 'block';
+                let targetAmount = 0;
+                if (qrLockMode === 'deposit' && deposit > 0) {
+                    targetAmount = deposit;
+                    qrTag.innerText = `สแกนโอนยอดมัดจำ (฿${deposit.toLocaleString()})`;
+                } else if (qrLockMode === 'pending' && pending > 0) {
+                    targetAmount = pending;
+                    qrTag.innerText = `สแกนโอนยอดคงเหลือ (฿${pending.toLocaleString()})`;
                 } else {
-                    qrImg.style.display = 'none';
+                    qrTag.innerText = `สแกน QR โอนได้ทุกธนาคาร`;
                 }
+                const payload = generatePromptPayPayload(cleanPp, targetAmount);
+                qrImg.src = createLocalQrDataUrl(payload);
+            } else {
+                qrImg.style.display = 'none';
             }
         }
 
-        // 📸 ฟังก์ชันดาวน์โหลด #pdfCaptureArea เป็นรูปภาพ PNG (รอฟอนต์และใช้ Inline SVG ไอคอนไม่หาย 100%)
         async function downloadInvoiceAsImage() {
             const captureArea = document.getElementById('pdfCaptureArea');
             const btn = document.getElementById('btnDownloadPng');
@@ -1133,10 +1342,7 @@
 
                 const dataUrl = await window.modernScreenshot.domToPng(captureArea, {
                     scale: 2,
-                    backgroundColor: '#ffffff',
-                    fetch: {
-                        requestInit: { mode: 'cors' }
-                    }
+                    backgroundColor: '#ffffff'
                 });
 
                 const link = document.createElement('a');
@@ -1170,8 +1376,9 @@
             const total = Number(document.getElementById('packPrice').value || 0);
             const deposit = Number(document.getElementById('paidDeposit').value || 0);
             const pending = Math.max(0, total - deposit);
+            const bankAcc = document.getElementById('bankAccountInput')?.value || '143-8-67251-2';
 
-            const briefText = `📸 I'M OIL PHOTO - สรุปบรีฟคิวงานจองถ่ายภาพ\n━━━━━━━━━━━━━━━━━━━━\n📌 ข้อมูลนัดหมายคุณลูกค้า\n• ชื่อผู้จอง: ${name}\n• เบอร์ติดต่อ: ${phone}\n• ประเภทแพ็กเกจ: ${pack}\n• วันที่นัดถ่ายงาน: ${date}\n• ช่วงเวลาทำงาน: ${time}\n• สถานที่นัดกอง: ${loc}\n\n💰 รายละเอียดค่าบริการและการเงิน\n• ยอดเงินรวมทั้งสิ้น: ฿${total.toLocaleString()} บาท\n• ชำระเงินมัดจำล็อคคิวแล้ว: ฿${deposit.toLocaleString()} บาท\n• 🚨 คงเหลือค้างชำระหน้างาน: ฿${pending.toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nขอบพระคุณที่ไว้วางใจให้พวกเราดูแลความทรงจำสำคัญครับ แล้วเจอกันวันงานนะครับ! 🔥`;
+            const briefText = `📸 I'M OIL PHOTO - สรุปบรีฟคิวงานจองถ่ายภาพ\n━━━━━━━━━━━━━━━━━━━━\n📌 ข้อมูลนัดหมายคุณลูกค้า\n• ชื่อผู้จอง: ${name}\n• เบอร์ติดต่อ: ${phone}\n• ประเภทแพ็กเกจ: ${pack}\n• วันที่นัดถ่ายงาน: ${date}\n• ช่วงเวลาทำงาน: ${time}\n• สถานที่นัดกอง: ${loc}\n\n💰 รายละเอียดค่าบริการและการเงิน\n• ยอดเงินรวมทั้งสิ้น: ฿${total.toLocaleString()} บาท\n• ชำระเงินมัดจำล็อคคิวแล้ว: ฿${deposit.toLocaleString()} บาท\n• 🚨 คงเหลือค้างชำระหน้างาน: ฿${pending.toLocaleString()} บาท\n• 🏦 บัญชีกสิกรไทย (MAKE): ${bankAcc} (นาย สุพจน์ สำอางค์ญาติ)\n━━━━━━━━━━━━━━━━━━━━\nขอบพระคุณที่ไว้วางใจให้พวกเราดูแลความทรงจำสำคัญครับ แล้วเจอกันวันงานนะครับ! 🔥`;
             navigator.clipboard.writeText(briefText).then(() => {
                 showToast("คัดลอกสรุปบรีฟลงคลิปบอร์ดสำเร็จ!");
             });
@@ -1224,13 +1431,12 @@
             updateDashboard(); 
         }
 
-        // คลิกวันว่างบนปฏิทิน ➔ เด้งขึ้นไปตั้งวันที่ในฟอร์มออกใบจอง/ลงคิวด้านบนทันที
         function handleCalendarDayClick(dayStr) {
             let dayJobs = filteredJobs.filter(j => j.date === dayStr);
             if (dayJobs.length === 0) {
                 if (currentSystemView === 'admin') {
                     jumpToNewJobForm(dayStr);
-                    showToast(`เลือกวันที่ ${dayStr} ในฟอร์มลงคิวงานแล้ว!`);
+                    showToast(`เปิดหน้าลงคิวงานสำหรับวันที่ ${dayStr}`);
                 }
                 return;
             }
@@ -1371,9 +1577,9 @@
         function renderCalendarBadges() {
             const container = document.getElementById('calendarBadgesContainer'); if(!container) return;
             if (currentSystemView === 'public') {
-                container.innerHTML = `<span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-emerald-500 shadow-md"></span> ✅ ว่างจองคิวได้</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-rose-500 shadow-md"></span> ❌ คิวงานเต็มแล้ว</span>`;
+                container.innerHTML = `<span class="flex items-center gap-1.5 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> ว่างจองคิวได้</span><span class="flex items-center gap-1.5 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> คิวงานเต็มแล้ว</span>`;
             } else {
-                container.innerHTML = `<span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-sky-400 shadow-md"></span> 🎓 รับปริญญา/นอกรอบ</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-pink-300 shadow-md"></span> 👰 งานแต่งงาน (ชมพูอ่อน)</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-amber-500 shadow-md"></span> 🙏 งานบวช</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-emerald-400 shadow-md"></span> 📸 อื่นๆ / ทั่วไป</span><span class="flex items-center gap-1.5 font-medium"><span class="w-3 h-3 rounded-full bg-red-500 shadow-md"></span> 🔴 ปิดงานเรียบร้อย</span>`;
+                container.innerHTML = `<span class="flex items-center gap-1.5 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span> 🎓 รับปริญญา</span><span class="flex items-center gap-1.5 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-pink-300"></span> 👰 แต่งงาน</span><span class="flex items-center gap-1.5 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> 🙏 งานบวช</span><span class="flex items-center gap-1.5 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> 📸 ทั่วไป</span><span class="flex items-center gap-1.5 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> 🔴 ปิดงาน</span>`;
             }
         }
 
@@ -1508,6 +1714,10 @@
 
         function renderCustomers() {
             const grid = document.getElementById('customerGrid'); if(!grid) return; grid.innerHTML = '';
+            if (filteredJobs.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center text-slate-500 py-12 text-xs">ไม่มีข้อมูลลูกค้าในเดือนนี้</div>`;
+                return;
+            }
             filteredJobs.forEach(job => {
                 let card = document.createElement('div'); card.className = "bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3 hover:border-slate-700 transition-all";
                 let jobType = job.status_notes || "อื่นๆ";
@@ -1537,12 +1747,14 @@
                         </div>
                         <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-mono font-bold px-2.5 py-1 rounded-lg flex items-center gap-1"><i class="fa-solid fa-calendar-day text-[10px]"></i> ${thaiDateStr}</span>
                     </div>
-                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 text-xs space-y-1.5">${phoneHTML} ${fbHTML}</div>`;
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 text-xs space-y-1.5">${phoneHTML} ${fbHTML}</div>
+                    <div class="flex justify-end pt-1">
+                        <button onclick="loadJobToInvoiceEditor(${job.id})" class="text-[11px] text-amber-400 hover:underline cursor-pointer flex items-center gap-1"><i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูล / ออกใบเสร็จ</button>
+                    </div>`;
                 grid.appendChild(card);
             });
         }
 
-        // ดึงข้อมูลคิวงานขึ้นมาแก้ไข + ออกใบเสร็จในฟอร์มหลักที่เดียว
         function loadJobToInvoiceEditor(jobId) {
             const job = allJobs.find(j => j.id === jobId); if (!job) return;
             document.getElementById('editingJobId').value = job.id;
@@ -1566,7 +1778,6 @@
             else if (job.status_notes === "งานบวช") matchedType = "งานบวช";
             pkgSelect.value = matchedType;
 
-            // เปลี่ยนป้ายสถานะและปุ่มเป็นโหมดแก้ไขคิวเดิม
             const badge = document.getElementById('formEditStatusBadge');
             badge.className = "bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-bold px-2.5 py-0.5 rounded-full";
             badge.innerText = `✏️ กำลังแก้ไขคิวงาน: ${job.title}`;
@@ -1576,8 +1787,8 @@
             btnSave.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> 💾 บันทึกแก้ไขคิวงานเดิม (#${job.id})`;
 
             syncInputToPreview();
-            showToast(`ดึงข้อมูล "${job.title}" มาที่ฟอร์มแก้ไขและใบพรีวิวแล้ว!`);
-            window.scrollTo({ top: document.getElementById('quotation').offsetTop - 20, behavior: 'smooth' });
+            switchAppTab('quotation');
+            showToast(`เปิดข้อมูล "${job.title}" ในหน้าแก้ไขและออกบิลแล้ว!`);
         }
 
         async function quickFinishJob(jobId, totalAmount) {
@@ -1744,8 +1955,9 @@
             const total = Number(document.getElementById('packPrice').value || 0);
             const deposit = Number(document.getElementById('paidDeposit').value || 0);
             const pending = Math.max(0, total - deposit);
+            const bankAcc = document.getElementById('bankAccountInput')?.value || '143-8-67251-2';
 
-            let briefText = `📸 [I'M OIL PHOTO] ใบยืนยันการจองคิวงานถ่ายภาพ\n━━━━━━━━━━━━━━━━━━━━\n🎫 ข้อมูลนัดหมายคุณลูกค้า\n• ชื่อผู้จอง: ${name}\n• เบอร์ติดต่อ: ${phone}\n• ประเภทงาน: ${packageType}\n• วันที่ถ่ายงาน: ${date}\n• ช่วงเวลา: ${time}\n• สถานที่นัดกอง: ${location}\n\n💰 รายละเอียดค่าบริการการเงิน\n• ราคาเต็มแพ็กเกจ: ฿${total.toLocaleString()} บาท\n• มัดจำล็อคคิวแล้ว: ฿${deposit.toLocaleString()} บาท\n• 🚨 ยอดคงเหลือจ่ายหน้างาน: ฿${pending.toLocaleString()} บาท\n━━━━━━━━━━━━━━━━━━━━\nขอบพระคุณที่ไว้วางใจให้ดูแลความทรงจำสำคัญครับ! 📸✨`;
+            let briefText = `📸 [I'M OIL PHOTO] ใบยืนยันการจองคิวงานถ่ายภาพ\n━━━━━━━━━━━━━━━━━━━━\n🎫 ข้อมูลนัดหมายคุณลูกค้า\n• ชื่อผู้จอง: ${name}\n• เบอร์ติดต่อ: ${phone}\n• ประเภทงาน: ${packageType}\n• วันที่ถ่ายงาน: ${date}\n• ช่วงเวลา: ${time}\n• สถานที่นัดกอง: ${location}\n\n💰 รายละเอียดค่าบริการการเงิน\n• ราคาเต็มแพ็กเกจ: ฿${total.toLocaleString()} บาท\n• มัดจำล็อคคิวแล้ว: ฿${deposit.toLocaleString()} บาท\n• 🚨 ยอดคงเหลือจ่ายหน้างาน: ฿${pending.toLocaleString()} บาท\n• 🏦 กสิกรไทย (MAKE): ${bankAcc} (นาย สุพจน์ สำอางค์ญาติ)\n━━━━━━━━━━━━━━━━━━━━\nขอบพระคุณที่ไว้วางใจให้ดูแลความทรงจำสำคัญครับ! 📸✨`;
 
             try {
                 const lineShareUrl = `https://line.me/R/share?text=${encodeURIComponent(briefText)}`;
